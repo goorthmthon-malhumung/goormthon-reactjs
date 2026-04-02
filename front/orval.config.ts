@@ -1,12 +1,12 @@
 /// <reference types="node" />
 
-import { defineConfig } from "orval";
 import { config } from "dotenv";
+import { defineConfig } from "orval";
 
 config({ path: ".env.local" });
 
 const DEFAULT_OPENAPI_SPEC_URL =
-  "https://junhugae.goorm.training/api/v3/api-docs";
+  "https://junhugaeapi.goorm.training/v3/api-docs";
 
 const specUrl = process.env.VITE_OPENAPI_SPEC_URL ?? DEFAULT_OPENAPI_SPEC_URL;
 
