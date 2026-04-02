@@ -155,7 +155,7 @@ export function ReservationPage() {
       return;
     }
 
-    navigate(ROUTES.experienceDetail);
+    navigate(ROUTES.matching);
   };
 
   return (

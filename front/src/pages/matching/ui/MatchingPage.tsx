@@ -45,7 +45,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "haenyeo",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "바닷가에서 작업 중인 해녀들",
       badgeLabel: "45년 이어온",
@@ -62,7 +62,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "stone",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 바닷가에서 일하는 장인의 모습",
       badgeLabel: "25년 이어온",
@@ -79,7 +79,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "horse",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 현장에서 활동 중인 직업 체험 장면",
       badgeLabel: "25년 이어온",
@@ -96,7 +96,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "tangerine",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 귤 농가의 수확 작업 장면",
       badgeLabel: "25년 이어온",
@@ -113,7 +113,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "stone",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 마을의 돌담과 장인 작업 장면",
       badgeLabel: "18년 이어온",
@@ -130,7 +130,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "haenyeo",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.jobDetail,
       imageSrc: mentorCardImage,
       imageAlt: "해녀 공동체 활동 기록 장면",
       badgeLabel: "12년 이어온",
@@ -147,7 +147,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "experience",
     category: "horse",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 말 농장 체험 장면",
       badgeLabel: "8년 이어온",
@@ -164,7 +164,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "experience",
     category: "tangerine",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "귤 수확 체험 장면",
       badgeLabel: "6년 이어온",
@@ -181,7 +181,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "experience",
     category: "stone",
     card: {
-      to: ROUTES.experienceDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "돌담 쌓기 체험 장면",
       badgeLabel: "10년 이어온",
@@ -388,7 +388,10 @@ export function MatchingPage() {
   const handleBottomTabChange = (tab: "home" | "my") => {
     if (tab === "home") {
       navigate(ROUTES.home);
+      return;
     }
+
+    navigate(ROUTES.my);
   };
 
   return (
@@ -519,7 +522,7 @@ export function MatchingPage() {
         <BottomNavigation
           activeTab="home"
           onTabChange={handleBottomTabChange}
-          onCenterClick={() => {}}
+          onCenterClick={() => navigate(ROUTES.matching)}
         />
       </Box>
     </Box>
