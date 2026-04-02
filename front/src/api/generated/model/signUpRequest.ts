@@ -6,8 +6,11 @@
  */
 
 export interface SignUpRequest {
-  name?: string;
-  phone?: string;
-  password?: string;
-  mentor?: boolean;
+  name: string;
+  phone: string;
+  password: string;
+  isMentor: boolean;
+  introduce: string;
+  interests: string;
+  workYear: number;
 }

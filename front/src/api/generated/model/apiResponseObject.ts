@@ -8,7 +8,7 @@ import type { ApiResponseObjectData } from './apiResponseObjectData';
 import type { ErrorResponse } from './errorResponse';
 
 export interface ApiResponseObject {
-  success?: boolean;
+  success: boolean;
   data?: ApiResponseObjectData;
   error?: ErrorResponse;
 }

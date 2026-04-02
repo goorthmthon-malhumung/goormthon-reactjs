@@ -5,7 +5,8 @@
  * OpenAPI spec version: v0
  */
 
-export interface ErrorResponse {
-  code: string;
-  message: string;
+export interface CreateExperienceBookingRequest {
+  experienceId: number;
+  startDate: string;
+  endDate: string;
 }

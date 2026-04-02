@@ -1,44 +1,55 @@
 import backIcon from "@/assets/job-detail/back.svg";
-import shareIcon from "@/assets/job-detail/share.svg";
+import interestIcon from "@/assets/job-detail/interest.svg";
+import { isApiError } from "@/api/fetcher";
+import { useAddFavorite } from "@/api/generated/job/job";
+import {
+  DEFAULT_SESSION_PROFILE,
+  useSessionProfile,
+} from "@/features/auth/api/useSessionProfile";
+import {
+  DEFAULT_JOB_DETAIL_VIEW,
+  useJobDetailView,
+} from "@/features/jobs/api/useJobDetailView";
 import { ROUTES } from "@/shared/config/routes";
+import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { UserOutlineIcon } from "@vapor-ui/icons";
 import { useNavigate } from "react-router-dom";
 
+const JOB_ID = 1;
+const FALLBACK_EXPERIENCE_ID = 1;
 const HERO_HEIGHT_PX = 379;
 const SHEET_TOP_PX = 350;
 const CONTENT_SIDE_PADDING_PX = 24;
 const TITLE_FONT =
   '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
 
-const FIGMA_HERO_IMAGE =
-  "https://www.figma.com/api/mcp/asset/f41730c6-3372-4d0f-8089-4f8826f7de9d";
 const FIGMA_MENTOR_CARD_IMAGE =
   "https://www.figma.com/api/mcp/asset/d9b1e0a7-96b6-4483-9318-38501fc7314f";
 const FIGMA_MENTOR_BADGE_ICON =
   "https://www.figma.com/api/mcp/asset/6777bff0-eb49-4c65-a319-bf0e829217cf";
 
-const SKILLS = [
-  "물질 기술",
-  "해산물 채취",
-  "바다 안전",
-  "바다 안전",
-  "물때 판단",
-  "장비 관리",
-] as const;
-
 function TopCircleButton({
   iconSrc,
   ariaLabel,
   onClick,
+  disabled = false,
 }: {
   iconSrc: string;
   ariaLabel: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Box
-      render={<button type="button" onClick={onClick} aria-label={ariaLabel} />}
+      render={
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={ariaLabel}
+          disabled={disabled}
+        />
+      }
       $css={{
         width: "39.998px",
         height: "39.998px",
@@ -47,7 +58,8 @@ function TopCircleButton({
         backgroundColor: "rgba(255, 255, 255, 0.9)",
         display: "grid",
         placeItems: "center",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
         padding: 0,
       }}
     >
@@ -249,6 +261,44 @@ function MentorCard({
 
 export function JobDetailPage() {
   const navigate = useNavigate();
+  const jobQuery = useJobDetailView(JOB_ID);
+  const sessionQuery = useSessionProfile();
+  const favoriteMutation = useAddFavorite();
+  const job = jobQuery.data ?? DEFAULT_JOB_DETAIL_VIEW;
+  const sessionProfile = sessionQuery.data ?? DEFAULT_SESSION_PROFILE;
+  const jobId = job.jobId;
+  const memberId = sessionProfile.memberId;
+  const title = job.title;
+  const introduction = job.introduction;
+  const heroImageSrc = job.heroImageSrc;
+  const skills = job.skills;
+  const currentParticipants = job.currentParticipants;
+  const maxParticipants = job.maxParticipants;
+  const mentorName = job.mentorName;
+  const pageStatus = favoriteMutation.isError
+    ? {
+        tone: "error" as const,
+        message: favoriteMutation.error.message,
+      }
+    : favoriteMutation.isSuccess
+      ? {
+          tone: "success" as const,
+          message: "관심 직업으로 등록했습니다.",
+        }
+      : jobQuery.isError
+        ? {
+            tone: "error" as const,
+            message: jobQuery.error.message,
+            onRetry: () => {
+              void jobQuery.refetch();
+            },
+          }
+        : jobQuery.isPending
+          ? {
+              tone: "loading" as const,
+              message: "직업 정보를 불러오는 중입니다.",
+            }
+          : null;
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -257,6 +307,35 @@ export function JobDetailPage() {
     }
 
     navigate(ROUTES.matching);
+  };
+
+  const handleFavorite = () => {
+    if (sessionQuery.isPending) {
+      return;
+    }
+
+    if (sessionQuery.isError) {
+      if (
+        isApiError(sessionQuery.error) &&
+        (sessionQuery.error.status === 401 || sessionQuery.error.status === 403)
+      ) {
+        navigate(ROUTES.login);
+      }
+
+      return;
+    }
+
+    if (!memberId) {
+      navigate(ROUTES.login);
+      return;
+    }
+
+    favoriteMutation.mutate({
+      jobId,
+      params: {
+        userId: memberId,
+      },
+    });
   };
 
   return (
@@ -293,9 +372,15 @@ export function JobDetailPage() {
             onClick={handleBack}
           />
           <TopCircleButton
-            iconSrc={shareIcon}
-            ariaLabel="공유하기"
-            onClick={() => {}}
+            iconSrc={interestIcon}
+            ariaLabel="관심 표현"
+            onClick={handleFavorite}
+            disabled={
+              favoriteMutation.isPending ||
+              sessionQuery.isPending ||
+              jobQuery.isPending ||
+              jobQuery.isError
+            }
           />
         </Box>
 
@@ -317,7 +402,7 @@ export function JobDetailPage() {
             }}
           >
             <Box
-              render={<img src={FIGMA_HERO_IMAGE} alt="" aria-hidden="true" />}
+              render={<img src={heroImageSrc} alt="" aria-hidden="true" />}
               $css={{
                 position: "absolute",
                 inset: 0,
@@ -394,7 +479,7 @@ export function JobDetailPage() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                금녕 해녀와 함께하는 전복따기금녕금녕 해녀와 함께하는 전복따기금녕
+                  {title}
               </Text>
 
               <HStack
@@ -415,7 +500,7 @@ export function JobDetailPage() {
                     letterSpacing: "-0.1504px",
                   }}
                 >
-                  5/8명
+                  {currentParticipants}/{maxParticipants}명
                 </Text>
               </HStack>
             </VStack>
@@ -451,6 +536,13 @@ export function JobDetailPage() {
                   paddingInline: `${CONTENT_SIDE_PADDING_PX}px`,
                 }}
               >
+                {pageStatus ? (
+                  <QueryNotice
+                    tone={pageStatus.tone}
+                    message={pageStatus.message}
+                    onRetry={pageStatus.onRetry}
+                  />
+                ) : null}
                 <VStack
                   $css={{
                     gap: "16px",
@@ -480,7 +572,7 @@ export function JobDetailPage() {
                       letterSpacing: "-0.1px",
                     }}
                   >
-                    45년 경력의 김영숙 해녀님과 함께하는 물질 체험입니다. 전통 해녀복을 입고 바다에 들어가 직접 해산물을 채취하며 제주 해녀 문화를 체험할 수 있습니다. 초보자도 안전하게 참여할 수 있도록 구명조끼와 안전 장비가 제공되며, 해녀님의 세심한 지도 아래 진행됩니다.
+                    {introduction}
                   </Text>
                 </VStack>
 
@@ -496,7 +588,7 @@ export function JobDetailPage() {
                       flexWrap: "wrap",
                     }}
                   >
-                    {SKILLS.map((skill) => (
+                    {skills.map((skill) => (
                       <SkillPill key={skill} label={skill} />
                     ))}
                   </HStack>
@@ -550,7 +642,21 @@ export function JobDetailPage() {
           }}
         >
           <Box
-            render={<button type="button" onClick={() => navigate(ROUTES.reservation)} />}
+            render={
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(ROUTES.reservation, {
+                    state: {
+                      experienceId: FALLBACK_EXPERIENCE_ID,
+                      summaryTitle: title,
+                      summaryMentor: mentorName,
+                    },
+                  })
+                }
+                disabled={jobQuery.isPending || jobQuery.isError}
+              />
+            }
             $css={{
               width: "100%",
               height: "58.923px",
@@ -560,7 +666,9 @@ export function JobDetailPage() {
               color: "#FFFFFF",
               display: "grid",
               placeItems: "center",
-              cursor: "pointer",
+              cursor:
+                jobQuery.isPending || jobQuery.isError ? "not-allowed" : "pointer",
+              opacity: jobQuery.isPending || jobQuery.isError ? 0.6 : 1,
             }}
           >
             <Text

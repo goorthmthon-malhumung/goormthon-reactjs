@@ -250,6 +250,105 @@ export const useLogout = <TError = ErrorType<unknown>,
       return useMutation(getLogoutMutationOptions(options), queryClient);
     }
     /**
+ * 회원 ID로 이름, 멘토 여부, 소개 글을 조회합니다.
+ * @summary 회원 정보 조회
+ */
+export const getGetMemberInfoUrl = (memberId: number,) => {
+
+
+
+
+  return `/users/${memberId}`
+}
+
+export const getMemberInfo = async (memberId: number, options?: RequestInit): Promise<ApiResponseObject> => {
+
+  return customFetch<ApiResponseObject>(getGetMemberInfoUrl(memberId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMemberInfoQueryKey = (memberId: number,) => {
+    return [
+    `/users/${memberId}`
+    ] as const;
+    }
+
+
+export const getGetMemberInfoQueryOptions = <TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMemberInfoQueryKey(memberId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMemberInfo>>> = ({ signal }) => getMemberInfo(memberId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMemberInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getMemberInfo>>>
+export type GetMemberInfoQueryError = ErrorType<unknown>
+
+
+export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
+ memberId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMemberInfo>>,
+          TError,
+          Awaited<ReturnType<typeof getMemberInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
+ memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMemberInfo>>,
+          TError,
+          Awaited<ReturnType<typeof getMemberInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
+ memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 회원 정보 조회
+ */
+
+export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
+ memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMemberInfoQueryOptions(memberId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
  * 세션이 존재하면 로그인된 사용자 정보를 반환합니다. 세션이 없으면 로그인되지 않은 상태입니다.
  * @summary 로그인 여부 확인
  */
