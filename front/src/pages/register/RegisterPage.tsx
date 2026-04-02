@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -17,6 +17,7 @@ type RegisterStep = 0 | 1 | 2;
 type RoleType = "mentor" | "successor" | null;
 
 const JOB_OPTIONS = ["해녀", "돌담 장인", "감귤 농사", "목장주"] as const;
+const PASSWORD_POLICY_TEXT = "8~16자, 영문, 특수문자 포함";
 
 const INPUT_STYLES = {
   height: "48px",
@@ -161,18 +162,20 @@ function Footer({
   buttonLabel,
   disabled,
   onClick,
+  compact = false,
 }: {
   buttonLabel: string;
   disabled: boolean;
   onClick: () => void;
+  compact?: boolean;
 }) {
   return (
     <VStack
       $css={{
-        paddingTop: "24px",
-        gap: "24px",
+        paddingTop: compact ? "12px" : "24px",
+        gap: compact ? "16px" : "24px",
         alignItems: "stretch",
-        paddingBottom: "20px",
+        paddingBottom: "59px",
       }}
     >
       <Button
@@ -242,6 +245,9 @@ export function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const hasPasswordConfirm = passwordConfirm.trim().length > 0;
+  const isPasswordMatched = password === passwordConfirm;
+  const isInfoStep = step === 2;
 
   const canProceed =
     step === 0
@@ -252,7 +258,7 @@ export function RegisterPage() {
           phone.trim().length > 0 &&
           password.trim().length > 0 &&
           passwordConfirm.trim().length > 0 &&
-          password === passwordConfirm;
+          isPasswordMatched;
 
   const setStep = (nextStep: RegisterStep) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -308,7 +314,7 @@ export function RegisterPage() {
           }}
         >
           <RoleCard
-            icon="🧑‍🌾"
+            icon="👨‍🌾"
             title="멘토 (전통 직업 종사자)"
             description="전통 기술과 지식을 후대에 전수하고 싶어요"
             selected={role === "mentor"}
@@ -336,9 +342,7 @@ export function RegisterPage() {
         >
           <Field.Root name="job">
             <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-              <Field.Label $css={FIELD_LABEL_STYLES}>
-                직업
-              </Field.Label>
+              <Field.Label $css={FIELD_LABEL_STYLES}>직업</Field.Label>
               <Select.Root
                 value={job}
                 onValueChange={(value) => setJob(value ? String(value) : null)}
@@ -370,15 +374,15 @@ export function RegisterPage() {
 
           <Field.Root name="career">
             <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-              <Field.Label $css={FIELD_LABEL_STYLES}>
-                경력
-              </Field.Label>
+              <Field.Label $css={FIELD_LABEL_STYLES}>경력</Field.Label>
               <TextInput
                 type="tel"
                 inputMode="numeric"
                 placeholder="숫자만 입력해주세요"
                 value={career}
-                onValueChange={(value) => setCareer(value.replace(/[^0-9]/g, ""))}
+                onValueChange={(value) =>
+                  setCareer(value.replace(/[^0-9]/g, ""))
+                }
                 $css={INPUT_STYLES}
               />
             </VStack>
@@ -390,16 +394,14 @@ export function RegisterPage() {
     return (
       <VStack
         $css={{
-          gap: "16px",
+          gap: "12px",
           alignItems: "stretch",
-          marginTop: "54px",
+          marginTop: "28px",
         }}
       >
         <Field.Root name="name">
           <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-            <Field.Label $css={FIELD_LABEL_STYLES}>
-              이름
-            </Field.Label>
+            <Field.Label $css={FIELD_LABEL_STYLES}>이름</Field.Label>
             <TextInput
               value={name}
               placeholder="이름을 입력해주세요"
@@ -411,9 +413,7 @@ export function RegisterPage() {
 
         <Field.Root name="phone">
           <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-            <Field.Label $css={FIELD_LABEL_STYLES}>
-              핸드폰 번호
-            </Field.Label>
+            <Field.Label $css={FIELD_LABEL_STYLES}>핸드폰 번호</Field.Label>
             <TextInput
               type="tel"
               inputMode="numeric"
@@ -427,9 +427,7 @@ export function RegisterPage() {
 
         <Field.Root name="password">
           <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-            <Field.Label $css={FIELD_LABEL_STYLES}>
-              비밀번호
-            </Field.Label>
+            <Field.Label $css={FIELD_LABEL_STYLES}>비밀번호</Field.Label>
             <TextInput
               type="password"
               value={password}
@@ -437,14 +435,23 @@ export function RegisterPage() {
               onValueChange={(value) => setPassword(value)}
               $css={INPUT_STYLES}
             />
+            <Field.Description
+              $css={{
+                paddingLeft: "4px",
+                color: "var(--vapor-color-foreground-hint-100, #5d5d5d)",
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 400,
+              }}
+            >
+              {PASSWORD_POLICY_TEXT}
+            </Field.Description>
           </VStack>
         </Field.Root>
 
         <Field.Root name="passwordConfirm">
           <VStack $css={{ gap: "8px", alignItems: "stretch" }}>
-            <Field.Label $css={FIELD_LABEL_STYLES}>
-              비밀번호 확인
-            </Field.Label>
+            <Field.Label $css={FIELD_LABEL_STYLES}>비밀번호 확인</Field.Label>
             <TextInput
               type="password"
               value={passwordConfirm}
@@ -452,6 +459,21 @@ export function RegisterPage() {
               onValueChange={(value) => setPasswordConfirm(value)}
               $css={INPUT_STYLES}
             />
+            {hasPasswordConfirm ? (
+              <Field.Description
+                $css={{
+                  paddingLeft: "4px",
+                  color: isPasswordMatched
+                    ? "var(--vapor-color-green-500, #008160)"
+                    : "var(--vapor-color-red-500, #d4333f)",
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 400,
+                }}
+              >
+                {isPasswordMatched ? "일치합니다." : "불일치합니다."}
+              </Field.Description>
+            ) : null}
           </VStack>
         </Field.Root>
       </VStack>
@@ -463,13 +485,17 @@ export function RegisterPage() {
       render={<main />}
       $css={{
         width: "100%",
-        height: "100%",
+        height: "100dvh",
+        minHeight: "100dvh",
+        overflow: "hidden",
         backgroundColor: "var(--vapor-color-background-surface-200, #f7f7f7)",
       }}
     >
       <VStack
         $css={{
-          height: "100%",
+          height: "100dvh",
+          minHeight: "100dvh",
+          overflow: "hidden",
           alignItems: "stretch",
         }}
       >
@@ -477,7 +503,7 @@ export function RegisterPage() {
           $css={{
             height: "56px",
             alignItems: "center",
-            backgroundColor: "var(--vapor-color-white, #ffffff)",
+            backgroundColor: "var(--vapor-color-background-surface-200, #f7f7f7)",
             paddingInline: "16px",
           }}
         >
@@ -510,15 +536,15 @@ export function RegisterPage() {
             $css={{
               flex: 1,
               minHeight: 0,
-              overflowY: "auto",
+              overflow: "hidden",
             }}
           >
             <VStack
               $css={{
                 alignItems: "stretch",
                 paddingInline: "16px",
-                paddingTop: "32px",
-                paddingBottom: "16px",
+                paddingTop: isInfoStep ? "24px" : "32px",
+                paddingBottom: isInfoStep ? "8px" : "16px",
               }}
             >
               {step === 0 ? (
@@ -547,6 +573,7 @@ export function RegisterPage() {
               buttonLabel={step === 2 ? "회원가입 완료" : "다음"}
               disabled={!canProceed}
               onClick={handleNext}
+              compact={isInfoStep}
             />
           </Box>
         </VStack>
