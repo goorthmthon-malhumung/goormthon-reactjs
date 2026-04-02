@@ -4,13 +4,13 @@ import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
 import statMatchingIcon from "@/assets/my/stat-matching.svg";
 import {
-  useMyCompletedExperienceHistory,
-  useMyUpcomingExperienceReservations,
-} from "@/features/experiences/api/useMyBookingViews";
-import {
   DEFAULT_SESSION_PROFILE,
   useSessionProfile,
 } from "@/features/auth/api/useSessionProfile";
+import {
+  useMyCompletedExperienceHistory,
+  useMyUpcomingExperienceReservations,
+} from "@/features/experiences/api/useMyBookingViews";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
@@ -621,8 +621,8 @@ export function MyPage() {
         <VStack
           $css={{
             width: "100%",
-            maxWidth: `${CONTENT_WIDTH_PX}px`,
-            marginInline: "auto",
+            // maxWidth: `${CONTENT_WIDTH_PX}px`,
+            // marginInline: "auto",
             paddingTop: "max(30px, calc(env(safe-area-inset-top) + 8px))",
             paddingInline: "16px",
             paddingBottom: "32px",
