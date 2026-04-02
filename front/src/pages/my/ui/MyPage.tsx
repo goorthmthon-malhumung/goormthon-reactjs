@@ -1,3 +1,5 @@
+import { isApiError } from "@/api/fetcher";
+import { getMeQueryKey, useLogout } from "@/api/generated/user/user";
 import calendarIcon from "@/assets/my/calendar.svg";
 import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
@@ -14,11 +16,14 @@ import {
   getRecordCollection,
   getString,
 } from "@/shared/lib/apiData";
+import { ROUTES } from "@/shared/config/routes";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
+import { useQueryClient } from "@tanstack/react-query";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { ChevronRightOutlineIcon } from "@vapor-ui/icons";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CONTENT_WIDTH_PX = 358;
 const FONT_FAMILY =
@@ -564,9 +569,13 @@ function formatParticipantLabel(
 }
 
 export function MyPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedUpcomingKind, setSelectedUpcomingKind] =
     useState<UpcomingKind>("job");
+  const [logoutErrorMessage, setLogoutErrorMessage] = useState("");
   const profileQuery = useSessionProfile();
+  const { mutate: logout, isPending: isLogoutPending } = useLogout();
   const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
   const completedHistoryQuery = useMyCompletedExperienceHistory();
   const profile = asRecord(profileQuery.data?.data);
@@ -679,6 +688,37 @@ export function MyPage() {
       : "예약된 체험이 없습니다.";
   const showCompletedEmptyState =
     !completedStatus && completedHistory.length === 0;
+
+  const handleLogout = () => {
+    setLogoutErrorMessage("");
+
+    logout(undefined, {
+      onSuccess: () => {
+        queryClient.removeQueries({
+          queryKey: getMeQueryKey(),
+          exact: true,
+        });
+        navigate(ROUTES.home, { replace: true });
+      },
+      onError: (error) => {
+        if (
+          isApiError(error) &&
+          (error.status === 401 || error.status === 403)
+        ) {
+          queryClient.removeQueries({
+            queryKey: getMeQueryKey(),
+            exact: true,
+          });
+          navigate(ROUTES.home, { replace: true });
+          return;
+        }
+
+        setLogoutErrorMessage(
+          isApiError(error) ? error.message : "로그아웃에 실패했습니다.",
+        );
+      },
+    });
+  };
 
   return (
     <Box
@@ -834,6 +874,15 @@ export function MyPage() {
               </Box>
             ) : null}
 
+            {logoutErrorMessage ? (
+              <Box $css={{ width: "100%" }}>
+                <QueryNotice
+                  tone="error"
+                  message={logoutErrorMessage}
+                />
+              </Box>
+            ) : null}
+
             {showStats ? (
               <HStack
                 $css={{
@@ -860,18 +909,25 @@ export function MyPage() {
             ) : null}
 
             <Box
-              render={<button type="button" />}
+              render={
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={isLogoutPending}
+                />
+              }
               $css={{
                 width: "100%",
                 height: "48px",
                 borderRadius: "8px",
                 border: "1px solid #C6C6C6",
-                backgroundColor: "#F7F7F7",
-                color: "#393939",
+                background: "var(--vapor-color-cyan-300)",
+                color: "#FFF",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer",
+                cursor: isLogoutPending ? "not-allowed" : "pointer",
+                opacity: isLogoutPending ? 0.6 : 1,
               }}
             >
               <Text
@@ -884,7 +940,7 @@ export function MyPage() {
                   letterSpacing: "-0.1px",
                 }}
               >
-                프로필 수정
+                로그아웃
               </Text>
             </Box>
           </VStack>

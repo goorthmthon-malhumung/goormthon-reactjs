@@ -13,7 +13,6 @@ import {
   UserIcon,
   UserOutlineIcon,
 } from "@vapor-ui/icons";
-import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const TAB_ACTIVE_COLOR = "var(--vapor-color-cyan-200, #84d2e2)";
@@ -126,23 +125,30 @@ export function BottomNavigation() {
     },
   });
   const profile = asRecord(meQuery.data?.data);
+  const isUnauthenticatedResponse =
+    meQuery.isSuccess && meQuery.data?.data == null;
+  const isAuthError =
+    meQuery.isError &&
+    isApiError(meQuery.error) &&
+    (meQuery.error.status === 401 || meQuery.error.status === 403);
+  const shouldRedirectMyToLogin =
+    isAuthError || isUnauthenticatedResponse;
   const isMentor = profile?.isMentor === true;
   const tabs = isMentor ? MENTOR_TABS : MENTEE_TABS;
   const activeId = getActiveId(pathname, isMentor);
 
-  useEffect(() => {
-    if (!meQuery.isError || !isApiError(meQuery.error)) {
+  if (meQuery.isPending || (meQuery.isError && !isAuthError)) {
+    return null;
+  }
+
+  const handleTabClick = (tab: Tab) => {
+    if (tab.id === "my" && shouldRedirectMyToLogin) {
+      navigate(ROUTES.login, { replace: true });
       return;
     }
 
-    if (meQuery.error.status === 401 || meQuery.error.status === 403) {
-      navigate(ROUTES.login, { replace: true });
-    }
-  }, [meQuery.error, meQuery.isError, navigate]);
-
-  if (meQuery.isPending || meQuery.isError) {
-    return null;
-  }
+    navigate(tab.route);
+  };
 
   return (
     <Box
@@ -176,7 +182,15 @@ export function BottomNavigation() {
               render={
                 <button
                   type="button"
-                  onClick={() => navigate(route)}
+                  onClick={() =>
+                    handleTabClick({
+                      id,
+                      label,
+                      route,
+                      ActiveIcon,
+                      InactiveIcon,
+                    })
+                  }
                   aria-label={label}
                   aria-current={isActive ? "page" : undefined}
                 />

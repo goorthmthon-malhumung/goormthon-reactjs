@@ -1,17 +1,26 @@
+import { isApiError } from "@/api/fetcher";
+import { getMeQueryKey, useLogout } from "@/api/generated/user/user";
 import { useSessionProfile } from "@/features/auth/api/useSessionProfile";
 import haenyeoMentorIcon from "@/shared/assets/haenyeoMentorIcon.svg";
+import { ROUTES } from "@/shared/config/routes";
 import { asRecord, getString } from "@/shared/lib/apiData";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
+import { useQueryClient } from "@tanstack/react-query";
 import { Box, Button, HStack, Text, VStack } from "@vapor-ui/core";
 import { LocationOutlineIcon, TimeOutlineIcon } from "@vapor-ui/icons";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PROFILE_BLOCK_WIDTH_PX = 358;
 
 export function MentorMyPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [logoutErrorMessage, setLogoutErrorMessage] = useState("");
   const profileQuery = useSessionProfile();
+  const { mutate: logout, isPending: isLogoutPending } = useLogout();
   const profile = asRecord(profileQuery.data?.data);
-  console.log("profile", profile);
   const displayName = getString(profile, "name");
   const displayPhone = getString(profile, "phone");
   const displayLocation = getString(profile, "location");
@@ -33,6 +42,37 @@ export function MentorMyPage() {
           message: "회원 정보를 불러오는 중입니다.",
         }
         : null;
+
+  const handleLogout = () => {
+    setLogoutErrorMessage("");
+
+    logout(undefined, {
+      onSuccess: () => {
+        queryClient.removeQueries({
+          queryKey: getMeQueryKey(),
+          exact: true,
+        });
+        navigate(ROUTES.home, { replace: true });
+      },
+      onError: (error) => {
+        if (
+          isApiError(error) &&
+          (error.status === 401 || error.status === 403)
+        ) {
+          queryClient.removeQueries({
+            queryKey: getMeQueryKey(),
+            exact: true,
+          });
+          navigate(ROUTES.home, { replace: true });
+          return;
+        }
+
+        setLogoutErrorMessage(
+          isApiError(error) ? error.message : "로그아웃에 실패했습니다.",
+        );
+      },
+    });
+  };
 
   return (
     <Box
@@ -266,6 +306,8 @@ export function MentorMyPage() {
 
             <Button
               size="lg"
+              onClick={handleLogout}
+              disabled={isLogoutPending}
               $css={{
                 width: "100%",
                 height: "48px",
@@ -275,17 +317,19 @@ export function MentorMyPage() {
                 gap: "var(--vapor-button-gap, 6px)",
                 borderRadius: "var(--vapor-size-borderRadius-300)",
                 border: "1px solid var(--vapor-color-gray-200, #c6c6c6)",
-                backgroundColor: "var(--vapor-color-gray-050, #f7f7f7)",
-                color: "var(--vapor-color-gray-800, #393939)",
+                background: "var(--vapor-color-cyan-300)",
+                color: "#FFF",
                 fontFamily: "var(--vapor-typography-fontFamily-sans)",
                 fontSize: "var(--vapor-typography-fontSize-100)",
                 fontStyle: "normal",
                 fontWeight: 500,
                 lineHeight: "var(--vapor-typography-lineHeight-100)",
                 letterSpacing: "var(--vapor-typography-letterSpacing-100)",
+                cursor: isLogoutPending ? "not-allowed" : "pointer",
+                opacity: isLogoutPending ? 0.6 : 1,
               }}
             >
-              프로필 수정
+              로그아웃
             </Button>
           </VStack>
 
@@ -300,6 +344,20 @@ export function MentorMyPage() {
                 tone={profileStatus.tone}
                 message={profileStatus.message}
                 onRetry={profileStatus.onRetry}
+              />
+            </Box>
+          ) : null}
+
+          {logoutErrorMessage ? (
+            <Box
+              $css={{
+                width: "100%",
+                maxWidth: `${PROFILE_BLOCK_WIDTH_PX}px`,
+              }}
+            >
+              <QueryNotice
+                tone="error"
+                message={logoutErrorMessage}
               />
             </Box>
           ) : null}
