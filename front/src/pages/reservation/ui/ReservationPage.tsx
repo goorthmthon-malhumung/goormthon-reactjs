@@ -1,4 +1,5 @@
 import backArrowIcon from "@/assets/reservation/back-arrow.svg";
+import { useCreateBooking } from "@/api/generated/experience/experience";
 import calendarIcon from "@/assets/reservation/calendar.svg";
 import infoIcon from "@/assets/reservation/info.svg";
 import peopleIcon from "@/assets/reservation/people.svg";
@@ -17,7 +18,7 @@ import {
   type DateRange,
 } from "react-day-picker";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const PAGE_BACKGROUND = "var(--vapor-color-background-surface-200, #f7f7f7)";
 const SURFACE_WHITE = "rgba(255, 255, 255, 0.9)";
@@ -32,6 +33,7 @@ const CARD_RADIUS = "16px";
 const CTA_RADIUS = "14px";
 const CONTENT_WIDTH = "358px";
 const BUTTON_HEIGHT = "55.981px";
+const DEFAULT_EXPERIENCE_ID = 1;
 const SUMMARY_TITLE = "금녕 해녀와 함께하는 전복따기";
 const SUMMARY_MENTOR = "김영숙 해녀";
 const UNIT_PRICE = 50000;
@@ -79,6 +81,14 @@ function formatDate(date: Date) {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}.${month}.${day}`;
+}
+
+function formatApiDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function formatDateRange(range?: DateRange) {
@@ -253,6 +263,14 @@ function SelectButton({
 
 export function ReservationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const routeState = (location.state as
+    | {
+        experienceId?: number;
+        summaryTitle?: string;
+        summaryMentor?: string;
+      }
+    | null) ?? null;
   const [participantCount, setParticipantCount] = useState(1);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
@@ -262,8 +280,17 @@ export function ReservationPage() {
   const [displayMonth, setDisplayMonth] = useState(() =>
     getMonthStart(DEFAULT_DATE_RANGE.from),
   );
+  const bookingMutation = useCreateBooking();
   const totalPrice = UNIT_PRICE * participantCount;
   const hasCompleteDraftRange = Boolean(draftRange?.from && draftRange.to);
+  const canSubmitBooking = Boolean(selectedRange?.from && selectedRange.to);
+  const isBookingDisabled =
+    !canSubmitBooking || bookingMutation.isPending || bookingMutation.isSuccess;
+  const bookingStatusMessage = bookingMutation.isError
+    ? bookingMutation.error.message
+    : bookingMutation.isSuccess
+      ? "체험 예약 요청이 완료되었습니다."
+      : null;
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -296,6 +323,20 @@ export function ReservationPage() {
 
     setSelectedRange(cloneDateRange(draftRange));
     setIsDatePickerOpen(false);
+  };
+
+  const handleCreateBooking = () => {
+    if (!selectedRange?.from || !selectedRange.to) {
+      return;
+    }
+
+    bookingMutation.mutate({
+      data: {
+        experienceId: routeState?.experienceId ?? DEFAULT_EXPERIENCE_ID,
+        startDate: formatApiDate(selectedRange.from),
+        endDate: formatApiDate(selectedRange.to),
+      },
+    });
   };
 
   return (
@@ -463,7 +504,7 @@ export function ReservationPage() {
                     letterSpacing: "-0.1px",
                   }}
                 >
-                  {SUMMARY_TITLE}
+                  {routeState?.summaryTitle ?? SUMMARY_TITLE}
                 </Text>
                 <Text
                   render={<p />}
@@ -477,7 +518,7 @@ export function ReservationPage() {
                     letterSpacing: "-0.1px",
                   }}
                 >
-                  {SUMMARY_MENTOR}
+                  {routeState?.summaryMentor ?? SUMMARY_MENTOR}
                 </Text>
               </VStack>
             </Box>
@@ -690,8 +731,32 @@ export function ReservationPage() {
           zIndex: 3,
         }}
       >
+        {bookingStatusMessage ? (
+          <Text
+            render={<p />}
+            $css={{
+              color: bookingMutation.isError ? "#DC2626" : "#0D8298",
+              fontFamily:
+                '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+              fontSize: "14px",
+              lineHeight: "22px",
+              fontWeight: 500,
+              letterSpacing: "-0.1px",
+              marginBottom: "8px",
+            }}
+          >
+            {bookingStatusMessage}
+          </Text>
+        ) : null}
         <Box
-          render={<button type="button" aria-label="다음" />}
+          render={
+            <button
+              type="button"
+              aria-label="다음"
+              onClick={handleCreateBooking}
+              disabled={isBookingDisabled}
+            />
+          }
           $css={{
             width: "100%",
             height: BUTTON_HEIGHT,
@@ -699,7 +764,8 @@ export function ReservationPage() {
             borderRadius: CTA_RADIUS,
             backgroundColor: CTA_BACKGROUND,
             color: "#FFFFFF",
-            cursor: "pointer",
+            cursor: isBookingDisabled ? "not-allowed" : "pointer",
+            opacity: isBookingDisabled ? 0.6 : 1,
             display: "grid",
             placeItems: "center",
           }}
@@ -714,8 +780,12 @@ export function ReservationPage() {
               fontWeight: 600,
               letterSpacing: "-0.3125px",
             }}
-          >
-            다음
+            >
+            {bookingMutation.isPending
+              ? "예약 중..."
+              : bookingMutation.isSuccess
+                ? "예약 완료"
+                : "다음"}
           </Text>
         </Box>
       </Box>

@@ -1,19 +1,28 @@
-import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import { useNavigate } from "react-router-dom";
+import type { ReactNode } from "react";
+import { useLogout } from "@/api/generated/user/user";
 import completedImageOne from "@/assets/my/completed-1.jpg";
 import completedImageTwo from "@/assets/my/completed-2.jpg";
-import profileAvatar from "@/assets/my/profile-avatar.jpg";
-import statCompletedIcon from "@/assets/my/stat-completed.svg";
-import statInterestIcon from "@/assets/my/stat-interest.svg";
-import statMatchingIcon from "@/assets/my/stat-matching.svg";
 import starIcon from "@/assets/my/experiences-star.svg";
-import calendarIcon from "@/assets/my/calendar.svg";
-import locationIcon from "@/assets/my/location.svg";
+import profileAvatar from "@/assets/my/profile-avatar.jpg";
+import statMatchingMedalIcon from "@/assets/my/stat-matching-medal.svg";
+import {
+  DEFAULT_SESSION_PROFILE,
+  useSessionProfile,
+} from "@/features/auth/api/useSessionProfile";
 import { ROUTES } from "@/shared/config/routes";
 import {
   BottomNavigation,
   type BottomNavTab,
 } from "@/shared/ui/navigation/BottomNavigation";
+import { QueryNotice } from "@/shared/ui/states/QueryNotice";
+import { useQueryClient } from "@tanstack/react-query";
+import { Box, HStack, Text, VStack } from "@vapor-ui/core";
+import {
+  CalendarOutlineIcon,
+  HeartOutlineIcon,
+  LocationOutlineIcon,
+} from "@vapor-ui/icons";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_BG = "#F8FAFC";
 const PROFILE_BG = "var(--vapor-color-cyan-200, #84d2e2)";
@@ -21,13 +30,19 @@ const SHADOW =
   "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.08)";
 const CONTENT_WIDTH = "344.528px";
 
+type ProfileStatus = {
+  tone: "error" | "loading";
+  message: string;
+  onRetry?: () => void;
+};
+
 type StatCardProps = {
-  iconSrc: string;
+  icon: ReactNode;
   value: string;
   label: string;
 };
 
-function StatCard({ iconSrc, value, label }: StatCardProps) {
+function StatCard({ icon, value, label }: StatCardProps) {
   return (
     <Box
       $css={{
@@ -44,13 +59,16 @@ function StatCard({ iconSrc, value, label }: StatCardProps) {
       }}
     >
       <Box
-        render={<img src={iconSrc} alt="" aria-hidden="true" />}
         $css={{
           width: "19.993px",
           height: "19.993px",
+          color: "#FFFFFF",
+          lineHeight: 0,
           display: "block",
         }}
-      />
+      >
+        {icon}
+      </Box>
       <Text
         render={<p />}
         $css={{
@@ -206,14 +224,7 @@ function ReservationCard({ title, dateTime, location }: ReservationCardProps) {
             alignItems: "center",
           }}
         >
-          <Box
-            render={<img src={calendarIcon} alt="" aria-hidden="true" />}
-            $css={{
-              width: "15.995px",
-              height: "15.995px",
-              display: "block",
-            }}
-          />
+          <CalendarOutlineIcon size={16} color="#45556C" aria-hidden="true" />
           <Text
             render={<p />}
             $css={{
@@ -236,14 +247,7 @@ function ReservationCard({ title, dateTime, location }: ReservationCardProps) {
             alignItems: "center",
           }}
         >
-          <Box
-            render={<img src={locationIcon} alt="" aria-hidden="true" />}
-            $css={{
-              width: "15.995px",
-              height: "15.995px",
-              display: "block",
-            }}
-          />
+          <LocationOutlineIcon size={16} color="#45556C" aria-hidden="true" />
           <Text
             render={<p />}
             $css={{
@@ -439,6 +443,37 @@ function InterestFieldCard() {
 
 export function MyPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const profileQuery = useSessionProfile();
+  const logoutMutation = useLogout({
+    mutation: {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["/users/me"],
+        });
+        navigate(ROUTES.onboarding, { replace: true });
+      },
+    },
+  });
+  const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
+  const displayName = profile.displayName;
+  const displayEmail = profile.displayEmail;
+  const displayLocation = profile.displayLocation;
+  const joinedLabel = profile.joinedLabel;
+  const completedCount = String(profile.completedCount);
+  const favoriteCount = String(profile.favoriteCount);
+  const matchingCount = String(profile.matchingCount);
+  const profileStatus: ProfileStatus | null = logoutMutation.isError
+    ? {
+        tone: "error" as const,
+        message: logoutMutation.error.message,
+      }
+    : profileQuery.isPending && !profileQuery.data
+        ? {
+            tone: "loading" as const,
+            message: "회원 정보를 불러오는 중입니다.",
+          }
+        : null;
 
   return (
     <Box
@@ -468,7 +503,7 @@ export function MyPage() {
           $css={{
             backgroundColor: PROFILE_BG,
             paddingTop: "max(47.995px, calc(env(safe-area-inset-top) + 16px))",
-            paddingBottom: "104px",
+            paddingBottom: "124px",
           }}
         >
           <VStack
@@ -529,7 +564,7 @@ export function MyPage() {
                     letterSpacing: "0.0703px",
                   }}
                 >
-                  이지영
+                  {displayName}
                 </Text>
                 <Text
                   render={<p />}
@@ -543,7 +578,7 @@ export function MyPage() {
                     letterSpacing: "-0.1504px",
                   }}
                 >
-                  jiyoung@example.com
+                  {displayEmail}
                 </Text>
 
                 <HStack
@@ -555,13 +590,19 @@ export function MyPage() {
                   }}
                 >
                   <Box
-                    render={<img src={locationIcon} alt="" aria-hidden="true" />}
                     $css={{
                       width: "15.995px",
                       height: "15.995px",
+                      color: "#FFFFFF",
                       display: "block",
                     }}
-                  />
+                  >
+                    <LocationOutlineIcon
+                      size={16}
+                      color="#FFFFFF"
+                      aria-hidden="true"
+                    />
+                  </Box>
                   <Text
                     render={<p />}
                     $css={{
@@ -573,7 +614,7 @@ export function MyPage() {
                       fontWeight: 400,
                     }}
                   >
-                    제주시
+                    {displayLocation}
                   </Text>
                   <Text
                     render={<span />}
@@ -586,13 +627,19 @@ export function MyPage() {
                     ·
                   </Text>
                   <Box
-                    render={<img src={calendarIcon} alt="" aria-hidden="true" />}
                     $css={{
                       width: "15.995px",
                       height: "15.995px",
+                      color: "#FFFFFF",
                       display: "block",
                     }}
-                  />
+                  >
+                    <CalendarOutlineIcon
+                      size={16}
+                      color="#FFFFFF"
+                      aria-hidden="true"
+                    />
+                  </Box>
                   <Text
                     render={<p />}
                     $css={{
@@ -604,9 +651,23 @@ export function MyPage() {
                       fontWeight: 400,
                     }}
                   >
-                    2026년 3월 가입
+                    {joinedLabel}
                   </Text>
                 </HStack>
+                {profileStatus ? (
+                  <Box
+                    $css={{
+                      width: "100%",
+                      marginTop: "11.996px",
+                    }}
+                  >
+                    <QueryNotice
+                      tone={profileStatus.tone}
+                      message={profileStatus.message}
+                      onRetry={profileStatus.onRetry}
+                    />
+                  </Box>
+                ) : null}
               </VStack>
             </HStack>
 
@@ -615,9 +676,40 @@ export function MyPage() {
                 gap: "11.996px",
               }}
             >
-              <StatCard iconSrc={statCompletedIcon} value="5" label="완료한 체험" />
-              <StatCard iconSrc={statInterestIcon} value="12" label="관심 직업" />
-              <StatCard iconSrc={statMatchingIcon} value="3" label="매칭 연결" />
+              <StatCard
+                icon={
+                  <CalendarOutlineIcon
+                    size={20}
+                    color="#FFFFFF"
+                    aria-hidden="true"
+                  />
+                }
+                value={completedCount}
+                label="완료한 체험"
+              />
+              <StatCard
+                icon={
+                  <HeartOutlineIcon
+                    size={20}
+                    color="#FFFFFF"
+                    aria-hidden="true"
+                  />
+                }
+                value={favoriteCount}
+                label="관심 직업"
+              />
+              <StatCard
+                icon={
+                  <img
+                    src={statMatchingMedalIcon}
+                    alt=""
+                    aria-hidden="true"
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                  />
+                }
+                value={matchingCount}
+                label="매칭 연결"
+              />
             </HStack>
           </VStack>
         </Box>
@@ -771,15 +863,21 @@ export function MyPage() {
           </Box>
 
           <Box
-            render={<button type="button" />}
+            render={
+              <button
+                type="button"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+              />
+            }
             $css={{
               width: "100%",
               height: "58.923px",
               borderRadius: "14px",
               border: "1.471px solid #E2E8F0",
               backgroundColor: "#FFFFFF",
-              color: "#314158",
-              cursor: "pointer",
+              color: logoutMutation.isPending ? "#94A3B8" : "#314158",
+              cursor: logoutMutation.isPending ? "not-allowed" : "pointer",
             }}
           >
             <Text
@@ -793,7 +891,7 @@ export function MyPage() {
                 letterSpacing: "-0.3125px",
               }}
             >
-              로그아웃
+              {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
             </Text>
           </Box>
         </VStack>

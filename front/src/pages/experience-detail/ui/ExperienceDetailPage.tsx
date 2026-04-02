@@ -1,6 +1,11 @@
 import heroImage from "@/assets/experience-detail/hero.jpg";
 import galleryBeachImage from "@/assets/experience-detail/gallery-beach.jpg";
+import {
+  DEFAULT_EXPERIENCE_DETAIL_VIEW,
+  useExperienceDetailView,
+} from "@/features/experiences/api/useExperienceDetailView";
 import { ROUTES } from "@/shared/config/routes";
+import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import {
   ChevronLeftOutlineIcon,
@@ -10,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 const PAGE_BG = "#FFFFFF";
+const EXPERIENCE_ID = 1;
 const TITLE_FONT =
   '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
 const HERO_HEIGHT = "379px";
@@ -17,18 +23,6 @@ const HERO_OVERLAY_BOTTOM = "49px";
 const CONTENT_SIDE_PADDING = "24px";
 const CTA_HEIGHT = "58.923px";
 const CTA_BOTTOM = "50.08px";
-
-const INTRO_TEXT =
-  "45년 경력의 김영숙 해녀님과 함께하는 물질 체험입니다. 전통 해녀복을 입고 바다에 들어가 직접 해산물을 채취하며 제주 해녀 문화를 체험할 수 있습니다. 초보자도 안전하게 참여할 수 있도록 구명조끼와 안전 장비가 제공되며, 해녀님의 세심한 지도 아래 진행됩니다.";
-
-const SKILLS = [
-  "물질 기술",
-  "해산물 채취",
-  "바다 안전",
-  "바다 안전",
-  "물때 판단",
-  "장비 관리",
-] as const;
 
 const MENTORS = [
   {
@@ -225,6 +219,30 @@ function MentorCard({
 
 export function ExperienceDetailPage() {
   const navigate = useNavigate();
+  const experienceQuery = useExperienceDetailView(EXPERIENCE_ID);
+  const experience = experienceQuery.data ?? DEFAULT_EXPERIENCE_DETAIL_VIEW;
+  const experienceId = experience.experienceId;
+  const title = experience.title;
+  const introduction = experience.introduction;
+  const heroImageSrc = experience.heroImageSrc;
+  const skills = experience.skills;
+  const currentParticipants = experience.currentParticipants;
+  const maxParticipants = experience.maxParticipants;
+  const mentorName = experience.mentorName;
+  const pageStatus = experienceQuery.isError
+    ? {
+        tone: "error" as const,
+        message: experienceQuery.error.message,
+        onRetry: () => {
+          void experienceQuery.refetch();
+        },
+      }
+    : experienceQuery.isPending
+      ? {
+          tone: "loading" as const,
+          message: "체험 정보를 불러오는 중입니다.",
+        }
+      : null;
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -270,7 +288,7 @@ export function ExperienceDetailPage() {
             }}
           >
             <Box
-              render={<img src={heroImage} alt="" />}
+              render={<img src={heroImageSrc} alt="" />}
               aria-hidden="true"
               $css={{
                 position: "absolute",
@@ -376,7 +394,7 @@ export function ExperienceDetailPage() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                금녕 해녀와 함께하는 전복따기금녕금녕 해녀와 함께하는 전복따기금녕
+                  {title}
               </Text>
 
               <HStack
@@ -397,7 +415,7 @@ export function ExperienceDetailPage() {
                     letterSpacing: "-0.1504px",
                   }}
                 >
-                  5/8명
+                  {currentParticipants}/{maxParticipants}명
                 </Text>
               </HStack>
             </VStack>
@@ -427,6 +445,13 @@ export function ExperienceDetailPage() {
                   paddingInline: CONTENT_SIDE_PADDING,
                 }}
               >
+                {pageStatus ? (
+                  <QueryNotice
+                    tone={pageStatus.tone}
+                    message={pageStatus.message}
+                    onRetry={pageStatus.onRetry}
+                  />
+                ) : null}
                 <VStack
                   $css={{
                     gap: "16px",
@@ -456,7 +481,7 @@ export function ExperienceDetailPage() {
                       letterSpacing: "-0.1px",
                     }}
                   >
-                    {INTRO_TEXT}
+                    {introduction}
                   </Text>
                 </VStack>
 
@@ -473,7 +498,7 @@ export function ExperienceDetailPage() {
                       alignItems: "center",
                     }}
                   >
-                    {SKILLS.map((skill) => (
+                    {skills.map((skill) => (
                       <SkillPill key={skill} label={skill} />
                     ))}
                   </HStack>
@@ -512,7 +537,19 @@ export function ExperienceDetailPage() {
 
         <Box
           render={
-            <button type="button" onClick={() => navigate(ROUTES.reservation)} />
+            <button
+              type="button"
+              onClick={() =>
+                navigate(ROUTES.reservation, {
+                  state: {
+                    experienceId,
+                    summaryTitle: title,
+                    summaryMentor: mentorName,
+                  },
+                })
+              }
+              disabled={experienceQuery.isPending || experienceQuery.isError}
+            />
           }
           $css={{
             position: "absolute",
@@ -524,7 +561,12 @@ export function ExperienceDetailPage() {
             borderRadius: "14px",
             backgroundColor: "#1CB3CB",
             color: "#FFFFFF",
-            cursor: "pointer",
+            cursor:
+              experienceQuery.isPending || experienceQuery.isError
+                ? "not-allowed"
+                : "pointer",
+            opacity:
+              experienceQuery.isPending || experienceQuery.isError ? 0.6 : 1,
             zIndex: 5,
             display: "grid",
             placeItems: "center",
