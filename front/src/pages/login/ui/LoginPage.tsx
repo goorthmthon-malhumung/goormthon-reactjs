@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -15,6 +16,7 @@ import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { useSignIn } from "@/api/generated/user/user";
 import { isApiError } from "@/api/fetcher";
+import { resolvePostAuthRoute } from "@/features/auth/lib/postAuthRoute";
 
 const FIELD_INPUT_STYLES = {
   height: "48px",
@@ -26,6 +28,7 @@ const FIELD_INPUT_STYLES = {
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -42,8 +45,9 @@ export function LoginPage() {
     signIn(
       { data: { phone, password } },
       {
-        onSuccess: () => {
-          navigate(ROUTES.home, { replace: true });
+        onSuccess: async () => {
+          const nextRoute = await resolvePostAuthRoute(queryClient);
+          navigate(nextRoute, { replace: true });
         },
         onError: (error) => {
           if (isApiError(error)) {
