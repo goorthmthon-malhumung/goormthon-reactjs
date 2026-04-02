@@ -4,12 +4,9 @@ import horseIcon from "@/shared/assets/horseIcon.svg";
 import logo from "@/shared/assets/logo.svg";
 import mandarinIcon from "@/shared/assets/mandarinIcon.svg";
 import stoneIcon from "@/shared/assets/stoneIcon.svg";
-import { ROUTES } from "@/shared/config/routes";
 import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const SMALL_CARD_IMAGE_URL =
   "https://www.figma.com/api/mcp/asset/652edba1-291d-40e3-b23e-9257796c661c";
@@ -186,20 +183,6 @@ function LargeExperienceCard({
 }
 
 export function HomePage() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<BottomNavTab>("home");
-
-  const handleBottomTabChange = (tab: BottomNavTab) => {
-    setActiveTab(tab);
-
-    if (tab === "home") {
-      navigate(ROUTES.home);
-      return;
-    }
-
-    navigate(ROUTES.my);
-  };
-
   return (
     <Box
       render={<section />}
@@ -445,11 +428,7 @@ export function HomePage() {
           flexShrink: 0,
         }}
       >
-        <BottomNavigation
-          activeTab={activeTab}
-          onTabChange={handleBottomTabChange}
-          onCenterClick={() => navigate(ROUTES.matching)}
-        />
+        <BottomNavigation />
       </Box>
     </Box>
   );
