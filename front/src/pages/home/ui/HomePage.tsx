@@ -1,21 +1,17 @@
-import adImage from "@/shared/assets/ad.png";
+import banner from "@/shared/assets/banner.png";
 import haenyeoIcon from "@/shared/assets/haenyeoIcon.svg";
 import horseIcon from "@/shared/assets/horseIcon.svg";
 import logo from "@/shared/assets/logo.svg";
 import mandarinIcon from "@/shared/assets/mandarinIcon.svg";
 import stoneIcon from "@/shared/assets/stoneIcon.svg";
 import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
-import {
-  BottomNavigation,
-  type BottomNavTab,
-} from "@/shared/ui/navigation/BottomNavigation";
+import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
-import { useState } from "react";
 
 const SMALL_CARD_IMAGE_URL =
-  "https://www.figma.com/api/mcp/asset/acf1766d-7833-45cb-9d64-368c486a2af0";
+  "https://www.figma.com/api/mcp/asset/652edba1-291d-40e3-b23e-9257796c661c";
 const LARGE_CARD_IMAGE_URL =
-  "https://www.figma.com/api/mcp/asset/fb990819-5353-4633-a2d6-b7a342cb57f7";
+  "https://www.figma.com/api/mcp/asset/378f6b43-2954-444a-919f-af0b0831f962";
 
 const CATEGORY_ITEMS = [
   { iconSrc: haenyeoIcon, label: "해녀" },
@@ -28,27 +24,27 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   {
     to: "/tokens",
     imageSrc: SMALL_CARD_IMAGE_URL,
-    imageAlt: "귤나무에 물을 주는 하루",
-    badgeLabel: "정착지원금 30만원",
-    title: "귤나무에 물을 주는 하루",
+    imageAlt: "금녕 해녀와 함께하는 전복따기",
+    badgeLabel: "정부지원금 30만원",
+    title: "금녕 해녀와 함께하는 전복따기",
     statusLabel: "김** 해녀 · D-10",
-    caption: "제주도 구좌읍",
+    caption: "제주시 구좌읍",
   },
   {
     to: "/tokens",
     imageSrc: SMALL_CARD_IMAGE_URL,
-    imageAlt: "제주도 귤을 수확하는 하루",
-    badgeLabel: "정착지원금 30만원",
-    title: "제주도 귤을 수확하는 하루",
+    imageAlt: "제주의 귤을 키우는 하루",
+    badgeLabel: "정부지원금 30만원",
+    title: "제주의 귤을 키우는 하루",
     statusLabel: "임** 농부 · D-20",
-    caption: "서귀포시 효돈동",
+    caption: "서귀포시 남원읍",
   },
   {
     to: "/tokens",
     imageSrc: SMALL_CARD_IMAGE_URL,
-    imageAlt: "제주도 밭을 일구는 하루",
-    badgeLabel: "정착지원금 30만원",
-    title: "제주도 밭을 일구는 하루",
+    imageAlt: "제주의 돌을 쌓는 하루",
+    badgeLabel: "정부지원금 30만원",
+    title: "제주의 돌을 쌓는 하루",
     statusLabel: "강** 장인 · D-10",
     caption: "서귀포시 성산읍",
   },
@@ -56,12 +52,12 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
 
 const LARGE_EXPERIENCE_CARDS = [
   {
-    title: "제주도 마을을 돌아보는 하루",
+    title: "제주의 말을 돌보는 하루",
     deadline: "D-24",
-    location: "제주도 구좌읍",
+    location: "제주시 구좌읍",
   },
   {
-    title: "제주도 돌담을 쌓아가는 장인",
+    title: "제주의 돌담을 이어가는 장인",
     deadline: "D-12",
     location: "서귀포시 성산읍",
   },
@@ -187,21 +183,17 @@ function LargeExperienceCard({
 }
 
 export function HomePage() {
-  const [activeTab, setActiveTab] = useState<BottomNavTab>("home");
-
   return (
     <Box
       render={<section />}
       $css={{
         width: "100%",
-        // height: "100%",
         height: "100dvh",
         minHeight: "100dvh",
         backgroundColor: "var(--vapor-color-background-surface-200, #f7f7f7)",
-        position: "relative",
-        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       <Box
@@ -209,6 +201,7 @@ export function HomePage() {
           width: "100%",
           boxSizing: "border-box",
           height: "48px",
+          flexShrink: 0,
           backgroundColor: "var(--vapor-color-background-canvas, #ffffff)",
           display: "flex",
           justifyContent: "center",
@@ -221,35 +214,19 @@ export function HomePage() {
       <Box
         $css={{
           flex: 1,
+          minHeight: 0,
           overflowY: "auto",
-          paddingTop: "28px",
-          paddingBottom: "calc(140px + env(safe-area-inset-bottom))",
-          display: "flex",
-          flexDirection: "column",
-          gap: "42px",
-          paddingInline: "16px",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         <Box
           $css={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
+            backgroundColor: "var(--vapor-color-background-canvas, #ffffff)",
+            paddingTop: "28px",
+            paddingBottom: "28px",
+            paddingInline: "16px",
           }}
         >
-          <Text
-            render={<h2 />}
-            $css={{
-              fontSize: "18px",
-              lineHeight: "26px",
-              fontWeight: 700,
-              letterSpacing: "-0.1px",
-              color: "var(--vapor-color-gray-800, #393939)",
-            }}
-          >
-            어떤 제주를 경험해볼까요?
-          </Text>
-
           <Box
             $css={{
               display: "flex",
@@ -314,132 +291,144 @@ export function HomePage() {
 
         <Box
           $css={{
+            width: "100%",
+            height: "12px",
+            backgroundColor: "var(--vapor-color-gray-050, #f7f7f7)",
+          }}
+        />
+
+        <Box
+          $css={{
+            paddingTop: "42px",
+            paddingInline: "16px",
+            paddingBottom: "16px",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "54px",
           }}
         >
-          <Text
-            render={<h2 />}
-            $css={{
-              paddingLeft: "4px",
-              fontSize: "18px",
-              lineHeight: "26px",
-              fontWeight: 700,
-              letterSpacing: "-0.1px",
-              color: "var(--vapor-color-gray-800, #393939)",
-            }}
-          >
-            제주의 삶을 경험해보세요, 혜택은 덤으로
-          </Text>
-
           <Box
             $css={{
               display: "flex",
-              gap: "10px",
-              overflowX: "auto",
-              overflowY: "hidden",
-              scrollSnapType: "x mandatory",
-              scrollBehavior: "smooth",
-              overscrollBehaviorX: "contain",
-              paddingBottom: "2px",
+              flexDirection: "column",
+              gap: "16px",
             }}
           >
-            {SMALL_EXPERIENCE_CARDS.map((card) => (
-              <Box
-                key={card.title}
-                $css={{
-                  width: "165px",
-                  flex: "0 0 auto",
-                  scrollSnapAlign: "start",
-                }}
-              >
-                <ThumbnailCard {...card} />
-              </Box>
-            ))}
+            <Text
+              render={<h2 />}
+              $css={{
+                paddingLeft: "4px",
+                fontSize: "18px",
+                lineHeight: "26px",
+                fontWeight: 700,
+                letterSpacing: "-0.1px",
+                color: "var(--vapor-color-gray-800, #393939)",
+              }}
+            >
+              제주의 삶을 경험해보세요, 혜택은 덤으로
+            </Text>
+
+            <Box
+              $css={{
+                display: "flex",
+                gap: "10px",
+                overflowX: "auto",
+                overflowY: "hidden",
+                scrollSnapType: "x mandatory",
+                scrollBehavior: "smooth",
+                overscrollBehaviorX: "contain",
+                paddingBottom: "2px",
+              }}
+            >
+              {SMALL_EXPERIENCE_CARDS.map((card) => (
+                <Box
+                  key={card.title}
+                  $css={{
+                    width: "165px",
+                    flex: "0 0 auto",
+                    scrollSnapAlign: "start",
+                  }}
+                >
+                  <ThumbnailCard {...card} />
+                </Box>
+              ))}
+            </Box>
           </Box>
-        </Box>
 
-        <Box
-          $css={{
-            width: "100%",
-            height: "80px",
-            minHeight: "80px",
-            flexShrink: 0,
-            borderRadius: "16px",
-            overflow: "hidden",
-            backgroundColor: "var(--vapor-color-gray-000, #ffffff)",
-          }}
-        >
           <Box
-            render={<img src={adImage} alt="광고 배너" />}
             $css={{
-              display: "block",
               width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </Box>
-
-        <Box
-          $css={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
-          <Text
-            $css={{
-              paddingLeft: "4px",
-              fontSize: "18px",
-              lineHeight: "26px",
-              fontWeight: 700,
-              letterSpacing: "-0.1px",
-              color: "var(--vapor-color-gray-800, #393939)",
+              height: "109px",
+              flexShrink: 0,
+              borderRadius: "16px",
+              overflow: "hidden",
+              backgroundColor: "var(--vapor-color-gray-000, #ffffff)",
             }}
           >
             <Box
-              render={<span />}
+              render={<img src={banner} alt="광고 배너" />}
               $css={{
-                color: "var(--vapor-color-orange-400, #ef6f25)",
+                display: "block",
+                width: "100%",
+                height: "100%",
               }}
-            >
-              2030
-            </Box>
-            {"이 찾는 전통 직업"}
-          </Text>
+            />
+          </Box>
 
           <Box
             $css={{
               display: "flex",
-              gap: "10px",
-              overflowX: "auto",
+              flexDirection: "column",
+              gap: "20px",
             }}
           >
-            {LARGE_EXPERIENCE_CARDS.map((card) => (
-              <LargeExperienceCard
-                key={card.title}
-                title={card.title}
-                deadline={card.deadline}
-                location={card.location}
-              />
-            ))}
+            <Text
+              $css={{
+                paddingLeft: "4px",
+                fontSize: "18px",
+                lineHeight: "26px",
+                fontWeight: 700,
+                letterSpacing: "-0.1px",
+                color: "var(--vapor-color-gray-800, #393939)",
+              }}
+            >
+              <Box
+                render={<span />}
+                $css={{
+                  color: "var(--vapor-color-orange-400, #ef6f25)",
+                }}
+              >
+                2030
+              </Box>
+              {"이 찾는 전통 직업"}
+            </Text>
+
+            <Box
+              $css={{
+                display: "flex",
+                gap: "10px",
+                overflowX: "auto",
+              }}
+            >
+              {LARGE_EXPERIENCE_CARDS.map((card) => (
+                <LargeExperienceCard
+                  key={card.title}
+                  title={card.title}
+                  deadline={card.deadline}
+                  location={card.location}
+                />
+              ))}
+            </Box>
           </Box>
         </Box>
       </Box>
 
       <Box
         $css={{
-          position: "absolute",
-          left: "0",
-          right: "0",
-          // bottom: "0",
-          bottom: "20px",
-          paddingInline: "16px",
+          flexShrink: 0,
         }}
       >
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation />
       </Box>
     </Box>
   );
