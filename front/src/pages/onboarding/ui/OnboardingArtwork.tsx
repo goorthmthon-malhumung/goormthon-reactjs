@@ -6,41 +6,47 @@ import starImageUrl from "@/assets/onboarding/star.svg";
 import stoneImageUrl from "@/assets/onboarding/stone.svg";
 import tangerineImageUrl from "@/assets/onboarding/tangerine.svg";
 
-function OnboardingGogglesIcon() {
+function OnboardingGoggles() {
   return (
     <Box
       $css={{
         position: "absolute",
-        top: "4px",
-        left: "28px",
-        width: "67px",
-        height: "59px",
+        left: "34px",
+        top: "96px",
+        width: "111px",
+        height: "90px",
+        opacity: 0.92,
+        filter: "blur(2px)",
       }}
     >
       <Box
         render={<img src={snorkelImageUrl} alt="" />}
+        aria-hidden="true"
         $css={{
           position: "absolute",
-          top: "5.55px",
-          left: "50.35px",
-          width: "16.113px",
-          height: "38.121px",
+          top: "20px",
+          left: "67px",
+          width: "18px",
+          height: "52px",
           display: "block",
-          transform: "rotate(6.5deg)",
+          transform: "rotate(18deg)",
           transformOrigin: "center",
+          opacity: 0.75,
         }}
       />
       <Box
         render={<img src={gogglesImageUrl} alt="" />}
+        aria-hidden="true"
         $css={{
           position: "absolute",
-          top: "29.81px",
-          left: "0px",
-          width: "53.132px",
-          height: "27.359px",
+          top: "34px",
+          left: "0",
+          width: "82px",
+          height: "44px",
           display: "block",
-          transform: "rotate(6.5deg)",
+          transform: "rotate(18deg)",
           transformOrigin: "center",
+          opacity: 0.85,
         }}
       />
       <Box
@@ -48,45 +54,22 @@ function OnboardingGogglesIcon() {
           <div
             style={{
               position: "absolute",
-              top: "28.64px",
-              left: "4.4px",
-              width: "5px",
-              height: "31.646px",
+              top: "30px",
+              left: "3px",
+              width: "9px",
+              height: "51px",
               backgroundColor: "#83F0FF",
-              transform: "rotate(40.34deg)",
+              transform: "rotate(52deg)",
               transformOrigin: "center",
+              opacity: 0.28,
               WebkitMaskImage: `url(${gogglesMaskImageUrl})`,
               maskImage: `url(${gogglesMaskImageUrl})`,
               WebkitMaskRepeat: "no-repeat",
               maskRepeat: "no-repeat",
-              WebkitMaskPosition: "-3.244px 2.327px",
-              maskPosition: "-3.244px 2.327px",
-              WebkitMaskSize: "50.814px 25.04px",
-              maskSize: "50.814px 25.04px",
-            }}
-          />
-        }
-      />
-      <Box
-        render={
-          <div
-            style={{
-              position: "absolute",
-              top: "27.31px",
-              left: "-0.82px",
-              width: "2.488px",
-              height: "29.96px",
-              backgroundColor: "#83F0FF",
-              transform: "rotate(40.34deg)",
-              transformOrigin: "center",
-              WebkitMaskImage: `url(${gogglesMaskImageUrl})`,
-              maskImage: `url(${gogglesMaskImageUrl})`,
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskPosition: "1.981px 3.651px",
-              maskPosition: "1.981px 3.651px",
-              WebkitMaskSize: "50.814px 25.04px",
-              maskSize: "50.814px 25.04px",
+              WebkitMaskPosition: "-2px 2px",
+              maskPosition: "-2px 2px",
+              WebkitMaskSize: "78px 40px",
+              maskSize: "78px 40px",
             }}
           />
         }
@@ -95,53 +78,26 @@ function OnboardingGogglesIcon() {
   );
 }
 
-function OnboardingStarIcon() {
+function OnboardingStone() {
   return (
     <Box
       $css={{
         position: "absolute",
-        top: "68.46px",
-        left: "0px",
-        width: "35.236px",
-        height: "34.927px",
-        display: "grid",
-        placeItems: "center",
-      }}
-    >
-      <Box
-        render={<img src={starImageUrl} alt="" />}
-        $css={{
-          width: "25.865px",
-          height: "24.772px",
-          display: "block",
-          transform: "rotate(-33.45deg)",
-          transformOrigin: "center",
-        }}
-      />
-    </Box>
-  );
-}
-
-function OnboardingStoneIcon() {
-  return (
-    <Box
-      $css={{
-        position: "absolute",
-        top: "88.29px",
-        left: "31.5px",
-        width: "63.996px",
-        height: "45.689px",
-        display: "grid",
-        placeItems: "center",
+        left: "-30px",
+        bottom: "248px",
+        width: "128px",
+        height: "98px",
+        opacity: 0.78,
       }}
     >
       <Box
         render={<img src={stoneImageUrl} alt="" />}
+        aria-hidden="true"
         $css={{
-          width: "59.58px",
-          height: "38.392px",
+          width: "100%",
+          height: "100%",
           display: "block",
-          transform: "rotate(-7.34deg)",
+          transform: "rotate(-16deg)",
           transformOrigin: "center",
         }}
       />
@@ -149,30 +105,108 @@ function OnboardingStoneIcon() {
   );
 }
 
-function OnboardingTangerineIcon() {
+function OnboardingTangerine() {
   return (
     <Box
       $css={{
         position: "absolute",
-        top: "153.1px",
-        left: "33.82px",
-        width: "57.6px",
-        height: "60.675px",
-        display: "grid",
-        placeItems: "center",
+        right: "39px",
+        top: "138px",
+        width: "74px",
+        height: "76px",
       }}
     >
       <Box
         render={<img src={tangerineImageUrl} alt="" />}
+        aria-hidden="true"
         $css={{
-          width: "51.125px",
-          height: "54.675px",
+          width: "100%",
+          height: "100%",
           display: "block",
-          transform: "rotate(7.23deg)",
+          transform: "rotate(-23deg)",
           transformOrigin: "center",
         }}
       />
     </Box>
+  );
+}
+
+function OnboardingStar() {
+  return (
+    <Box
+      $css={{
+        position: "absolute",
+        right: "105px",
+        top: "156px",
+        width: "35px",
+        height: "35px",
+      }}
+    >
+      <Box
+        render={<img src={starImageUrl} alt="" />}
+        aria-hidden="true"
+        $css={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+          transform: "rotate(-23deg)",
+          transformOrigin: "center",
+        }}
+      />
+    </Box>
+  );
+}
+
+function DecorationDot({
+  top,
+  left,
+  right,
+  bottom,
+  size,
+  opacity = 0.34,
+}: {
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  size: string;
+  opacity?: number;
+}) {
+  return (
+    <Box
+      $css={{
+        position: "absolute",
+        top,
+        left,
+        right,
+        bottom,
+        width: size,
+        height: size,
+        borderRadius: "999px",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.1)",
+        opacity,
+      }}
+    />
+  );
+}
+
+function BottomGlow() {
+  return (
+    <Box
+      $css={{
+        position: "absolute",
+        right: "-48px",
+        bottom: "-18px",
+        width: "176px",
+        height: "126px",
+        borderRadius: "999px",
+        background:
+          "radial-gradient(circle at 35% 35%, rgba(118, 89, 255, 0.55) 0%, rgba(60, 78, 255, 0.18) 38%, rgba(1, 3, 42, 0) 78%)",
+        filter: "blur(16px)",
+        opacity: 0.85,
+      }}
+    />
   );
 }
 
@@ -181,16 +215,26 @@ export function OnboardingArtwork() {
     <Box
       aria-hidden="true"
       $css={{
-        position: "relative",
-        width: "112px",
-        height: "214px",
-        flexShrink: 0,
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
       }}
     >
-      <OnboardingGogglesIcon />
-      <OnboardingStarIcon />
-      <OnboardingStoneIcon />
-      <OnboardingTangerineIcon />
+      <OnboardingGoggles />
+      <OnboardingStar />
+      <OnboardingTangerine />
+      <OnboardingStone />
+      <BottomGlow />
+
+      <DecorationDot top="77px" left="57px" size="8px" opacity={0.48} />
+      <DecorationDot top="236px" left="217px" size="14px" opacity={0.24} />
+      <DecorationDot top="280px" left="40px" size="8px" opacity={0.36} />
+      <DecorationDot top="364px" left="220px" size="14px" opacity={0.16} />
+      <DecorationDot top="497px" right="24px" size="8px" opacity={0.42} />
+      <DecorationDot top="561px" left="162px" size="8px" opacity={0.46} />
+      <DecorationDot top="578px" right="62px" size="14px" opacity={0.56} />
+      <DecorationDot bottom="241px" left="31px" size="14px" opacity={0.52} />
+      <DecorationDot bottom="145px" right="17px" size="8px" opacity={0.28} />
     </Box>
   );
 }
