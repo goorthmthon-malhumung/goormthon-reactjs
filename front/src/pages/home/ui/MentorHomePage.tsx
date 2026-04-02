@@ -502,10 +502,9 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
           flexShrink: 0,
         }}
       >
-        <BottomNavigation isMentor />
+        <BottomNavigation />
       </Box>
     </Box>
   );
 }
-
 

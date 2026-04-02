@@ -3,14 +3,17 @@ import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
 import statMatchingIcon from "@/assets/my/stat-matching.svg";
-import {
-  DEFAULT_SESSION_PROFILE,
-  useSessionProfile,
-} from "@/features/auth/api/useSessionProfile";
+import { useSessionProfile } from "@/features/auth/api/useSessionProfile";
 import {
   useMyCompletedExperienceHistory,
   useMyUpcomingExperienceReservations,
 } from "@/features/experiences/api/useMyBookingViews";
+import {
+  asRecord,
+  getNumber,
+  getRecordCollection,
+  getString,
+} from "@/shared/lib/apiData";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
@@ -36,45 +39,23 @@ type StatCardProps = {
 };
 
 type UpcomingReservation = {
-  id: string;
-  kind: UpcomingKind;
   title: string;
   scheduleLabel: string;
-  statusLabel: string;
-  participantLabel: string;
+  statusLabel?: string;
+  participantLabel?: string;
 };
 
 type HistoryCardTone = "cyan" | "orange";
 
 type HistoryItem = {
-  id: string;
-  imageSrc: string;
-  badgeLabel: string;
-  badgeTone: HistoryCardTone;
+  imageSrc?: string;
+  badgeLabel?: string;
+  badgeTone?: HistoryCardTone;
   title: string;
-  mentorLabel: string;
-  deadlineLabel: string;
-  location: string;
+  mentorLabel?: string;
+  deadlineLabel?: string;
+  location?: string;
 };
-
-const UPCOMING_JOB_RESERVATIONS: readonly UpcomingReservation[] = [
-  {
-    id: "haenyeo-job",
-    kind: "job",
-    title: "해녀 물질 체험",
-    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
-    statusLabel: "예약확정",
-    participantLabel: "8명/10명",
-  },
-  {
-    id: "stone-job",
-    kind: "job",
-    title: "돌담 쌓기 체험",
-    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
-    statusLabel: "예약확정",
-    participantLabel: "2명/2명",
-  },
-] as const;
 
 function MetaItem({ iconSrc, label }: { iconSrc: string; label: string; }) {
   return (
@@ -259,7 +240,7 @@ function UpcomingReservationCard({
   scheduleLabel,
   statusLabel,
   participantLabel,
-}: Omit<UpcomingReservation, "id" | "kind">) {
+}: UpcomingReservation) {
   return (
     <Box
       $css={{
@@ -331,7 +312,7 @@ function UpcomingReservationCard({
               width: "100%",
             }}
           >
-            <StatusBadge label={statusLabel} />
+            {statusLabel ? <StatusBadge label={statusLabel} /> : null}
             {participantLabel ? (
               <Text
                 render={<p />}
@@ -427,15 +408,23 @@ function HistoryCard({
         }}
       >
         <Box
-          render={<img src={imageSrc} alt="" aria-hidden="true" />}
+          render={
+            imageSrc ? <img src={imageSrc} alt="" aria-hidden="true" /> : <div aria-hidden="true" />
+          }
           $css={{
             width: "100%",
             height: "100%",
             display: "block",
             objectFit: "cover",
+            background:
+              imageSrc
+                ? undefined
+                : "linear-gradient(135deg, #EEF9FB 0%, #C2E8F0 100%)",
           }}
         />
-        <HistoryBadge label={badgeLabel} tone={badgeTone} />
+        {badgeLabel && badgeTone ? (
+          <HistoryBadge label={badgeLabel} tone={badgeTone} />
+        ) : null}
       </Box>
 
       <VStack
@@ -477,67 +466,101 @@ function HistoryCard({
               color: "#4C4C4C",
             }}
           >
-            <Text
-              render={<span />}
-              $css={{
-                color: "inherit",
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                lineHeight: "22px",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {mentorLabel}
-            </Text>
-            <Text
-              render={<span />}
-              $css={{
-                color: "inherit",
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                lineHeight: "22px",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              ·
-            </Text>
-            <Text
-              render={<span />}
-              $css={{
-                color: "inherit",
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                lineHeight: "22px",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {deadlineLabel}
-            </Text>
+            {mentorLabel ? (
+              <Text
+                render={<span />}
+                $css={{
+                  color: "inherit",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {mentorLabel}
+              </Text>
+            ) : null}
+            {mentorLabel && deadlineLabel ? (
+              <Text
+                render={<span />}
+                $css={{
+                  color: "inherit",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ·
+              </Text>
+            ) : null}
+            {deadlineLabel ? (
+              <Text
+                render={<span />}
+                $css={{
+                  color: "inherit",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {deadlineLabel}
+              </Text>
+            ) : null}
           </HStack>
         </VStack>
 
-        <Text
-          render={<p />}
-          $css={{
-            color: "#A3A3A3",
-            fontFamily: FONT_FAMILY,
-            fontSize: "12px",
-            lineHeight: "18px",
-            fontWeight: 400,
-            letterSpacing: "-0.1px",
-          }}
-        >
-          {location}
-        </Text>
+        {location ? (
+          <Text
+            render={<p />}
+            $css={{
+              color: "#A3A3A3",
+              fontFamily: FONT_FAMILY,
+              fontSize: "12px",
+              lineHeight: "18px",
+              fontWeight: 400,
+              letterSpacing: "-0.1px",
+            }}
+          >
+            {location}
+          </Text>
+        ) : null}
       </VStack>
     </VStack>
   );
+}
+
+function formatDateRange(startDate?: string, endDate?: string) {
+  if (startDate && endDate && startDate !== endDate) {
+    return `${startDate} ~ ${endDate}`;
+  }
+
+  return startDate ?? endDate ?? "";
+}
+
+function formatParticipantLabel(
+  participantCount?: number,
+  maxParticipants?: number,
+) {
+  if (
+    typeof participantCount === "number" &&
+    typeof maxParticipants === "number"
+  ) {
+    return `${participantCount}명/${maxParticipants}명`;
+  }
+
+  if (typeof participantCount === "number") {
+    return `${participantCount}명`;
+  }
+
+  return undefined;
 }
 
 export function MyPage() {
@@ -546,7 +569,14 @@ export function MyPage() {
   const profileQuery = useSessionProfile();
   const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
   const completedHistoryQuery = useMyCompletedExperienceHistory();
-  const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
+  const profile = asRecord(profileQuery.data?.data);
+  const displayName = getString(profile, "name");
+  const displayPhone = getString(profile, "phone");
+  const displayLocation = getString(profile, "location");
+  const joinedLabel =
+    getString(profile, "joinedLabel") ?? getString(profile, "joinedAt");
+  const completedCount = getNumber(profile, "completedCount");
+  const matchingCount = getNumber(profile, "matchingCount");
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
       tone: "error",
@@ -561,10 +591,29 @@ export function MyPage() {
         message: "회원 정보를 불러오는 중입니다.",
       }
       : null;
-  const upcomingReservations =
-    selectedUpcomingKind === "job"
-      ? [...UPCOMING_JOB_RESERVATIONS]
-      : (upcomingExperienceQuery.data ?? []);
+  const upcomingReservations: UpcomingReservation[] = getRecordCollection(
+    upcomingExperienceQuery.data?.data,
+  ).reduce<UpcomingReservation[]>((acc, item) => {
+      const title = getString(item, "title");
+
+      if (!title) {
+        return acc;
+      }
+
+      acc.push({
+        title,
+        scheduleLabel:
+          getString(item, "schedule") ??
+          formatDateRange(getString(item, "startDate"), getString(item, "endDate")),
+        statusLabel: getString(item, "status"),
+        participantLabel: formatParticipantLabel(
+          getNumber(item, "participantCount"),
+          getNumber(item, "maxParticipants"),
+        ),
+      });
+
+      return acc;
+    }, []);
   const upcomingStatus =
     selectedUpcomingKind === "experience"
       ? upcomingExperienceQuery.isError
@@ -582,7 +631,28 @@ export function MyPage() {
           }
           : null
       : null;
-  const completedHistory = completedHistoryQuery.data ?? [];
+  const completedHistory: HistoryItem[] = getRecordCollection(
+    completedHistoryQuery.data?.data,
+  ).reduce<HistoryItem[]>((acc, item) => {
+      const title = getString(item, "title");
+
+      if (!title) {
+        return acc;
+      }
+
+      acc.push({
+        imageSrc: getString(item, "photoUrl"),
+        badgeLabel: getString(item, "status"),
+        title,
+        mentorLabel: getString(item, "mentorName"),
+        deadlineLabel:
+          getString(item, "schedule") ??
+          formatDateRange(getString(item, "startDate"), getString(item, "endDate")),
+        location: getString(item, "location"),
+      });
+
+      return acc;
+    }, []);
   const completedStatus = completedHistoryQuery.isError
     ? {
       tone: "error" as const,
@@ -597,6 +667,18 @@ export function MyPage() {
         message: "완료 내역을 불러오는 중입니다.",
       }
       : null;
+  const showProfileMeta = Boolean(displayLocation || joinedLabel);
+  const showStats =
+    typeof completedCount === "number" || typeof matchingCount === "number";
+  const showUpcomingEmptyState =
+    !upcomingStatus &&
+    (selectedUpcomingKind === "job" || upcomingReservations.length === 0);
+  const upcomingEmptyMessage =
+    selectedUpcomingKind === "job"
+      ? "직업 예약 API가 없어 표시할 수 없습니다."
+      : "예약된 체험이 없습니다.";
+  const showCompletedEmptyState =
+    !completedStatus && completedHistory.length === 0;
 
   return (
     <Box
@@ -667,7 +749,7 @@ export function MyPage() {
                 >
                   <Box
                     render={
-                      <img src={profileAvatar} alt={`${profile.displayName} 프로필 사진`} />
+                      <img src={profileAvatar} alt="프로필 사진" />
                     }
                     $css={{
                       width: "100%",
@@ -704,33 +786,41 @@ export function MyPage() {
                       letterSpacing: "-0.3px",
                     }}
                   >
-                    {profile.displayName}
+                    {displayName ?? ""}
                   </Text>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#393939",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "16px",
-                      lineHeight: "24px",
-                      fontWeight: 500,
-                      letterSpacing: "-0.1px",
-                    }}
-                  >
-                    {profile.displayEmail}
-                  </Text>
+                  {displayPhone ? (
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#393939",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "16px",
+                        lineHeight: "24px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      {displayPhone}
+                    </Text>
+                  ) : null}
                 </VStack>
 
-                <HStack
-                  $css={{
-                    gap: "12px",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <MetaItem iconSrc={locationIcon} label={profile.displayLocation} />
-                  <MetaItem iconSrc={calendarIcon} label={profile.joinedLabel} />
-                </HStack>
+                {showProfileMeta ? (
+                  <HStack
+                    $css={{
+                      gap: "12px",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {displayLocation ? (
+                      <MetaItem iconSrc={locationIcon} label={displayLocation} />
+                    ) : null}
+                    {joinedLabel ? (
+                      <MetaItem iconSrc={calendarIcon} label={joinedLabel} />
+                    ) : null}
+                  </HStack>
+                ) : null}
               </VStack>
             </HStack>
 
@@ -744,24 +834,30 @@ export function MyPage() {
               </Box>
             ) : null}
 
-            <HStack
-              $css={{
-                width: "100%",
-                gap: "6px",
-                alignItems: "center",
-              }}
-            >
-              <StatCard
-                iconSrc={statCompletedIcon}
-                value={`${profile.completedCount}회`}
-                label="완료한 체험"
-              />
-              <StatCard
-                iconSrc={statMatchingIcon}
-                value={`${profile.matchingCount}건`}
-                label="매칭 연결"
-              />
-            </HStack>
+            {showStats ? (
+              <HStack
+                $css={{
+                  width: "100%",
+                  gap: "6px",
+                  alignItems: "center",
+                }}
+              >
+                {typeof completedCount === "number" ? (
+                  <StatCard
+                    iconSrc={statCompletedIcon}
+                    value={`${completedCount}회`}
+                    label="완료한 체험"
+                  />
+                ) : null}
+                {typeof matchingCount === "number" ? (
+                  <StatCard
+                    iconSrc={statMatchingIcon}
+                    value={`${matchingCount}건`}
+                    label="매칭 연결"
+                  />
+                ) : null}
+              </HStack>
+            ) : null}
 
             <Box
               render={<button type="button" />}
@@ -854,15 +950,44 @@ export function MyPage() {
                 />
               ) : null}
 
-              {upcomingReservations.map((item) => (
-                <UpcomingReservationCard
-                  key={item.id}
-                  title={item.title}
-                  scheduleLabel={item.scheduleLabel}
-                  statusLabel={item.statusLabel}
-                  participantLabel={item.participantLabel}
-                />
-              ))}
+              {showUpcomingEmptyState ? (
+                <Box
+                  $css={{
+                    width: "100%",
+                    borderRadius: "14px",
+                    border: "1px solid #E2E8F0",
+                    backgroundColor: "#FFFFFF",
+                    padding: "16px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#767676",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "14px",
+                      lineHeight: "22px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    {upcomingEmptyMessage}
+                  </Text>
+                </Box>
+              ) : null}
+
+              {!upcomingStatus && selectedUpcomingKind === "experience"
+                ? upcomingReservations.map((item, index) => (
+                  <UpcomingReservationCard
+                    key={`${item.title}-${index}`}
+                    title={item.title}
+                    scheduleLabel={item.scheduleLabel}
+                    statusLabel={item.statusLabel}
+                    participantLabel={item.participantLabel}
+                  />
+                ))
+                : null}
             </VStack>
           </VStack>
 
@@ -901,9 +1026,37 @@ export function MyPage() {
                   message={completedStatus.message}
                   onRetry={completedStatus.onRetry}
                 />
+              ) : showCompletedEmptyState ? (
+                <Box
+                  $css={{
+                    width: "100%",
+                    borderRadius: "14px",
+                    border: "1px solid #E2E8F0",
+                    backgroundColor: "#FFFFFF",
+                    padding: "16px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#767676",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "14px",
+                      lineHeight: "22px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    완료된 체험 내역이 없습니다.
+                  </Text>
+                </Box>
               ) : (
                 completedHistory.map((item) => (
-                  <HistoryCard key={item.id} {...item} />
+                  <HistoryCard
+                    key={`${item.title}-${item.deadlineLabel ?? item.location ?? "history"}`}
+                    {...item}
+                  />
                 ))
               )}
             </HStack>

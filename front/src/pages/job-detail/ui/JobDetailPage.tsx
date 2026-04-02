@@ -1,15 +1,17 @@
-import {
-  DEFAULT_JOB_DETAIL_VIEW,
-  useJobDetailView,
-} from "@/features/jobs/api/useJobDetailView";
+import { useJobDetailView } from "@/features/jobs/api/useJobDetailView";
 import { ROUTES } from "@/shared/config/routes";
+import {
+  asRecord,
+  getNumber,
+  getString,
+  getStringList,
+} from "@/shared/lib/apiData";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { GroupOutlineIcon } from "@vapor-ui/icons";
 import { useNavigate, useParams } from "react-router-dom";
 
 const DEFAULT_JOB_ID = 1;
-const FALLBACK_EXPERIENCE_ID = 1;
 const HERO_HEIGHT_PX = 379;
 const CONTENT_OVERLAP_PX = 29;
 const CONTENT_SIDE_PADDING_PX = 24;
@@ -17,29 +19,7 @@ const CTA_BOTTOM_OFFSET_PX = 50.08;
 const CTA_HEIGHT_PX = 58.923;
 const TITLE_FONT =
   '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
-
-const FIGMA_MENTOR_CARD_IMAGE =
-  "https://www.figma.com/api/mcp/asset/3b96dd9e-019d-41df-96fb-49411b14e935";
-const FIGMA_MENTOR_BADGE_ICON =
-  "https://www.figma.com/api/mcp/asset/f8d9c380-c80d-4589-94cb-863f30b37c59";
-
-const DEADLINE_LABEL = "D - 20";
 const RESERVE_BUTTON_LABEL = "체험 예약하기";
-
-const MENTOR_CARD_ITEMS = [
-  {
-    title: "김영숙 멘토",
-    subtitleParts: ["68세", "45년 경력"],
-    chipLabel: "제주특별자치도 무형문화재",
-    chipWidth: "159.996px",
-  },
-  {
-    title: "임지은 멘토",
-    subtitleParts: ["72세", "45년 경력"],
-    chipLabel: "해녀 기능 보유자",
-    chipWidth: "110.996px",
-  },
-] as const;
 
 function SectionTitle({ children }: { children: string }) {
   return (
@@ -91,172 +71,26 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
-function MentorChip({
-  label,
-  width,
-}: {
-  label: string;
-  width: string;
-}) {
-  return (
-    <Box
-      $css={{
-        width,
-        height: "24px",
-        borderRadius: "999px",
-        backgroundColor: "#EEF9FB",
-        paddingInline: "8px",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxSizing: "border-box",
-      }}
-    >
-      <HStack
-        $css={{
-          gap: "4px",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-        }}
-      >
-        <Box
-          render={<img src={FIGMA_MENTOR_BADGE_ICON} alt="" aria-hidden="true" />}
-          $css={{
-            width: "11.996px",
-            height: "11.996px",
-            display: "block",
-            flexShrink: 0,
-          }}
-        />
-        <Text
-          render={<span />}
-          $css={{
-            color: "#17A3BA",
-            fontFamily: TITLE_FONT,
-            fontSize: "12px",
-            lineHeight: "18px",
-            fontWeight: 500,
-            letterSpacing: "0",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label}
-        </Text>
-      </HStack>
-    </Box>
-  );
-}
+function formatParticipantLabel(
+  participantCount?: number,
+  maxParticipants?: number,
+) {
+  if (
+    typeof participantCount === "number" &&
+    typeof maxParticipants === "number"
+  ) {
+    return `${participantCount}/${maxParticipants}명`;
+  }
 
-function MentorCard({
-  title,
-  subtitleParts,
-  chipLabel,
-  chipWidth,
-}: {
-  title: string;
-  subtitleParts: readonly string[];
-  chipLabel: string;
-  chipWidth: string;
-}) {
-  return (
-    <Box
-      $css={{
-        position: "relative",
-        width: "297px",
-        height: "168px",
-        borderRadius: "16px",
-        overflow: "hidden",
-        flexShrink: 0,
-        backgroundColor: "#FFFFFF",
-      }}
-    >
-      <Box
-        render={<img src={FIGMA_MENTOR_CARD_IMAGE} alt="" aria-hidden="true" />}
-        $css={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
+  if (typeof participantCount === "number") {
+    return `${participantCount}명`;
+  }
 
-      <Box
-        $css={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(194,232,240,0) 15.734%, rgba(194,232,240,0.96) 87.413%)",
-        }}
-      />
+  if (typeof maxParticipants === "number") {
+    return `정원 ${maxParticipants}명`;
+  }
 
-      <VStack
-        $css={{
-          position: "absolute",
-          left: "17px",
-          bottom: "20px",
-          width: "168px",
-          gap: "8px",
-          alignItems: "flex-start",
-        }}
-      >
-        <VStack
-          $css={{
-            gap: "2px",
-            alignItems: "flex-start",
-            width: "100%",
-          }}
-        >
-          <Text
-            render={<p />}
-            $css={{
-              color: "#393939",
-              fontFamily: TITLE_FONT,
-              fontSize: "18px",
-              lineHeight: "26px",
-              fontWeight: 700,
-              letterSpacing: "-0.1px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              width: "100%",
-            }}
-          >
-            {title}
-          </Text>
-
-          <HStack
-            $css={{
-              gap: "4px",
-              alignItems: "center",
-              color: "#4C4C4C",
-            }}
-          >
-            {subtitleParts.map((part, index) => (
-              <Text
-                key={`${title}-${part}`}
-                render={<span />}
-                $css={{
-                  color: "inherit",
-                  fontFamily: TITLE_FONT,
-                  fontSize: "14px",
-                  lineHeight: "22px",
-                  fontWeight: 500,
-                  letterSpacing: "-0.1px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {index > 0 ? `· ${part}` : part}
-              </Text>
-            ))}
-          </HStack>
-        </VStack>
-
-        <MentorChip label={chipLabel} width={chipWidth} />
-      </VStack>
-    </Box>
-  );
+  return undefined;
 }
 
 export function JobDetailPage() {
@@ -268,15 +102,25 @@ export function JobDetailPage() {
       ? parsedJobId
       : DEFAULT_JOB_ID;
   const jobQuery = useJobDetailView(jobId);
-  const job = jobQuery.data ?? DEFAULT_JOB_DETAIL_VIEW;
-  const experienceId = job.experienceId || FALLBACK_EXPERIENCE_ID;
-  const title = job.title;
-  const introduction = job.introduction;
-  const heroImageSrc = job.heroImageSrc;
-  const skills = job.skills;
-  const currentParticipants = job.currentParticipants;
-  const maxParticipants = job.maxParticipants;
-  const mentorName = job.mentorName;
+  const job = asRecord(jobQuery.data?.data);
+  const experienceId = getNumber(job, "experienceId");
+  const title = getString(job, "title");
+  const introduction = getString(job, "introduction");
+  const heroImageSrc = getString(job, "mainUrl");
+  const skills = getStringList(job, "skills");
+  const participantLabel = formatParticipantLabel(
+    getNumber(job, "participantCount"),
+    getNumber(job, "maxParticipants"),
+  );
+  const mentorName = getString(job, "mentorName");
+  const jobType = getString(job, "jobType");
+  const workHours = getString(job, "workHours");
+  const physicalLevel = getString(job, "physicalLevel");
+  const detailTags = [workHours, physicalLevel].filter(
+    (value): value is string => Boolean(value),
+  );
+  const canReserve =
+    !jobQuery.isPending && typeof experienceId === "number";
 
   const pageStatus = jobQuery.isError
     ? {
@@ -331,18 +175,20 @@ export function JobDetailPage() {
               backgroundColor: "#0B1020",
             }}
           >
-            <Box
-              render={<img src={heroImageSrc} alt="" aria-hidden="true" />}
-              $css={{
-                position: "absolute",
-                inset: 0,
-                width: "127.31%",
-                height: "100%",
-                left: "-12.04%",
-                top: "-0.05%",
-                objectFit: "cover",
-              }}
-            />
+            {heroImageSrc ? (
+              <Box
+                render={<img src={heroImageSrc} alt="" aria-hidden="true" />}
+                $css={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "127.31%",
+                  height: "100%",
+                  left: "-12.04%",
+                  top: "-0.05%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : null}
 
             <Box
               $css={{
@@ -373,33 +219,35 @@ export function JobDetailPage() {
                   alignItems: "flex-start",
                 }}
               >
-                <Box
-                  $css={{
-                    height: "32px",
-                    width: "fit-content",
-                    borderRadius: "999px",
-                    backgroundColor: "#EF6F25",
-                    paddingInline: "12px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text
-                    render={<span />}
+                {jobType ? (
+                  <Box
                     $css={{
-                      color: "#FFF6F1",
-                      fontFamily: TITLE_FONT,
-                      fontSize: "14px",
-                      lineHeight: "22px",
-                      fontWeight: 500,
-                      letterSpacing: "-0.1px",
-                      whiteSpace: "nowrap",
+                      height: "32px",
+                      width: "fit-content",
+                      borderRadius: "999px",
+                      backgroundColor: "#EF6F25",
+                      paddingInline: "12px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {DEADLINE_LABEL}
-                  </Text>
-                </Box>
+                    <Text
+                      render={<span />}
+                      $css={{
+                        color: "#FFF6F1",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "14px",
+                        lineHeight: "22px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {jobType}
+                    </Text>
+                  </Box>
+                ) : null}
 
                 <Text
                   render={
@@ -424,30 +272,32 @@ export function JobDetailPage() {
                     wordBreak: "keep-all",
                   }}
                 >
-                  {title}
+                  {title ?? ""}
                 </Text>
 
-                <HStack
-                  $css={{
-                    gap: "3.999px",
-                    alignItems: "center",
-                  }}
-                >
-                  <GroupOutlineIcon size={16} color="#FFFFFF" aria-hidden="true" />
-                  <Text
-                    render={<p />}
+                {participantLabel ? (
+                  <HStack
                     $css={{
-                      color: "#FFFFFF",
-                      fontFamily: TITLE_FONT,
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                      fontWeight: 400,
-                      letterSpacing: "-0.1504px",
+                      gap: "3.999px",
+                      alignItems: "center",
                     }}
                   >
-                    {currentParticipants}/{maxParticipants}명
-                  </Text>
-                </HStack>
+                    <GroupOutlineIcon size={16} color="#FFFFFF" aria-hidden="true" />
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#FFFFFF",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "14px",
+                        lineHeight: "20px",
+                        fontWeight: 400,
+                        letterSpacing: "-0.1504px",
+                      }}
+                    >
+                      {participantLabel}
+                    </Text>
+                  </HStack>
+                ) : null}
               </VStack>
             </Box>
           </Box>
@@ -478,75 +328,105 @@ export function JobDetailPage() {
                 />
               ) : null}
 
-              <VStack
-                $css={{
-                  gap: "16px",
-                }}
-              >
-                <SectionTitle>제주의 말을 돌보는 하루</SectionTitle>
-                <Text
-                  render={<p />}
+              {detailTags.length > 0 ? (
+                <VStack
                   $css={{
-                    color: "#767676",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "16px",
-                    lineHeight: "24px",
-                    fontWeight: 500,
-                    letterSpacing: "-0.1px",
-                    wordBreak: "keep-all",
+                    gap: "16px",
                   }}
                 >
-                  {introduction}
-                </Text>
-              </VStack>
+                  <SectionTitle>기본 정보</SectionTitle>
+                  <Box
+                    $css={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      columnGap: "10px",
+                      rowGap: "8px",
+                      alignItems: "center",
+                    }}
+                  >
+                    {detailTags.map((item) => (
+                      <SkillPill key={item} label={item} />
+                    ))}
+                  </Box>
+                </VStack>
+              ) : null}
 
-              <VStack
-                $css={{
-                  gap: "16px",
-                }}
-              >
-                <SectionTitle>배울 수 있는 기술</SectionTitle>
-                <Box
+              {introduction ? (
+                <VStack
                   $css={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    columnGap: "10px",
-                    rowGap: "8px",
-                    alignItems: "center",
+                    gap: "16px",
                   }}
                 >
-                  {skills.map((skill, index) => (
-                    <SkillPill key={`${skill}-${index}`} label={skill} />
-                  ))}
-                </Box>
-              </VStack>
+                  <SectionTitle>직업 소개</SectionTitle>
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#767676",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "16px",
+                      lineHeight: "24px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                      wordBreak: "keep-all",
+                    }}
+                  >
+                    {introduction}
+                  </Text>
+                </VStack>
+              ) : null}
 
-              <VStack
-                $css={{
-                  gap: "16px",
-                }}
-              >
-                <SectionTitle>해녀 멘토분들을 만나보세요</SectionTitle>
+              {skills.length > 0 ? (
+                <VStack
+                  $css={{
+                    gap: "16px",
+                  }}
+                >
+                  <SectionTitle>기술</SectionTitle>
+                  <Box
+                    $css={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      columnGap: "10px",
+                      rowGap: "8px",
+                      alignItems: "center",
+                    }}
+                  >
+                    {skills.map((skill, index) => (
+                      <SkillPill key={`${skill}-${index}`} label={skill} />
+                    ))}
+                  </Box>
+                </VStack>
+              ) : null}
+
+              {!pageStatus &&
+              detailTags.length === 0 &&
+              !introduction &&
+              skills.length === 0 ? (
                 <Box
                   $css={{
                     width: "100%",
-                    overflowX: "auto",
-                    overflowY: "hidden",
+                    borderRadius: "16px",
+                    border: "1px solid #E2E8F0",
+                    backgroundColor: "#FFFFFF",
+                    padding: "16px",
+                    boxSizing: "border-box",
                   }}
                 >
-                  <HStack
+                  <Text
+                    render={<p />}
                     $css={{
-                      gap: "10px",
-                      width: "max-content",
-                      paddingBottom: "4px",
+                      color: "#767676",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "14px",
+                      lineHeight: "22px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
                     }}
                   >
-                    {MENTOR_CARD_ITEMS.map((item) => (
-                      <MentorCard key={item.title} {...item} />
-                    ))}
-                  </HStack>
+                    서버 응답에 표시할 직업 상세 정보가 없습니다.
+                  </Text>
                 </Box>
-              </VStack>
+              ) : null}
             </VStack>
           </Box>
         </Box>
@@ -568,12 +448,12 @@ export function JobDetailPage() {
                   navigate(ROUTES.reservation, {
                     state: {
                       experienceId,
-                      summaryTitle: title,
+                      summaryTitle: title ?? "",
                       summaryMentor: mentorName,
                     },
                   })
                 }
-                disabled={jobQuery.isPending}
+                disabled={!canReserve}
               />
             }
             $css={{
@@ -585,8 +465,8 @@ export function JobDetailPage() {
               color: "#FFFFFF",
               display: "grid",
               placeItems: "center",
-              cursor: jobQuery.isPending ? "not-allowed" : "pointer",
-              opacity: jobQuery.isPending ? 0.6 : 1,
+              cursor: canReserve ? "pointer" : "not-allowed",
+              opacity: canReserve ? 1 : 0.6,
               padding: 0,
             }}
           >

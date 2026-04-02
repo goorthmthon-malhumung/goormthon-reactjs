@@ -12,13 +12,13 @@ import {
 
 export type ThumbnailCardProps = {
   to: string;
-  imageSrc: string;
-  imageAlt: string;
-  badgeLabel: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  badgeLabel?: string;
   badgeTone?: ThumbnailBadgeTone;
   title: string;
-  statusLabel: string;
-  caption: string;
+  statusLabel?: string;
+  caption?: string;
 };
 
 const SINGLE_LINE_ELLIPSIS_STYLES = {
@@ -76,16 +76,22 @@ export function ThumbnailCard({
           }}
         >
           <Box
-            render={<img src={imageSrc} alt={imageAlt} />}
+            render={
+              imageSrc ? <img src={imageSrc} alt={imageAlt ?? title} /> : <div aria-hidden="true" />
+            }
             $css={{
               display: "block",
               width: "100%",
               height: "100%",
               objectFit: "cover",
+              background:
+                imageSrc
+                  ? undefined
+                  : "linear-gradient(135deg, #EEF9FB 0%, #C2E8F0 100%)",
             }}
           />
 
-          <ThumbnailBadge label={badgeLabel} tone={badgeTone} />
+          {badgeLabel ? <ThumbnailBadge label={badgeLabel} tone={badgeTone} /> : null}
         </Box>
 
         <Card.Body
@@ -115,26 +121,30 @@ export function ThumbnailCard({
             >
               {title}
             </Text>
+            {statusLabel ? (
+              <Text
+                typography="subtitle1"
+                $css={{
+                  color: "#4C4C4C",
+                  ...SINGLE_LINE_ELLIPSIS_STYLES,
+                }}
+              >
+                {statusLabel}
+              </Text>
+            ) : null}
+          </VStack>
+
+          {caption ? (
             <Text
-              typography="subtitle1"
+              typography="body3"
               $css={{
-                color: "#4C4C4C",
+                color: "#A3A3A3",
                 ...SINGLE_LINE_ELLIPSIS_STYLES,
               }}
             >
-              {statusLabel}
+              {caption}
             </Text>
-          </VStack>
-
-          <Text
-            typography="body3"
-            $css={{
-              color: "#A3A3A3",
-              ...SINGLE_LINE_ELLIPSIS_STYLES,
-            }}
-          >
-            {caption}
-          </Text>
+          ) : null}
         </Card.Body>
       </Card.Root>
     </Box>

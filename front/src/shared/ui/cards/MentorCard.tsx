@@ -9,14 +9,14 @@ import { Link } from "react-router-dom";
 export type MentorCardProps = {
   to: string;
   state?: unknown;
-  imageSrc: string;
-  imageAlt: string;
-  badgeLabel: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  badgeLabel?: string;
   title: string;
-  metaLabel: string;
-  description: string;
-  location: string;
-  tags: readonly string[];
+  metaLabel?: string;
+  description?: string;
+  location?: string;
+  tags?: readonly string[];
 };
 
 const SINGLE_LINE_ELLIPSIS_STYLES = {
@@ -75,39 +75,47 @@ export function MentorCard({
           }}
         >
           <Box
-            render={<img src={imageSrc} alt={imageAlt} />}
+            render={
+              imageSrc ? <img src={imageSrc} alt={imageAlt ?? title} /> : <div aria-hidden="true" />
+            }
             $css={{
               display: "block",
               width: "100%",
               height: "100%",
               objectFit: "cover",
+              background:
+                imageSrc
+                  ? undefined
+                  : "linear-gradient(135deg, #EEF9FB 0%, #C2E8F0 100%)",
             }}
           />
-          <Box
-            $css={{
-              position: "absolute",
-              top: "12px",
-              right: "12px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "32px",
-              paddingInline: "12px",
-              borderRadius: "999px",
-              backgroundColor: "#C2E8F0",
-            }}
-          >
-            <Text
-              typography="subtitle1"
+          {badgeLabel ? (
+            <Box
               $css={{
-                color: "#0D8298",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "32px",
+                paddingInline: "12px",
+                borderRadius: "999px",
+                backgroundColor: "#C2E8F0",
               }}
             >
-              {badgeLabel}
-            </Text>
-          </Box>
+              <Text
+                typography="subtitle1"
+                $css={{
+                  color: "#0D8298",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                {badgeLabel}
+              </Text>
+            </Box>
+          ) : null}
         </Box>
 
         <Card.Body
@@ -150,75 +158,83 @@ export function MentorCard({
                   >
                     {title}
                   </Text>
+                  {metaLabel ? (
+                    <Text
+                      typography="subtitle1"
+                      $css={{
+                        color: "#767676",
+                        letterSpacing: "-0.1px",
+                        ...SINGLE_LINE_ELLIPSIS_STYLES,
+                      }}
+                    >
+                      {metaLabel}
+                    </Text>
+                  ) : null}
+                </VStack>
+
+                {description ? (
                   <Text
                     typography="subtitle1"
                     $css={{
-                      color: "#767676",
+                      color: "#45556C",
                       letterSpacing: "-0.1px",
-                      ...SINGLE_LINE_ELLIPSIS_STYLES,
+                      minHeight: "44px",
+                      ...DESCRIPTION_CLAMP_STYLES,
                     }}
                   >
-                    {metaLabel}
+                    {description}
                   </Text>
-                </VStack>
-
-                <Text
-                  typography="subtitle1"
-                  $css={{
-                    color: "#45556C",
-                    letterSpacing: "-0.1px",
-                    minHeight: "44px",
-                    ...DESCRIPTION_CLAMP_STYLES,
-                  }}
-                >
-                  {description}
-                </Text>
+                ) : null}
               </VStack>
 
-              <Text
-                typography="body3"
-                $css={{
-                  color: "#A3A3A3",
-                  letterSpacing: "-0.1px",
-                  ...SINGLE_LINE_ELLIPSIS_STYLES,
-                }}
-              >
-                {location}
-              </Text>
-            </VStack>
-
-            <Box
-              $css={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "4px",
-                alignItems: "center",
-              }}
-            >
-              {tags.map((tag) => (
-                <Box
-                  key={tag}
+              {location ? (
+                <Text
+                  typography="body3"
                   $css={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "3px 8px",
-                    borderRadius: "999px",
-                    backgroundColor: "#EEF9FB",
+                    color: "#A3A3A3",
+                    letterSpacing: "-0.1px",
+                    ...SINGLE_LINE_ELLIPSIS_STYLES,
                   }}
                 >
-                  <Text
-                    typography="body3"
+                  {location}
+                </Text>
+              ) : null}
+            </VStack>
+
+            {tags && tags.length > 0 ? (
+              <Box
+                $css={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "4px",
+                  alignItems: "center",
+                }}
+              >
+                {tags.map((tag) => (
+                  <Box
+                    key={tag}
                     $css={{
-                      color: "#17A3BA",
-                      fontWeight: 500,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "3px 8px",
+                      borderRadius: "999px",
+                      backgroundColor: "#EEF9FB",
                     }}
                   >
-                    {tag}
-                  </Text>
-                </Box>
-              ))}
-            </Box>
+                    <Text
+                      typography="body3"
+                      $css={{
+                        color: "#17A3BA",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {tag}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+            ) : null}
           </VStack>
         </Card.Body>
       </Card.Root>

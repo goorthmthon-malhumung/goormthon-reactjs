@@ -1,12 +1,6 @@
-import completedImageOne from "@/assets/my/completed-1.jpg";
-import completedImageTwo from "@/assets/my/completed-2.jpg";
-import {
-  DEFAULT_SESSION_PROFILE,
-  useSessionProfile,
-} from "@/features/auth/api/useSessionProfile";
-import { ROUTES } from "@/shared/config/routes";
-import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
+import { useSessionProfile } from "@/features/auth/api/useSessionProfile";
 import haenyeoMentorIcon from "@/shared/assets/haenyeoMentorIcon.svg";
+import { asRecord, getString } from "@/shared/lib/apiData";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, Button, HStack, Text, VStack } from "@vapor-ui/core";
@@ -14,66 +8,30 @@ import { LocationOutlineIcon, TimeOutlineIcon } from "@vapor-ui/icons";
 
 const PROFILE_BLOCK_WIDTH_PX = 358;
 
-const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
-  {
-    to: ROUTES.experienceDetail,
-    imageSrc: completedImageOne,
-    imageAlt: "제주의 돌을 쌓는 하루",
-    badgeLabel: "25년 이어온",
-    badgeTone: "cyan",
-    title: "제주의 돌을 쌓는 하루",
-    statusLabel: "강** 장인 · D-10",
-    caption: "서귀포시 성산읍",
-  },
-  {
-    to: ROUTES.experienceDetail,
-    imageSrc: completedImageTwo,
-    imageAlt: "금닝 해녀와 함께하는 하루",
-    badgeLabel: "정부지원금 30만원",
-    badgeTone: "orange",
-    title: "금닝 해녀와 함께하는 하루",
-    statusLabel: "김** 해녀 · D-10",
-    caption: "제주시 구좌읍",
-  },
-  {
-    to: ROUTES.experienceDetail,
-    imageSrc: completedImageOne,
-    imageAlt: "제주의 돌을 쌓는 하루",
-    badgeLabel: "25년 이어온",
-    badgeTone: "cyan",
-    title: "제주의 돌을 쌓는 하루",
-    statusLabel: "강** 장인 · D-10",
-    caption: "서귀포시 성산읍",
-  },
-  {
-    to: ROUTES.experienceDetail,
-    imageSrc: completedImageTwo,
-    imageAlt: "금닝 해녀와 함께하는 하루",
-    badgeLabel: "정부지원금 30만원",
-    badgeTone: "orange",
-    title: "금닝 해녀와 함께하는 하루",
-    statusLabel: "김** 해녀 · D-10",
-    caption: "제주시 구좌읍",
-  },
-] as const;
-
 export function MentorMyPage() {
   const profileQuery = useSessionProfile();
-  const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
+  const profile = asRecord(profileQuery.data?.data);
+  console.log("profile", profile);
+  const displayName = getString(profile, "name");
+  const displayPhone = getString(profile, "phone");
+  const displayLocation = getString(profile, "location");
+  const joinedLabel =
+    getString(profile, "joinedLabel") ?? getString(profile, "joinedAt");
+  const isMentor = profile?.isMentor === true;
   const profileStatus =
     profileQuery.isError && !profileQuery.data
       ? {
-          tone: "error" as const,
-          message: profileQuery.error.message,
-          onRetry: () => {
-            void profileQuery.refetch();
-          },
-        }
+        tone: "error" as const,
+        message: profileQuery.error.message,
+        onRetry: () => {
+          void profileQuery.refetch();
+        },
+      }
       : profileQuery.isPending && !profileQuery.data
         ? {
-            tone: "loading" as const,
-            message: "회원 정보를 불러오는 중입니다.",
-          }
+          tone: "loading" as const,
+          message: "회원 정보를 불러오는 중입니다.",
+        }
         : null;
 
   return (
@@ -180,91 +138,129 @@ export function MentorMyPage() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {profile.displayName}
+                    {displayName ?? ""}
                   </Text>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "var(--vapor-color-gray-800, #393939)",
-                      fontFamily: "var(--vapor-typography-fontFamily-sans)",
-                      fontSize: "var(--vapor-typography-fontSize-100)",
-                      fontStyle: "normal",
-                      fontWeight: 500,
-                      lineHeight: "var(--vapor-typography-lineHeight-100)",
-                      letterSpacing:
-                        "var(--vapor-typography-letterSpacing-100)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {profile.displayEmail}
-                  </Text>
+                  {displayPhone ? (
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "var(--vapor-color-gray-800, #393939)",
+                        fontFamily: "var(--vapor-typography-fontFamily-sans)",
+                        fontSize: "var(--vapor-typography-fontSize-100)",
+                        fontStyle: "normal",
+                        fontWeight: 500,
+                        lineHeight: "var(--vapor-typography-lineHeight-100)",
+                        letterSpacing:
+                          "var(--vapor-typography-letterSpacing-100)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {displayPhone}
+                    </Text>
+                  ) : null}
                 </VStack>
 
-                <HStack
-                  $css={{
-                    width: "100%",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
+                {displayLocation || joinedLabel ? (
                   <HStack
                     $css={{
+                      width: "100%",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "12px",
                     }}
                   >
-                    <LocationOutlineIcon
-                      size={16}
-                      color="var(--vapor-color-gray-900, #262626)"
-                      aria-hidden="true"
-                    />
-                    <Text
-                      render={<p />}
-                      $css={{
-                        color: "var(--vapor-color-gray-900, #262626)",
-                        fontFamily:
-                          '"Inter", "Noto Sans KR", "Pretendard", sans-serif',
-                        fontSize: "14px",
-                        fontStyle: "normal",
-                        fontWeight: 400,
-                        lineHeight: "20px",
-                        letterSpacing: "-0.1504px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {profile.displayLocation}
-                    </Text>
-                  </HStack>
+                    {displayLocation ? (
+                      <HStack
+                        $css={{
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <LocationOutlineIcon
+                          size={16}
+                          color="var(--vapor-color-gray-900, #262626)"
+                          aria-hidden="true"
+                        />
+                        <Text
+                          render={<p />}
+                          $css={{
+                            color: "var(--vapor-color-gray-900, #262626)",
+                            fontFamily:
+                              '"Inter", "Noto Sans KR", "Pretendard", sans-serif',
+                            fontSize: "14px",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            lineHeight: "20px",
+                            letterSpacing: "-0.1504px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {displayLocation}
+                        </Text>
+                      </HStack>
+                    ) : null}
 
-                  <HStack
+                    {joinedLabel ? (
+                      <HStack
+                        $css={{
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <TimeOutlineIcon
+                          size={16}
+                          color="var(--vapor-color-gray-900, #262626)"
+                          aria-hidden="true"
+                        />
+                        <Text
+                          render={<p />}
+                          $css={{
+                            color: "var(--vapor-color-gray-900, #262626)",
+                            fontFamily:
+                              '"Inter", "Noto Sans KR", "Pretendard", sans-serif',
+                            fontSize: "14px",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            lineHeight: "20px",
+                            letterSpacing: "-0.1504px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {joinedLabel}
+                        </Text>
+                      </HStack>
+                    ) : null}
+                  </HStack>
+                ) : isMentor ? (
+                  <Box
                     $css={{
+                      width: "fit-content",
+                      borderRadius: "999px",
+                      backgroundColor: "#EEF9FB",
+                      paddingInline: "12px",
+                      height: "32px",
+                      display: "inline-flex",
                       alignItems: "center",
-                      gap: "4px",
+                      justifyContent: "center",
                     }}
                   >
-                    <TimeOutlineIcon
-                      size={16}
-                      color="var(--vapor-color-gray-900, #262626)"
-                      aria-hidden="true"
-                    />
                     <Text
                       render={<p />}
                       $css={{
-                        color: "var(--vapor-color-gray-900, #262626)",
+                        color: "#0D8298",
                         fontFamily:
                           '"Inter", "Noto Sans KR", "Pretendard", sans-serif',
                         fontSize: "14px",
                         fontStyle: "normal",
-                        fontWeight: 400,
-                        lineHeight: "20px",
-                        letterSpacing: "-0.1504px",
+                        fontWeight: 500,
+                        lineHeight: "22px",
+                        letterSpacing: "-0.1px",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {profile.joinedLabel}
+                      멘토
                     </Text>
-                  </HStack>
-                </HStack>
+                  </Box>
+                ) : null}
               </VStack>
             </HStack>
 
@@ -335,21 +331,27 @@ export function MentorMyPage() {
             <Box
               $css={{
                 width: "100%",
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: "16px",
+                borderRadius: "16px",
+                border: "1px solid #E2E8F0",
+                backgroundColor: "#FFFFFF",
+                padding: "20px",
+                boxSizing: "border-box",
               }}
             >
-              {COMPLETED_HISTORY_CARDS.map((card, index) => (
-                <Box
-                  key={`${card.title}-${index}`}
-                  $css={{
-                    width: "100%",
-                  }}
-                >
-                  <ThumbnailCard {...card} />
-                </Box>
-              ))}
+              <Text
+                render={<p />}
+                $css={{
+                  color: "#767676",
+                  fontFamily: "var(--vapor-typography-fontFamily-sans)",
+                  fontSize: "14px",
+                  fontStyle: "normal",
+                  fontWeight: 500,
+                  lineHeight: "22px",
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                연동된 멘토 전용 완료 내역 API가 없어 목록을 표시하지 않습니다.
+              </Text>
             </Box>
           </VStack>
         </VStack>
@@ -360,7 +362,7 @@ export function MentorMyPage() {
           flexShrink: 0,
         }}
       >
-        <BottomNavigation isMentor />
+        <BottomNavigation />
       </Box>
     </Box>
   );

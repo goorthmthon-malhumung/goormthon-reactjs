@@ -1,15 +1,15 @@
-import heroImage from "@/assets/experience-detail/hero.jpg";
-import galleryBeachImage from "@/assets/experience-detail/gallery-beach.jpg";
-import {
-  DEFAULT_EXPERIENCE_DETAIL_VIEW,
-  useExperienceDetailView,
-} from "@/features/experiences/api/useExperienceDetailView";
+import { useExperienceDetailView } from "@/features/experiences/api/useExperienceDetailView";
 import { ROUTES } from "@/shared/config/routes";
+import {
+  asRecord,
+  getNumber,
+  getString,
+  getStringList,
+} from "@/shared/lib/apiData";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import {
   ChevronLeftOutlineIcon,
-  LocationOutlineIcon,
   UserOutlineIcon,
 } from "@vapor-ui/icons";
 import { useNavigate } from "react-router-dom";
@@ -23,21 +23,6 @@ const HERO_OVERLAY_BOTTOM = "49px";
 const CONTENT_SIDE_PADDING = "24px";
 const CTA_HEIGHT = "58.923px";
 const CTA_BOTTOM = "50.08px";
-
-const MENTORS = [
-  {
-    imageSrc: heroImage,
-    title: "김영숙 멘토",
-    meta: "68세 · 45년 경력",
-    badge: "제주특별자치도 무형문화재",
-  },
-  {
-    imageSrc: galleryBeachImage,
-    title: "임지은 멘토",
-    meta: "72세 · 45년 경력",
-    badge: "해녀 기능 보유자",
-  },
-] as const;
 
 function SectionTitle({ children }: { children: string }) {
   return (
@@ -88,147 +73,46 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
-function MentorCard({
-  imageSrc,
-  title,
-  meta,
-  badge,
-}: {
-  imageSrc: string;
-  title: string;
-  meta: string;
-  badge: string;
-}) {
-  return (
-    <Box
-      $css={{
-        position: "relative",
-        width: "297px",
-        height: "168px",
-        borderRadius: "16px",
-        overflow: "hidden",
-        flexShrink: 0,
-      }}
-    >
-      <Box
-        render={<img src={imageSrc} alt="" aria-hidden="true" />}
-        $css={{
-          position: "absolute",
-          inset: 0,
-          width: "127.31%",
-          height: "100%",
-          left: "-12.04%",
-          top: "-0.05%",
-          objectFit: "cover",
-          display: "block",
-        }}
-      />
-      <Box
-        $css={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(194, 232, 240, 0) 15.734%, rgba(194, 232, 240, 0.88) 87.413%)",
-        }}
-      />
+function formatParticipantLabel(
+  participantCount?: number,
+  maxParticipants?: number,
+) {
+  if (
+    typeof participantCount === "number" &&
+    typeof maxParticipants === "number"
+  ) {
+    return `${participantCount}/${maxParticipants}명`;
+  }
 
-      <VStack
-        $css={{
-          position: "absolute",
-          left: "17px",
-          right: "141px",
-          bottom: "20px",
-          gap: "8px",
-          zIndex: 1,
-        }}
-      >
-        <VStack
-          $css={{
-            gap: "2px",
-          }}
-        >
-          <Text
-            render={<h3 />}
-            $css={{
-              color: "#393939",
-              fontFamily: TITLE_FONT,
-              fontSize: "18px",
-              lineHeight: "26px",
-              fontWeight: 700,
-              letterSpacing: "-0.1px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {title}
-          </Text>
-          <Text
-            render={<p />}
-            $css={{
-              color: "#4C4C4C",
-              fontFamily: TITLE_FONT,
-              fontSize: "14px",
-              lineHeight: "22px",
-              fontWeight: 500,
-              letterSpacing: "-0.1px",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {meta}
-          </Text>
-        </VStack>
+  if (typeof participantCount === "number") {
+    return `${participantCount}명`;
+  }
 
-        <Box
-          $css={{
-            width: "fit-content",
-            borderRadius: "999px",
-            backgroundColor: "var(--vapor-color-cyan-050, #eef9fb)",
-            paddingInline: "8px",
-            paddingBlock: "3px",
-          }}
-        >
-          <HStack
-            $css={{
-              gap: "4px",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <LocationOutlineIcon size={12} color="#17A3BA" />
-            <Text
-              render={<span />}
-              $css={{
-                color: "var(--vapor-color-cyan-400, #17a3ba)",
-                fontFamily: TITLE_FONT,
-                fontSize: "12px",
-                lineHeight: "18px",
-                fontWeight: 500,
-                letterSpacing: "0px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {badge}
-            </Text>
-          </HStack>
-        </Box>
-      </VStack>
-    </Box>
-  );
+  if (typeof maxParticipants === "number") {
+    return `정원 ${maxParticipants}명`;
+  }
+
+  return undefined;
 }
 
 export function ExperienceDetailPage() {
   const navigate = useNavigate();
   const experienceQuery = useExperienceDetailView(EXPERIENCE_ID);
-  const experience = experienceQuery.data ?? DEFAULT_EXPERIENCE_DETAIL_VIEW;
-  const experienceId = experience.experienceId;
-  const title = experience.title;
-  const introduction = experience.introduction;
-  const heroImageSrc = experience.heroImageSrc;
-  const skills = experience.skills;
-  const currentParticipants = experience.currentParticipants;
-  const maxParticipants = experience.maxParticipants;
-  const mentorName = experience.mentorName;
+  const experience = asRecord(experienceQuery.data?.data);
+  const experienceId = getNumber(experience, "id") ?? EXPERIENCE_ID;
+  const title = getString(experience, "title");
+  const introduction = getString(experience, "introduction");
+  const heroImageSrc = getString(experience, "photoUrl");
+  const mentorName = getString(experience, "mentorName");
+  const experienceType = getString(experience, "experienceType");
+  const location = getString(experience, "location");
+  const schedule = getString(experience, "schedule");
+  const inclusions = getStringList(experience, "inclusions");
+  const requirements = getStringList(experience, "requirements");
+  const participantLabel = formatParticipantLabel(
+    getNumber(experience, "participantCount"),
+    getNumber(experience, "maxParticipants"),
+  );
   const pageStatus = experienceQuery.isError
     ? {
         tone: "error" as const,
@@ -287,20 +171,22 @@ export function ExperienceDetailPage() {
               backgroundColor: "#0B1020",
             }}
           >
-            <Box
-              render={<img src={heroImageSrc} alt="" />}
-              aria-hidden="true"
-              $css={{
-                position: "absolute",
-                inset: 0,
-                width: "127.31%",
-                height: "100%",
-                left: "-12.04%",
-                top: "-0.05%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
+            {heroImageSrc ? (
+              <Box
+                render={<img src={heroImageSrc} alt="" />}
+                aria-hidden="true"
+                $css={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "127.31%",
+                  height: "100%",
+                  left: "-12.04%",
+                  top: "-0.05%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            ) : null}
             <Box
               $css={{
                 position: "absolute",
@@ -345,33 +231,35 @@ export function ExperienceDetailPage() {
                 zIndex: 1,
               }}
             >
-              <Box
-                $css={{
-                  width: "fit-content",
-                  height: "32px",
-                  paddingInline: "12px",
-                  borderRadius: "999px",
-                  backgroundColor: "#EF6F25",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  render={<p />}
+              {experienceType ? (
+                <Box
                   $css={{
-                    color: "#FFF6F1",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "14px",
-                    lineHeight: "22px",
-                    fontWeight: 500,
-                    letterSpacing: "-0.1px",
-                    whiteSpace: "nowrap",
+                    width: "fit-content",
+                    height: "32px",
+                    paddingInline: "12px",
+                    borderRadius: "999px",
+                    backgroundColor: "#EF6F25",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  D - 20
-                </Text>
-              </Box>
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#FFF6F1",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "14px",
+                      lineHeight: "22px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {experienceType}
+                  </Text>
+                </Box>
+              ) : null}
 
               <Text
                 render={
@@ -394,30 +282,32 @@ export function ExperienceDetailPage() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                  {title}
+                {title ?? ""}
               </Text>
 
-              <HStack
-                $css={{
-                  gap: "4px",
-                  alignItems: "center",
-                }}
-              >
-                <UserOutlineIcon size={16} color="#FFFFFF" />
-                <Text
-                  render={<p />}
+              {participantLabel ? (
+                <HStack
                   $css={{
-                    color: "#FFFFFF",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    fontWeight: 400,
-                    letterSpacing: "-0.1504px",
+                    gap: "4px",
+                    alignItems: "center",
                   }}
                 >
-                  {currentParticipants}/{maxParticipants}명
-                </Text>
-              </HStack>
+                  <UserOutlineIcon size={16} color="#FFFFFF" />
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#FFFFFF",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "14px",
+                      lineHeight: "20px",
+                      fontWeight: 400,
+                      letterSpacing: "-0.1504px",
+                    }}
+                  >
+                    {participantLabel}
+                  </Text>
+                </HStack>
+              ) : null}
             </VStack>
           </Box>
 
@@ -452,84 +342,148 @@ export function ExperienceDetailPage() {
                     onRetry={pageStatus.onRetry}
                   />
                 ) : null}
-                <VStack
-                  $css={{
-                    gap: "16px",
-                  }}
-                >
-                  <Text
-                    render={<h2 />}
+                {introduction ? (
+                  <VStack
                     $css={{
-                      color: "#393939",
-                      fontFamily: TITLE_FONT,
-                      fontSize: "18px",
-                      lineHeight: "26px",
-                      fontWeight: 700,
-                      letterSpacing: "-0.1px",
+                      gap: "16px",
                     }}
                   >
-                    제주의 말을 돌보는 하루
-                  </Text>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#767676",
-                      fontFamily: TITLE_FONT,
-                      fontSize: "16px",
-                      lineHeight: "24px",
-                      fontWeight: 500,
-                      letterSpacing: "-0.1px",
-                    }}
-                  >
-                    {introduction}
-                  </Text>
-                </VStack>
+                    <SectionTitle>체험 소개</SectionTitle>
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#767676",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "16px",
+                        lineHeight: "24px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      {introduction}
+                    </Text>
+                  </VStack>
+                ) : null}
 
-                <VStack
-                  $css={{
-                    gap: "16px",
-                  }}
-                >
-                  <SectionTitle>배울 수 있는 기술</SectionTitle>
-                  <HStack
+                {schedule ? (
+                  <VStack
                     $css={{
-                      gap: "8px",
-                      flexWrap: "wrap",
-                      alignItems: "center",
+                      gap: "16px",
                     }}
                   >
-                    {skills.map((skill) => (
-                      <SkillPill key={skill} label={skill} />
-                    ))}
-                  </HStack>
-                </VStack>
+                    <SectionTitle>일정</SectionTitle>
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#767676",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "16px",
+                        lineHeight: "24px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      {schedule}
+                    </Text>
+                  </VStack>
+                ) : null}
 
-                <VStack
-                  $css={{
-                    gap: "16px",
-                  }}
-                >
-                  <SectionTitle>해녀 멘토분들을 만나보세요</SectionTitle>
-                  <HStack
+                {location ? (
+                  <VStack
                     $css={{
-                      gap: "10px",
-                      alignItems: "center",
-                      overflowX: "auto",
-                      overflowY: "hidden",
-                      paddingBottom: "2px",
+                      gap: "16px",
                     }}
                   >
-                    {MENTORS.map((mentor) => (
-                      <MentorCard
-                        key={mentor.title}
-                        imageSrc={mentor.imageSrc}
-                        title={mentor.title}
-                        meta={mentor.meta}
-                        badge={mentor.badge}
-                      />
-                    ))}
-                  </HStack>
-                </VStack>
+                    <SectionTitle>장소</SectionTitle>
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#767676",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "16px",
+                        lineHeight: "24px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      {location}
+                    </Text>
+                  </VStack>
+                ) : null}
+
+                {inclusions.length > 0 ? (
+                  <VStack
+                    $css={{
+                      gap: "16px",
+                    }}
+                  >
+                    <SectionTitle>포함 사항</SectionTitle>
+                    <HStack
+                      $css={{
+                        gap: "8px",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                      }}
+                    >
+                      {inclusions.map((item) => (
+                        <SkillPill key={item} label={item} />
+                      ))}
+                    </HStack>
+                  </VStack>
+                ) : null}
+
+                {requirements.length > 0 ? (
+                  <VStack
+                    $css={{
+                      gap: "16px",
+                    }}
+                  >
+                    <SectionTitle>참여 조건</SectionTitle>
+                    <HStack
+                      $css={{
+                        gap: "8px",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                      }}
+                    >
+                      {requirements.map((item) => (
+                        <SkillPill key={item} label={item} />
+                      ))}
+                    </HStack>
+                  </VStack>
+                ) : null}
+
+                {!pageStatus &&
+                !introduction &&
+                !schedule &&
+                !location &&
+                inclusions.length === 0 &&
+                requirements.length === 0 ? (
+                  <Box
+                    $css={{
+                      width: "100%",
+                      borderRadius: "16px",
+                      border: "1px solid #E2E8F0",
+                      backgroundColor: "#FFFFFF",
+                      padding: "16px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <Text
+                      render={<p />}
+                      $css={{
+                        color: "#767676",
+                        fontFamily: TITLE_FONT,
+                        fontSize: "14px",
+                        lineHeight: "22px",
+                        fontWeight: 500,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      서버 응답에 표시할 체험 상세 정보가 없습니다.
+                    </Text>
+                  </Box>
+                ) : null}
               </VStack>
             </Box>
           </Box>
@@ -543,12 +497,12 @@ export function ExperienceDetailPage() {
                 navigate(ROUTES.reservation, {
                   state: {
                     experienceId,
-                    summaryTitle: title,
+                    summaryTitle: title ?? "",
                     summaryMentor: mentorName,
                   },
                 })
               }
-              disabled={experienceQuery.isPending || experienceQuery.isError}
+              disabled={experienceQuery.isPending}
             />
           }
           $css={{
@@ -561,12 +515,8 @@ export function ExperienceDetailPage() {
             borderRadius: "14px",
             backgroundColor: "#1CB3CB",
             color: "#FFFFFF",
-            cursor:
-              experienceQuery.isPending || experienceQuery.isError
-                ? "not-allowed"
-                : "pointer",
-            opacity:
-              experienceQuery.isPending || experienceQuery.isError ? 0.6 : 1,
+            cursor: experienceQuery.isPending ? "not-allowed" : "pointer",
+            opacity: experienceQuery.isPending ? 0.6 : 1,
             zIndex: 5,
             display: "grid",
             placeItems: "center",

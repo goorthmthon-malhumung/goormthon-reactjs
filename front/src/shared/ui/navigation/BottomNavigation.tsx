@@ -1,3 +1,7 @@
+import { isApiError } from "@/api/fetcher";
+import { useMe } from "@/api/generated/user/user";
+import { ROUTES } from "@/shared/config/routes";
+import { asRecord } from "@/shared/lib/apiData";
 import { Box, Text } from "@vapor-ui/core";
 import {
   AssignmentIcon,
@@ -9,8 +13,8 @@ import {
   UserIcon,
   UserOutlineIcon,
 } from "@vapor-ui/icons";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ROUTES } from "@/shared/config/routes";
 
 const TAB_ACTIVE_COLOR = "var(--vapor-color-cyan-200, #84d2e2)";
 const TAB_INACTIVE_COLOR = "var(--vapor-color-gray-200, #c6c6c6)";
@@ -18,7 +22,7 @@ const NAV_BACKGROUND_COLOR = "var(--app-color-navigation-background, #232323)";
 const ICON_SIZE = 22;
 
 type Tab = {
-  id: string;
+  id: "home" | "matching" | "management" | "my";
   label: string;
   route: string;
   ActiveIcon: typeof HomeIcon;
@@ -43,7 +47,7 @@ const MENTEE_TABS = [
   {
     id: "my" as const,
     label: "MY",
-    route: ROUTES.mentorMy,
+    route: ROUTES.my,
     ActiveIcon: UserIcon,
     InactiveIcon: UserOutlineIcon,
   },
@@ -73,26 +77,72 @@ const MENTOR_TABS = [
   },
 ] satisfies ReadonlyArray<Tab>;
 
-type BottomNavigationProps = {
-  isMentor?: boolean;
-};
+function getActiveId(
+  pathname: string,
+  isMentor: boolean,
+): Tab["id"] {
+  if (isMentor) {
+    if (
+      pathname === ROUTES.mentorMy ||
+      pathname.startsWith(`${ROUTES.mentorMy}/`)
+    ) {
+      return "my";
+    }
 
-export function BottomNavigation({ isMentor = false }: BottomNavigationProps) {
+    if (
+      pathname === ROUTES.mentorHome ||
+      pathname.startsWith(`${ROUTES.mentorHome}/`)
+    ) {
+      return "home";
+    }
+
+    return "management";
+  }
+
+  if (
+    pathname === ROUTES.my ||
+    pathname.startsWith(`${ROUTES.my}/`)
+  ) {
+    return "my";
+  }
+
+  if (
+    pathname === ROUTES.matching ||
+    pathname.startsWith(`${ROUTES.matching}/`)
+  ) {
+    return "matching";
+  }
+
+  return "home";
+}
+
+export function BottomNavigation() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const meQuery = useMe({
+    query: {
+      staleTime: 60_000,
+      retry: false,
+    },
+  });
+  const profile = asRecord(meQuery.data?.data);
+  const isMentor = profile?.isMentor === true;
   const tabs = isMentor ? MENTOR_TABS : MENTEE_TABS;
+  const activeId = getActiveId(pathname, isMentor);
 
-  const activeId =
-    pathname === ROUTES.my ||
-    pathname.startsWith(`${ROUTES.my}/`) ||
-    pathname === ROUTES.mentorMy ||
-    pathname.startsWith(`${ROUTES.mentorMy}/`)
-      ? "my"
-      : !isMentor &&
-          (pathname === ROUTES.matching ||
-            pathname.startsWith(`${ROUTES.matching}/`))
-        ? "matching"
-        : "home";
+  useEffect(() => {
+    if (!meQuery.isError || !isApiError(meQuery.error)) {
+      return;
+    }
+
+    if (meQuery.error.status === 401 || meQuery.error.status === 403) {
+      navigate(ROUTES.login, { replace: true });
+    }
+  }, [meQuery.error, meQuery.isError, navigate]);
+
+  if (meQuery.isPending || meQuery.isError) {
+    return null;
+  }
 
   return (
     <Box
