@@ -296,7 +296,8 @@ export const customFetch = async <T>(
   const response = await fetch(targetUrl, {
     ...restConfig,
     body: toRequestBody(body, json, headers),
-    credentials: restConfig.credentials ?? "include",
+    credentials: "include",
+    // credentials: restConfig.credentials ?? "include",
     headers,
   });
 
