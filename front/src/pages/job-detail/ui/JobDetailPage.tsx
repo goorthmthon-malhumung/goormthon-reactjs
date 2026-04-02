@@ -6,9 +6,9 @@ import { ROUTES } from "@/shared/config/routes";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { GroupOutlineIcon } from "@vapor-ui/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const JOB_ID = 1;
+const DEFAULT_JOB_ID = 1;
 const FALLBACK_EXPERIENCE_ID = 1;
 const HERO_HEIGHT_PX = 379;
 const CONTENT_OVERLAP_PX = 29;
@@ -261,8 +261,15 @@ function MentorCard({
 
 export function JobDetailPage() {
   const navigate = useNavigate();
-  const jobQuery = useJobDetailView(JOB_ID);
+  const { jobSlug } = useParams();
+  const parsedJobId = Number(jobSlug);
+  const jobId =
+    Number.isInteger(parsedJobId) && parsedJobId > 0
+      ? parsedJobId
+      : DEFAULT_JOB_ID;
+  const jobQuery = useJobDetailView(jobId);
   const job = jobQuery.data ?? DEFAULT_JOB_DETAIL_VIEW;
+  const experienceId = job.experienceId || FALLBACK_EXPERIENCE_ID;
   const title = job.title;
   const introduction = job.introduction;
   const heroImageSrc = job.heroImageSrc;
@@ -560,13 +567,13 @@ export function JobDetailPage() {
                 onClick={() =>
                   navigate(ROUTES.reservation, {
                     state: {
-                      experienceId: FALLBACK_EXPERIENCE_ID,
+                      experienceId,
                       summaryTitle: title,
                       summaryMentor: mentorName,
                     },
                   })
                 }
-                disabled={jobQuery.isPending || jobQuery.isError}
+                disabled={jobQuery.isPending}
               />
             }
             $css={{
@@ -578,8 +585,8 @@ export function JobDetailPage() {
               color: "#FFFFFF",
               display: "grid",
               placeItems: "center",
-              cursor: jobQuery.isPending || jobQuery.isError ? "not-allowed" : "pointer",
-              opacity: jobQuery.isPending || jobQuery.isError ? 0.6 : 1,
+              cursor: jobQuery.isPending ? "not-allowed" : "pointer",
+              opacity: jobQuery.isPending ? 0.6 : 1,
               padding: 0,
             }}
           >
