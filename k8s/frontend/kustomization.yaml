@@ -10,7 +10,7 @@ resources:
 configMapGenerator:
   - name: frontend-config
     files:
-      - config.json=config/frontend-config.json
+      - .env=config/.env
 
 generatorOptions:
   disableNameSuffixHash: true
