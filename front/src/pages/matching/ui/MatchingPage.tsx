@@ -388,10 +388,7 @@ export function MatchingPage() {
   return (
     <Box
       $css={{
-        position: "relative",
         width: "100%",
-        // height: "100%",
-        // minHeight: "100%",
         height: "100dvh",
         minHeight: "100dvh",
         display: "flex",
@@ -433,8 +430,10 @@ export function MatchingPage() {
       <Box
         $css={{
           flex: 1,
+          minHeight: 0,
           overflowY: "auto",
           backgroundColor: MATCHING_PAGE_BG,
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         <VStack
@@ -444,7 +443,7 @@ export function MatchingPage() {
             marginInline: "auto",
             gap: "16px",
             paddingTop: "24px",
-            paddingBottom: "calc(140px + env(safe-area-inset-bottom))",
+            paddingBottom: "24px",
           }}
         >
           <Box
@@ -501,13 +500,7 @@ export function MatchingPage() {
 
       <Box
         $css={{
-          position: "absolute",
-          left: "0",
-          right: "0",
-          // bottom: "0",
-          bottom: "20px",
-          paddingInline: "16px",
-          backgroundColor: "transparent",
+          flexShrink: 0,
         }}
       >
         <BottomNavigation />

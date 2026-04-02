@@ -10,10 +10,7 @@ import {
   useSessionProfile,
 } from "@/features/auth/api/useSessionProfile";
 import { ROUTES } from "@/shared/config/routes";
-import {
-  BottomNavigation,
-  type BottomNavTab,
-} from "@/shared/ui/navigation/BottomNavigation";
+import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { useQueryClient } from "@tanstack/react-query";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
@@ -479,24 +476,22 @@ export function MyPage() {
     <Box
       render={<main />}
       $css={{
-        position: "relative",
         width: "100%",
         height: "100dvh",
         minHeight: "100dvh",
         backgroundColor: PAGE_BG,
+        display: "flex",
+        flexDirection: "column",
         overflow: "hidden",
       }}
     >
       <Box
         $css={{
-          position: "absolute",
-          top: "0",
-          left: "0",
-          right: "0",
-          bottom: "0",
+          flex: 1,
+          minHeight: 0,
           overflowY: "auto",
           backgroundColor: PAGE_BG,
-          paddingBottom: "calc(140px + env(safe-area-inset-bottom))",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         <Box
@@ -736,6 +731,7 @@ export function MyPage() {
             gap: "23.992px",
             paddingInline: "15.995px",
             marginTop: "23.992px",
+            paddingBottom: "24px",
           }}
         >
           <Box
@@ -899,11 +895,7 @@ export function MyPage() {
 
       <Box
         $css={{
-          position: "absolute",
-          left: "0",
-          right: "0",
-          bottom: "20px",
-          zIndex: 4,
+          flexShrink: 0,
         }}
       >
         <BottomNavigation />
