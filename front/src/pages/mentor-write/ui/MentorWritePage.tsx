@@ -1381,7 +1381,7 @@ export function MentorWritePage() {
           display: "flex",
           alignItems: "center",
           paddingInline: "4px",
-          paddingTop: "8px",
+          height: "56px",
           flexShrink: 0,
         }}
       >

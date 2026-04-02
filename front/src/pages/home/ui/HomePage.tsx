@@ -210,12 +210,12 @@ export function HomePage() {
         $css={{
           width: "100%",
           boxSizing: "border-box",
-          height: "48px",
           flexShrink: 0,
           backgroundColor: "var(--vapor-color-background-canvas, #ffffff)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          paddingBlock: "28px",
         }}
       >
         <Box render={<img src={logo} alt="전허게" />} />
@@ -232,7 +232,7 @@ export function HomePage() {
         <Box
           $css={{
             backgroundColor: "var(--vapor-color-background-canvas, #ffffff)",
-            paddingTop: "28px",
+            paddingTop: "14px",
             paddingBottom: "28px",
             paddingInline: "16px",
           }}
