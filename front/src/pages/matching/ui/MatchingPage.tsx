@@ -7,13 +7,18 @@ import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import mentorCardImage from "@/assets/matching/mentor-card.jpg";
+import {
+  useMatchingJobListView,
+  type MatchingCategoryKey,
+} from "@/features/jobs/api/useMatchingJobListView";
 import type { MatchingDetailState } from "@/pages/matching-detail";
 import { ROUTES } from "@/shared/config/routes";
 import { MentorCard, type MentorCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
+import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 
 type MatchingKind = "job" | "experience";
-type MatchingCategory = "all" | "haenyeo" | "stone" | "horse" | "tangerine";
+type MatchingCategory = MatchingCategoryKey;
 
 type MatchingItem = {
   id: string;
@@ -79,6 +84,7 @@ function buildMatchingDetailState(item: MatchingItem): MatchingDetailState {
   const { mentorInitial, mentorName, deadlineLabel } = getMentorSummary(item.card.metaLabel);
 
   return {
+    kindLabel: item.kind === "job" ? "직업" : "체험",
     deadlineLabel,
     title: item.card.title,
     participantLabel: MATCHING_DETAIL_PARTICIPANTS,
@@ -418,9 +424,18 @@ export function MatchingPage() {
   const navigate = useNavigate();
   const [selectedKind, setSelectedKind] = useState<MatchingKind>("job");
   const [selectedCategory, setSelectedCategory] = useState<MatchingCategory>("all");
+  const jobListQuery = useMatchingJobListView();
 
-  const filteredItems = MATCHING_ITEMS.filter((item) => {
-    if (item.kind !== selectedKind) {
+  const jobItems = (jobListQuery.data ?? []).filter((item) => {
+    if (selectedCategory === "all") {
+      return true;
+    }
+
+    return item.category === selectedCategory;
+  });
+
+  const experienceItems = MATCHING_ITEMS.filter((item) => {
+    if (item.kind !== "experience") {
       return false;
     }
 
@@ -430,6 +445,51 @@ export function MatchingPage() {
 
     return item.category === selectedCategory;
   });
+
+  const listStatus = selectedKind === "job"
+    ? jobListQuery.isError
+      ? {
+        tone: "error" as const,
+        message: jobListQuery.error.message,
+        onRetry: () => {
+          void jobListQuery.refetch();
+        },
+      }
+      : jobListQuery.isPending
+        ? {
+          tone: "loading" as const,
+          message: "직업 목록을 불러오는 중입니다.",
+        }
+        : null
+    : null;
+
+  const totalCount = selectedKind === "job" ? jobItems.length : experienceItems.length;
+  const emptyMessage = selectedKind === "job"
+    ? "등록된 직업 매칭이 없습니다."
+    : "등록된 체험 매칭이 없습니다.";
+  const showEmptyState = !listStatus && totalCount === 0;
+
+  const totalLabel = selectedKind === "job" && jobListQuery.isPending
+    ? "불러오는 중"
+    : `총 ${totalCount}개`;
+
+  const renderJobCards = () =>
+    jobItems.map((item) => (
+      <MentorCard
+        key={item.id}
+        {...item.card}
+      />
+    ));
+
+  const renderExperienceCards = () =>
+    experienceItems.map((item) => (
+      <MentorCard
+        key={item.id}
+        {...item.card}
+        to={ROUTES.matchingDetail}
+        state={buildMatchingDetailState(item)}
+      />
+    ));
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -518,7 +578,7 @@ export function MatchingPage() {
                 letterSpacing: "-0.1px",
               }}
             >
-              총 {filteredItems.length}개
+              {totalLabel}
             </Text>
 
             <Box
@@ -546,14 +606,41 @@ export function MatchingPage() {
               gap: "16px",
             }}
           >
-            {filteredItems.map((item) => (
-              <MentorCard
-                key={item.id}
-                {...item.card}
-                to={ROUTES.matchingDetail}
-                state={buildMatchingDetailState(item)}
+            {listStatus ? (
+              <QueryNotice
+                tone={listStatus.tone}
+                message={listStatus.message}
+                onRetry={listStatus.onRetry}
               />
-            ))}
+            ) : null}
+
+            {showEmptyState ? (
+              <Box
+                $css={{
+                  width: "100%",
+                  borderRadius: "16px",
+                  border: "1px solid #E2E8F0",
+                  backgroundColor: "#FFFFFF",
+                  padding: "20px",
+                  boxSizing: "border-box",
+                }}
+              >
+                <Text
+                  render={<p />}
+                  $css={{
+                    color: "#767676",
+                    fontSize: "14px",
+                    lineHeight: "22px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                  }}
+                >
+                  {emptyMessage}
+                </Text>
+              </Box>
+            ) : null}
+
+            {!listStatus && (selectedKind === "job" ? renderJobCards() : renderExperienceCards())}
           </VStack>
         </VStack>
       </Box>

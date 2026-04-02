@@ -18,6 +18,7 @@ const DEFAULT_SKILLS = [
 
 export type JobDetailView = {
   jobId: number;
+  experienceId: number;
   title: string;
   introduction: string;
   heroImageSrc: string;
@@ -29,6 +30,7 @@ export type JobDetailView = {
 
 export const DEFAULT_JOB_DETAIL_VIEW: JobDetailView = {
   jobId: 1,
+  experienceId: 1,
   title: DEFAULT_TITLE,
   introduction: DEFAULT_INTRODUCTION,
   heroImageSrc: DEFAULT_HERO_IMAGE,
@@ -41,6 +43,11 @@ export const DEFAULT_JOB_DETAIL_VIEW: JobDetailView = {
 function mapJobDetail(source: unknown, fallbackId: number): JobDetailView {
   return {
     jobId: getNumber(source, ["id", "jobId"], fallbackId),
+    experienceId: getNumber(
+      source,
+      ["experienceId", "linkedExperienceId"],
+      DEFAULT_JOB_DETAIL_VIEW.experienceId,
+    ),
     title: getString(source, ["title", "jobTitle"], DEFAULT_JOB_DETAIL_VIEW.title),
     introduction: getString(
       source,

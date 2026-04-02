@@ -1,13 +1,12 @@
-import type { ReactNode } from "react";
-import { useEffect } from "react";
-import { useLogout } from "@/api/generated/user/user";
-import completedImageOne from "@/assets/my/completed-1.jpg";
-import completedImageTwo from "@/assets/my/completed-2.jpg";
 import calendarIcon from "@/assets/my/calendar.svg";
 import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
 import statMatchingIcon from "@/assets/my/stat-matching.svg";
+import {
+  useMyCompletedExperienceHistory,
+  useMyUpcomingExperienceReservations,
+} from "@/features/experiences/api/useMyBookingViews";
 import {
   DEFAULT_SESSION_PROFILE,
   useSessionProfile,
@@ -35,6 +34,81 @@ type StatCardProps = {
   label: string;
 };
 
+type UpcomingReservation = {
+  id: string;
+  kind: UpcomingKind;
+  title: string;
+  scheduleLabel: string;
+  statusLabel: string;
+  participantLabel: string;
+};
+
+type HistoryCardTone = "cyan" | "orange";
+
+type HistoryItem = {
+  id: string;
+  imageSrc: string;
+  badgeLabel: string;
+  badgeTone: HistoryCardTone;
+  title: string;
+  mentorLabel: string;
+  deadlineLabel: string;
+  location: string;
+};
+
+const UPCOMING_JOB_RESERVATIONS: readonly UpcomingReservation[] = [
+  {
+    id: "haenyeo-job",
+    kind: "job",
+    title: "해녀 물질 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "8명/10명",
+  },
+  {
+    id: "stone-job",
+    kind: "job",
+    title: "돌담 쌓기 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "2명/2명",
+  },
+] as const;
+
+function MetaItem({ iconSrc, label }: { iconSrc: string; label: string }) {
+  return (
+    <HStack
+      $css={{
+        gap: "4px",
+        alignItems: "center",
+      }}
+    >
+      <Box
+        render={<img src={iconSrc} alt="" aria-hidden="true" />}
+        $css={{
+          width: "15.995px",
+          height: "15.995px",
+          display: "block",
+          flexShrink: 0,
+        }}
+      />
+      <Text
+        render={<p />}
+        $css={{
+          color: "#262626",
+          fontFamily: FONT_FAMILY,
+          fontSize: "14px",
+          lineHeight: "20px",
+          fontWeight: 400,
+          letterSpacing: "-0.1504px",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </Text>
+    </HStack>
+  );
+}
 
 function StatCard({ iconSrc, value, label }: StatCardProps) {
   return (
@@ -257,19 +331,21 @@ function UpcomingReservationCard({
             }}
           >
             <StatusBadge label={statusLabel} />
-            <Text
-              render={<p />}
-              $css={{
-                color: "#767676",
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                lineHeight: "22px",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
-              }}
-            >
-              {participantLabel}
-            </Text>
+            {participantLabel ? (
+              <Text
+                render={<p />}
+                $css={{
+                  color: "#767676",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                {participantLabel}
+              </Text>
+            ) : null}
           </HStack>
         </VStack>
 
@@ -467,22 +543,8 @@ export function MyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const profileQuery = useSessionProfile();
-  const logoutMutation = useLogout({
-    mutation: {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ["/users/me"],
-        });
-        navigate(ROUTES.onboarding, { replace: true });
-      },
-    },
-  });
-  useEffect(() => {
-    if (profileQuery.data?.isMentor) {
-      navigate(ROUTES.mentorMy, { replace: true });
-    }
-  }, [profileQuery.data, navigate]);
-
+  const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
+  const completedHistoryQuery = useMyCompletedExperienceHistory();
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
@@ -498,10 +560,42 @@ export function MyPage() {
           message: "회원 정보를 불러오는 중입니다.",
         }
       : null;
-
-  const upcomingReservations = UPCOMING_RESERVATIONS.filter(
-    (item) => item.kind === selectedUpcomingKind,
-  );
+  const upcomingReservations =
+    selectedUpcomingKind === "job"
+      ? [...UPCOMING_JOB_RESERVATIONS]
+      : (upcomingExperienceQuery.data ?? []);
+  const upcomingStatus =
+    selectedUpcomingKind === "experience"
+      ? upcomingExperienceQuery.isError
+        ? {
+            tone: "error" as const,
+            message: upcomingExperienceQuery.error.message,
+            onRetry: () => {
+              void upcomingExperienceQuery.refetch();
+            },
+          }
+        : upcomingExperienceQuery.isPending
+          ? {
+              tone: "loading" as const,
+              message: "체험 예약 내역을 불러오는 중입니다.",
+            }
+          : null
+      : null;
+  const completedHistory = completedHistoryQuery.data ?? [];
+  const completedStatus = completedHistoryQuery.isError
+    ? {
+        tone: "error" as const,
+        message: completedHistoryQuery.error.message,
+        onRetry: () => {
+          void completedHistoryQuery.refetch();
+        },
+      }
+    : completedHistoryQuery.isPending
+      ? {
+          tone: "loading" as const,
+          message: "완료 내역을 불러오는 중입니다.",
+        }
+      : null;
 
   return (
     <Box
@@ -801,6 +895,14 @@ export function MyPage() {
                 gap: "11px",
               }}
             >
+              {upcomingStatus ? (
+                <QueryNotice
+                  tone={upcomingStatus.tone}
+                  message={upcomingStatus.message}
+                  onRetry={upcomingStatus.onRetry}
+                />
+              ) : null}
+
               {upcomingReservations.map((item) => (
                 <UpcomingReservationCard
                   key={item.id}
@@ -842,9 +944,17 @@ export function MyPage() {
                 gap: "10px",
               }}
             >
-              {HISTORY_ITEMS.map((item) => (
-                <HistoryCard key={item.id} {...item} />
-              ))}
+              {completedStatus ? (
+                <QueryNotice
+                  tone={completedStatus.tone}
+                  message={completedStatus.message}
+                  onRetry={completedStatus.onRetry}
+                />
+              ) : (
+                completedHistory.map((item) => (
+                  <HistoryCard key={item.id} {...item} />
+                ))
+              )}
             </HStack>
           </VStack>
         </VStack>

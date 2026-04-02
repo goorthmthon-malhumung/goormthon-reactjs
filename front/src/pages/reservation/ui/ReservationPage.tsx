@@ -27,7 +27,9 @@ const PRIMARY_TEXT = "#0F172B";
 const TITLE_TEXT = "#393939";
 const SECONDARY_TEXT = "#767676";
 const DARK_SURFACE = "#262626";
-const CTA_BACKGROUND = "#C2E8F0";
+const CTA_ACTIVE_BACKGROUND = "#1CB3CB";
+const CTA_DISABLED_BACKGROUND = "#C2E8F0";
+const CTA_SUCCESS_BACKGROUND = "#0D8298";
 const DATE_PICKER_CONFIRM_BACKGROUND = "#1CB3CB";
 const CARD_RADIUS = "16px";
 const CTA_RADIUS = "14px";
@@ -291,6 +293,11 @@ export function ReservationPage() {
     : bookingMutation.isSuccess
       ? "체험 예약 요청이 완료되었습니다."
       : null;
+  const bookingButtonBackground = bookingMutation.isSuccess
+    ? CTA_SUCCESS_BACKGROUND
+    : isBookingDisabled
+      ? CTA_DISABLED_BACKGROUND
+      : CTA_ACTIVE_BACKGROUND;
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -762,10 +769,10 @@ export function ReservationPage() {
             height: BUTTON_HEIGHT,
             border: "none",
             borderRadius: CTA_RADIUS,
-            backgroundColor: CTA_BACKGROUND,
+            backgroundColor: bookingButtonBackground,
             color: "#FFFFFF",
             cursor: isBookingDisabled ? "not-allowed" : "pointer",
-            opacity: isBookingDisabled ? 0.6 : 1,
+            opacity: 1,
             display: "grid",
             placeItems: "center",
           }}

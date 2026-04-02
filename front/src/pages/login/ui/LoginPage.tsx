@@ -13,6 +13,8 @@ import {
 } from "@vapor-ui/core";
 import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { ROUTES } from "@/shared/config/routes";
+import { useSignIn } from "@/api/generated/user/user";
+import { isApiError } from "@/api/fetcher";
 
 const FIELD_INPUT_STYLES = {
   height: "48px",
@@ -26,12 +28,32 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { mutate: signIn, isPending } = useSignIn();
 
   const canSubmit = phone.trim().length > 0 && password.trim().length > 0;
-  const disabled = !canSubmit;
+  const disabled = !canSubmit || isPending;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrorMessage("");
+
+    signIn(
+      { data: { phone, password } },
+      {
+        onSuccess: () => {
+          navigate(ROUTES.home, { replace: true });
+        },
+        onError: (error) => {
+          if (isApiError(error)) {
+            setErrorMessage(error.message);
+          } else {
+            setErrorMessage("로그인에 실패했습니다.");
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -195,6 +217,20 @@ export function LoginPage() {
                   </Field.Description>
                 </VStack>
               </Field.Root>
+
+              {errorMessage && (
+                <Text
+                  $css={{
+                    paddingLeft: "4px",
+                    color: "var(--vapor-color-red-500, #d4333f)",
+                    fontSize: "14px",
+                    lineHeight: "22px",
+                    fontWeight: 400,
+                  }}
+                >
+                  {errorMessage}
+                </Text>
+              )}
             </VStack>
           </VStack>
 

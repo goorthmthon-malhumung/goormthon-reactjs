@@ -37,6 +37,7 @@ type MatchingDetailGalleryImage = {
 };
 
 type MatchingDetailContent = {
+  kindLabel: string;
   heroImageSrc: string;
   heroImageAlt: string;
   deadlineLabel: string;
@@ -60,6 +61,7 @@ type MatchingDetailContent = {
 export type MatchingDetailState = Partial<MatchingDetailContent>;
 
 const DEFAULT_DETAIL_CONTENT: MatchingDetailContent = {
+  kindLabel: "직업",
   heroImageSrc: heroImage,
   heroImageAlt: "바닷가에서 작업 중인 해녀들의 모습",
   deadlineLabel: "D - 20",
@@ -442,28 +444,58 @@ export function MatchingDetailPage() {
                 alignItems: "flex-start",
               }}
             >
-              <Box
+              <HStack
                 $css={{
-                  display: "inline-flex",
+                  gap: "8px",
                   alignItems: "center",
-                  justifyContent: "center",
-                  height: "32px",
-                  paddingInline: "12px",
-                  borderRadius: "999px",
-                  backgroundColor: HERO_BADGE_BG,
                 }}
               >
-                <Text
-                  typography="subtitle1"
+                <Box
                   $css={{
-                    color: "#FFF6F1",
-                    fontWeight: 500,
-                    letterSpacing: "-0.1px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "32px",
+                    paddingInline: "12px",
+                    borderRadius: "999px",
+                    backgroundColor: ACCENT,
                   }}
                 >
-                  {detail.deadlineLabel}
-                </Text>
-              </Box>
+                  <Text
+                    typography="subtitle1"
+                    $css={{
+                      color: "#FFF6F1",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    {detail.kindLabel}
+                  </Text>
+                </Box>
+
+                <Box
+                  $css={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "32px",
+                    paddingInline: "12px",
+                    borderRadius: "999px",
+                    backgroundColor: HERO_BADGE_BG,
+                  }}
+                >
+                  <Text
+                    typography="subtitle1"
+                    $css={{
+                      color: "#FFF6F1",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    {detail.deadlineLabel}
+                  </Text>
+                </Box>
+              </HStack>
 
               <Text
                 render={<h1 />}
