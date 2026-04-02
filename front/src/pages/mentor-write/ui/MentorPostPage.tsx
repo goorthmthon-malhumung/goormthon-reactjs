@@ -1,6 +1,12 @@
 ﻿import mentorCardImage from "@/assets/matching/mentor-card.jpg";
 import { useMatchingJobListView } from "@/features/jobs/api/useMatchingJobListView";
 import { ROUTES } from "@/shared/config/routes";
+import {
+  getNumber,
+  getRecordCollection,
+  getString,
+  getStringList,
+} from "@/shared/lib/apiData";
 import { MentorCard, type MentorCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
@@ -154,7 +160,28 @@ export function MentorPostPage() {
     navigate(ROUTES.home);
   };
 
-  const jobCards = (jobListQuery.data ?? []).map((item) => item.card);
+  const jobCards: MentorCardProps[] = getRecordCollection(jobListQuery.data?.data).map((item) => {
+    const id = getNumber(item, "id");
+    const title = getString(item, "title") ?? "";
+    const metaLabel = [
+      getString(item, "workHours"),
+      getString(item, "physicalLevel"),
+    ]
+      .filter((value): value is string => Boolean(value))
+      .join(" · ");
+
+    return {
+      to: typeof id === "number" ? `/jobs/${id}` : ROUTES.mentorPost,
+      imageSrc: getString(item, "mainUrl"),
+      imageAlt: title ? `${title} 이미지` : "직업 이미지",
+      badgeLabel: getString(item, "jobType"),
+      title,
+      metaLabel: metaLabel || undefined,
+      description: getString(item, "introduction"),
+      location: getString(item, "location"),
+      tags: getStringList(item, "skills"),
+    };
+  });
   const cards = selectedKind === "job" ? jobCards : [...EXPERIENCE_ITEMS];
 
   const listStatus =
@@ -293,13 +320,16 @@ export function MentorPostPage() {
               </Box>
             ) : null}
 
-            {!listStatus && cards.map((card, index) => <MentorCard key={`${card.title}-${index}`} {...card} />)}
+            {!listStatus &&
+              cards.map((card: MentorCardProps, index: number) => (
+                <MentorCard key={`${card.title}-${index}`} {...card} />
+              ))}
           </VStack>
         </VStack>
       </Box>
 
       <Box $css={{ flexShrink: 0 }}>
-        <BottomNavigation isMentor />
+        <BottomNavigation />
       </Box>
     </Box>
   );

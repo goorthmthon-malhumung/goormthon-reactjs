@@ -83,7 +83,7 @@ function ScheduleCard({
   date,
   currentCount,
   maxCount,
-}: Omit<ScheduleItem, "id">) {
+}: Omit<ScheduleItem, "id" | "kind">) {
   return (
     <Box
       $css={{
@@ -507,4 +507,3 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
     </Box>
   );
 }
-
