@@ -1,17 +1,21 @@
 import {
-  Badge,
   Box,
   Card,
   Text,
   VStack,
 } from "@vapor-ui/core";
 import { Link } from "react-router-dom";
+import {
+  ThumbnailBadge,
+  type ThumbnailBadgeTone,
+} from "./ThumbnailBadge";
 
 export type ThumbnailCardProps = {
   to: string;
   imageSrc: string;
   imageAlt: string;
   badgeLabel: string;
+  badgeTone?: ThumbnailBadgeTone;
   title: string;
   statusLabel: string;
   caption: string;
@@ -32,6 +36,7 @@ export function ThumbnailCard({
   imageSrc,
   imageAlt,
   badgeLabel,
+  badgeTone = "orange",
   title,
   statusLabel,
   caption,
@@ -80,23 +85,7 @@ export function ThumbnailCard({
             }}
           />
 
-          <Badge
-            shape="pill"
-            size="md"
-            colorPalette="warning"
-            $css={{
-              position: "absolute",
-              top: "8px",
-              right: "8px",
-              backgroundColor: "#FFD9C8",
-              color: "#CD4D0A",
-              borderRadius: "999px",
-              boxShadow: "none",
-              fontWeight: 500,
-            }}
-          >
-            {badgeLabel}
-          </Badge>
+          <ThumbnailBadge label={badgeLabel} tone={badgeTone} />
         </Box>
 
         <Card.Body
