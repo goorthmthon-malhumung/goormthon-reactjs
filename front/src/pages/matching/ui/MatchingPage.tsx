@@ -7,6 +7,7 @@ import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import mentorCardImage from "@/assets/matching/mentor-card.jpg";
+import type { MatchingDetailState } from "@/pages/matching-detail";
 import { ROUTES } from "@/shared/config/routes";
 import { MentorCard, type MentorCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
@@ -38,6 +39,60 @@ const CATEGORY_OPTIONS: readonly CategoryOption[] = [
 const MATCHING_PAGE_BG = "#F7F7F7";
 const MATCHING_TOP_SURFACE_BG = "rgba(255, 255, 255, 0.9)";
 const MATCHING_CONTENT_WIDTH_PX = 358;
+const MATCHING_DETAIL_SCHEDULE = "2026년 4월 15일 ~ 2026년 5월 15일";
+const MATCHING_DETAIL_TIME = "오전 9:00 - 12:00 (3시간)";
+const MATCHING_DETAIL_PARTICIPANTS = "5/8명";
+const MATCHING_DETAIL_REQUIREMENTS = ["수영 가능자", "건강한 신체", "8세 이상"] as const;
+const MATCHING_DETAIL_INCLUDED_ITEMS = [
+  "해녀복 대여",
+  "안전 장비",
+  "해산물 시식",
+  "사진 촬영 서비스",
+] as const;
+
+function normalizeDeadlineLabel(label: string) {
+  const trimmed = label.trim();
+
+  if (/^D-\d+$/i.test(trimmed)) {
+    return trimmed.replace("D-", "D - ");
+  }
+
+  return trimmed;
+}
+
+function getMentorSummary(metaLabel: string) {
+  const [mentorName = "김영숙 해녀", deadline = "D-20"] = metaLabel
+    .split("·")
+    .map((part) => part.trim());
+
+  const mentorInitial =
+    mentorName.replace(/[^0-9A-Za-z가-힣]/g, "").charAt(0) || "김";
+
+  return {
+    mentorInitial,
+    mentorName,
+    deadlineLabel: normalizeDeadlineLabel(deadline),
+  };
+}
+
+function buildMatchingDetailState(item: MatchingItem): MatchingDetailState {
+  const { mentorInitial, mentorName, deadlineLabel } = getMentorSummary(item.card.metaLabel);
+
+  return {
+    deadlineLabel,
+    title: item.card.title,
+    participantLabel: MATCHING_DETAIL_PARTICIPANTS,
+    mentorInitial,
+    mentorName,
+    mentorCareer: item.card.badgeLabel.replace("이어온", "차"),
+    scheduleLabel: MATCHING_DETAIL_SCHEDULE,
+    timeLabel: MATCHING_DETAIL_TIME,
+    meetingPlace: item.card.location,
+    description: item.card.description,
+    includedItems: MATCHING_DETAIL_INCLUDED_ITEMS,
+    requirements: MATCHING_DETAIL_REQUIREMENTS,
+  };
+}
 
 const MATCHING_ITEMS: readonly MatchingItem[] = [
   {
@@ -45,7 +100,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "haenyeo",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "바닷가에서 작업 중인 해녀들",
       badgeLabel: "45년 이어온",
@@ -62,7 +117,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "stone",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 바닷가에서 일하는 장인의 모습",
       badgeLabel: "25년 이어온",
@@ -79,7 +134,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "horse",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 현장에서 활동 중인 직업 체험 장면",
       badgeLabel: "25년 이어온",
@@ -96,7 +151,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "tangerine",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 귤 농가의 수확 작업 장면",
       badgeLabel: "25년 이어온",
@@ -113,7 +168,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "stone",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "제주 마을의 돌담과 장인 작업 장면",
       badgeLabel: "18년 이어온",
@@ -130,7 +185,7 @@ const MATCHING_ITEMS: readonly MatchingItem[] = [
     kind: "job",
     category: "haenyeo",
     card: {
-      to: ROUTES.jobDetail,
+      to: ROUTES.matchingDetail,
       imageSrc: mentorCardImage,
       imageAlt: "해녀 공동체 활동 기록 장면",
       badgeLabel: "12년 이어온",
@@ -492,7 +547,12 @@ export function MatchingPage() {
             }}
           >
             {filteredItems.map((item) => (
-              <MentorCard key={item.id} {...item.card} />
+              <MentorCard
+                key={item.id}
+                {...item.card}
+                to={ROUTES.matchingDetail}
+                state={buildMatchingDetailState(item)}
+              />
             ))}
           </VStack>
         </VStack>

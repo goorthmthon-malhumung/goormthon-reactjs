@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 
 export type MentorCardProps = {
   to: string;
+  state?: unknown;
   imageSrc: string;
   imageAlt: string;
   badgeLabel: string;
@@ -34,6 +35,7 @@ const DESCRIPTION_CLAMP_STYLES = {
 
 export function MentorCard({
   to,
+  state,
   imageSrc,
   imageAlt,
   badgeLabel,
@@ -45,7 +47,7 @@ export function MentorCard({
 }: MentorCardProps) {
   return (
     <Box
-      render={<Link to={to} aria-label={`${title} 상세 보기`} />}
+      render={<Link to={to} state={state} aria-label={`${title} 상세 보기`} />}
       $css={{
         display: "block",
         width: "100%",
