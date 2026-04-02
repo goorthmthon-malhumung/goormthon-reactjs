@@ -136,8 +136,8 @@ function OnboardingStar() {
     <Box
       $css={{
         position: "absolute",
-        right: "105px",
-        top: "156px",
+        right: "118px",
+        top: "130px",
         width: "35px",
         height: "35px",
       }}
