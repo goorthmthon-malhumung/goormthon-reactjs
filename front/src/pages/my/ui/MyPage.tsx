@@ -1,5 +1,4 @@
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import { useNavigate } from "react-router-dom";
 import completedImageOne from "@/assets/my/completed-1.jpg";
 import completedImageTwo from "@/assets/my/completed-2.jpg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
@@ -9,11 +8,7 @@ import statMatchingIcon from "@/assets/my/stat-matching.svg";
 import starIcon from "@/assets/my/experiences-star.svg";
 import calendarIcon from "@/assets/my/calendar.svg";
 import locationIcon from "@/assets/my/location.svg";
-import { ROUTES } from "@/shared/config/routes";
-import {
-  BottomNavigation,
-  type BottomNavTab,
-} from "@/shared/ui/navigation/BottomNavigation";
+import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 
 const PAGE_BG = "#F8FAFC";
 const PROFILE_BG = "var(--vapor-color-cyan-200, #84d2e2)";
@@ -438,8 +433,6 @@ function InterestFieldCard() {
 }
 
 export function MyPage() {
-  const navigate = useNavigate();
-
   return (
     <Box
       render={<main />}
@@ -808,15 +801,7 @@ export function MyPage() {
           zIndex: 4,
         }}
       >
-        <BottomNavigation
-          activeTab="my"
-          onTabChange={(tab: BottomNavTab) => {
-            if (tab === "home") {
-              navigate(ROUTES.home);
-            }
-          }}
-          onCenterClick={() => navigate(ROUTES.matching)}
-        />
+        <BottomNavigation />
       </Box>
     </Box>
   );

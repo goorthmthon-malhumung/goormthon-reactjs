@@ -385,15 +385,6 @@ export function MatchingPage() {
     navigate(ROUTES.home);
   };
 
-  const handleBottomTabChange = (tab: "home" | "my") => {
-    if (tab === "home") {
-      navigate(ROUTES.home);
-      return;
-    }
-
-    navigate(ROUTES.my);
-  };
-
   return (
     <Box
       $css={{
@@ -519,11 +510,7 @@ export function MatchingPage() {
           backgroundColor: "transparent",
         }}
       >
-        <BottomNavigation
-          activeTab="home"
-          onTabChange={handleBottomTabChange}
-          onCenterClick={() => navigate(ROUTES.matching)}
-        />
+        <BottomNavigation />
       </Box>
     </Box>
   );

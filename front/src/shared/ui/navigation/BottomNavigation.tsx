@@ -1,5 +1,7 @@
 import { Box, Text } from "@vapor-ui/core";
 import {
+  AssignmentIcon,
+  AssignmentOutlineIcon,
   GroupIcon,
   GroupOutlineIcon,
   HomeIcon,
@@ -15,7 +17,15 @@ const TAB_INACTIVE_COLOR = "var(--vapor-color-gray-200, #c6c6c6)";
 const NAV_BACKGROUND_COLOR = "var(--app-color-navigation-background, #232323)";
 const ICON_SIZE = 22;
 
-const TABS = [
+type Tab = {
+  id: string;
+  label: string;
+  route: string;
+  ActiveIcon: typeof HomeIcon;
+  InactiveIcon: typeof HomeOutlineIcon;
+};
+
+const MENTEE_TABS = [
   {
     id: "home" as const,
     label: "홈",
@@ -37,17 +47,47 @@ const TABS = [
     ActiveIcon: UserIcon,
     InactiveIcon: UserOutlineIcon,
   },
-];
+] satisfies ReadonlyArray<Tab>;
 
-export function BottomNavigation() {
+const MENTOR_TABS = [
+  {
+    id: "home" as const,
+    label: "홈",
+    route: ROUTES.home,
+    ActiveIcon: HomeIcon,
+    InactiveIcon: HomeOutlineIcon,
+  },
+  {
+    id: "management" as const,
+    label: "체험관리",
+    route: ROUTES.home, // TODO: 체험관리 route 추가 후 교체
+    ActiveIcon: AssignmentIcon,
+    InactiveIcon: AssignmentOutlineIcon,
+  },
+  {
+    id: "my" as const,
+    label: "MY",
+    route: ROUTES.my,
+    ActiveIcon: UserIcon,
+    InactiveIcon: UserOutlineIcon,
+  },
+] satisfies ReadonlyArray<Tab>;
+
+type BottomNavigationProps = {
+  isMentor?: boolean;
+};
+
+export function BottomNavigation({ isMentor = false }: BottomNavigationProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const tabs = isMentor ? MENTOR_TABS : MENTEE_TABS;
 
   const activeId =
     pathname === ROUTES.my || pathname.startsWith(`${ROUTES.my}/`)
       ? "my"
-      : pathname === ROUTES.matching ||
-          pathname.startsWith(`${ROUTES.matching}/`)
+      : !isMentor &&
+          (pathname === ROUTES.matching ||
+            pathname.startsWith(`${ROUTES.matching}/`))
         ? "matching"
         : "home";
 
@@ -74,7 +114,7 @@ export function BottomNavigation() {
           gap: "100px",
         }}
       >
-        {TABS.map(({ id, label, route, ActiveIcon, InactiveIcon }) => {
+        {tabs.map(({ id, label, route, ActiveIcon, InactiveIcon }) => {
           const isActive = activeId === id;
           const Icon = isActive ? ActiveIcon : InactiveIcon;
           return (
