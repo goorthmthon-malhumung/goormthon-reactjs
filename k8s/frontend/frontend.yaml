@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-20
+        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-1/frontend:build-21
         ports:
         - containerPort: 3000
         volumeMounts:
@@ -34,5 +34,5 @@ spec:
   selector:
     app: frontend
   ports:
-  - port: 80
+  - port: 3000
     targetPort: 3000
