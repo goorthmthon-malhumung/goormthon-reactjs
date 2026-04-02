@@ -1,29 +1,27 @@
-import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import backIcon from "@/assets/job-detail/back.svg";
-import badgeIcon from "@/assets/job-detail/badge.svg";
-import calendarIcon from "@/assets/job-detail/calendar.svg";
-import clockIcon from "@/assets/job-detail/clock.svg";
-import effortIcon from "@/assets/job-detail/effort.svg";
-import heroImage from "@/assets/job-detail/hero.jpg";
-import interestIcon from "@/assets/job-detail/interest.svg";
-import locationIcon from "@/assets/job-detail/location.svg";
 import shareIcon from "@/assets/job-detail/share.svg";
 import { ROUTES } from "@/shared/config/routes";
+import { Box, HStack, Text, VStack } from "@vapor-ui/core";
+import { UserOutlineIcon } from "@vapor-ui/icons";
+import { useNavigate } from "react-router-dom";
 
-const FRAME_WIDTH_PX = 390;
-const HERO_TOP_PX = 0;
-const HERO_HEIGHT_PX = 332;
-const CONTENT_TOP_PX = 332;
-const CONTENT_WIDTH_PX = 358;
-const PAGE_BG = "#FFFFFF";
+const HERO_HEIGHT_PX = 379;
+const SHEET_TOP_PX = 350;
+const CONTENT_SIDE_PADDING_PX = 24;
 const TITLE_FONT =
   '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
+
+const FIGMA_HERO_IMAGE =
+  "https://www.figma.com/api/mcp/asset/f41730c6-3372-4d0f-8089-4f8826f7de9d";
+const FIGMA_MENTOR_CARD_IMAGE =
+  "https://www.figma.com/api/mcp/asset/d9b1e0a7-96b6-4483-9318-38501fc7314f";
+const FIGMA_MENTOR_BADGE_ICON =
+  "https://www.figma.com/api/mcp/asset/6777bff0-eb49-4c65-a319-bf0e829217cf";
 
 const SKILLS = [
   "물질 기술",
   "해산물 채취",
+  "바다 안전",
   "바다 안전",
   "물때 판단",
   "장비 관리",
@@ -46,11 +44,11 @@ function TopCircleButton({
         height: "39.998px",
         border: "none",
         borderRadius: "999px",
-        backgroundColor: "rgba(255,255,255,0.9)",
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         display: "grid",
         placeItems: "center",
         cursor: "pointer",
-        padding: "0",
+        padding: 0,
       }}
     >
       <Box
@@ -65,26 +63,21 @@ function TopCircleButton({
   );
 }
 
-function SectionCard({
-  children,
-  $css,
-}: {
-  children: ReactNode;
-  $css?: Record<string, string | number>;
-}) {
+function SectionTitle({ children }: { children: string }) {
   return (
-    <Box
+    <Text
+      render={<h2 />}
       $css={{
-        width: "100%",
-        borderRadius: "16px",
-        backgroundColor: "#FFFFFF",
-        boxShadow:
-          "0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.1)",
-        ...$css,
+        color: "#393939",
+        fontFamily: TITLE_FONT,
+        fontSize: "18px",
+        lineHeight: "26px",
+        fontWeight: 700,
+        letterSpacing: "-0.1px",
       }}
     >
       {children}
-    </Box>
+    </Text>
   );
 }
 
@@ -92,10 +85,10 @@ function SkillPill({ label }: { label: string }) {
   return (
     <Box
       $css={{
-        height: "35.988px",
-        borderRadius: "14px",
-        backgroundColor: "#F0F9FF",
-        paddingInline: "15.995px",
+        height: "32px",
+        borderRadius: "999px",
+        backgroundColor: "#EEF9FB",
+        paddingInline: "12px",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -104,12 +97,12 @@ function SkillPill({ label }: { label: string }) {
       <Text
         render={<span />}
         $css={{
-          color: "#0069A8",
+          color: "#0D8298",
           fontFamily: TITLE_FONT,
           fontSize: "14px",
-          lineHeight: "20px",
+          lineHeight: "22px",
           fontWeight: 500,
-          letterSpacing: "-0.1504px",
+          letterSpacing: "-0.1px",
           whiteSpace: "nowrap",
         }}
       >
@@ -119,21 +112,22 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
-function BadgePill({ label }: { label: string }) {
+function MentorChip({ label }: { label: string }) {
   return (
     <Box
       $css={{
-        height: "23.992px",
+        height: "32px",
         borderRadius: "999px",
-        backgroundColor: "#FFF7ED",
+        backgroundColor: "#EEF9FB",
+        paddingInline: "12px",
         display: "inline-flex",
         alignItems: "center",
-        paddingInline: "11.996px",
-        gap: "7.997px",
+        gap: "4px",
+        width: "fit-content",
       }}
     >
       <Box
-        render={<img src={badgeIcon} alt="" aria-hidden="true" />}
+        render={<img src={FIGMA_MENTOR_BADGE_ICON} alt="" aria-hidden="true" />}
         $css={{
           width: "11.996px",
           height: "11.996px",
@@ -144,11 +138,12 @@ function BadgePill({ label }: { label: string }) {
       <Text
         render={<span />}
         $css={{
-          color: "#CA3500",
+          color: "#17A3BA",
           fontFamily: TITLE_FONT,
           fontSize: "12px",
-          lineHeight: "16px",
+          lineHeight: "18px",
           fontWeight: 500,
+          letterSpacing: "0",
           whiteSpace: "nowrap",
         }}
       >
@@ -158,128 +153,96 @@ function BadgePill({ label }: { label: string }) {
   );
 }
 
-function InfoRow({
-  iconSrc,
+function MentorCard({
   title,
-  value,
+  subtitle,
+  chipLabel,
 }: {
-  iconSrc: string;
   title: string;
-  value: string;
+  subtitle: string;
+  chipLabel: string;
 }) {
   return (
     <Box
       $css={{
-        width: "100%",
-        borderRadius: "14px",
-        backgroundColor: "#F8FAFC",
-        padding: "15.995px",
+        position: "relative",
+        width: "297px",
+        height: "168px",
+        borderRadius: "16px",
+        overflow: "hidden",
+        flexShrink: 0,
+        scrollSnapAlign: "start",
+        backgroundColor: "#FFFFFF",
       }}
     >
+      <Box
+        render={<img src={FIGMA_MENTOR_CARD_IMAGE} alt="" aria-hidden="true" />}
+        $css={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center center",
+        }}
+      />
+      <Box
+        $css={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(194,232,240,0) 15.734%, rgba(194,232,240,0.96) 87.413%)",
+        }}
+      />
+
       <VStack
         $css={{
-          gap: "7.997px",
+          position: "absolute",
+          left: "17px",
+          bottom: "20px",
+          width: "168px",
+          gap: "8px",
         }}
       >
-        <HStack
+        <VStack
           $css={{
-            gap: "7.997px",
-            alignItems: "center",
+            gap: "2px",
           }}
         >
-          <Box
-            render={<img src={iconSrc} alt="" aria-hidden="true" />}
-            $css={{
-              width: "19.993px",
-              height: "19.993px",
-              display: "block",
-              flexShrink: 0,
-            }}
-          />
           <Text
-            render={<h4 />}
+            render={<p />}
             $css={{
-              color: "#0F172B",
+              color: "#393939",
               fontFamily: TITLE_FONT,
-              fontSize: "16px",
-              lineHeight: "24px",
-              fontWeight: 600,
-              letterSpacing: "-0.3125px",
+              fontSize: "18px",
+              lineHeight: "26px",
+              fontWeight: 700,
+              letterSpacing: "-0.1px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {title}
           </Text>
-        </HStack>
-        <Text
-          render={<p />}
-          $css={{
-            color: "#45556C",
-            fontFamily: TITLE_FONT,
-            fontSize: "14px",
-            lineHeight: "20px",
-            fontWeight: 400,
-            letterSpacing: "-0.1504px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {value}
-        </Text>
+          <Text
+            render={<p />}
+            $css={{
+              color: "#4C4C4C",
+              fontFamily: TITLE_FONT,
+              fontSize: "14px",
+              lineHeight: "22px",
+              fontWeight: 500,
+              letterSpacing: "-0.1px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {subtitle}
+          </Text>
+        </VStack>
+
+        <MentorChip label={chipLabel} />
       </VStack>
-    </Box>
-  );
-}
-
-function ActionButton({
-  iconSrc,
-  label,
-  variant,
-  onClick,
-}: {
-  iconSrc: string;
-  label: string;
-  variant: "filled" | "outline";
-  onClick: () => void;
-}) {
-  const isFilled = variant === "filled";
-
-  return (
-    <Box
-      render={<button type="button" onClick={onClick} />}
-      $css={{
-        flex: "1 1 0",
-        minWidth: 0,
-        height: "58.923px",
-        borderRadius: "14px",
-        border: isFilled ? "none" : "1.471px solid #E2E8F0",
-        backgroundColor: isFilled ? "#1CB3CB" : "#FFFFFF",
-        display: "grid",
-        placeItems: "center",
-        cursor: "pointer",
-        position: "relative",
-      }}
-    >
-      <Box
-        render={<img src={iconSrc} alt="" aria-hidden="true" />}
-        $css={{
-          position: "absolute",
-          left: "24.923px",
-          width: "19.993px",
-          height: "19.993px",
-          display: "block",
-        }}
-      />
-      <Text
-        $css={{
-          color: isFilled ? "#FFFFFF" : "#0F172B",
-          fontFamily: TITLE_FONT,
-          fontSize: "16px",
-          lineHeight: "24px",
-          fontWeight: 600,
-          letterSpacing: "-0.3125px",
-        }}
-      >
-        {label}
-      </Text>
     </Box>
   );
 }
@@ -300,29 +263,25 @@ export function JobDetailPage() {
     <Box
       render={<main />}
       $css={{
-        width: "100%",
-        minHeight: "100dvh",
-        backgroundColor: PAGE_BG,
-        display: "flex",
-        justifyContent: "center",
+        backgroundColor: "#FFFFFF",
         overflow: "hidden",
       }}
     >
       <Box
         $css={{
           position: "relative",
-          width: `min(${FRAME_WIDTH_PX}px, 100vw)`,
           minHeight: "100dvh",
-          backgroundColor: PAGE_BG,
+          backgroundColor: "#FFFFFF",
           overflow: "hidden",
         }}
       >
-        <HStack
+        <Box
           $css={{
             position: "absolute",
             top: "max(16px, calc(env(safe-area-inset-top) + 8px))",
             left: "16px",
             right: "16px",
+            display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             zIndex: 10,
@@ -338,32 +297,34 @@ export function JobDetailPage() {
             ariaLabel="공유하기"
             onClick={() => {}}
           />
-        </HStack>
+        </Box>
 
         <Box
           $css={{
             position: "absolute",
             inset: 0,
             overflowY: "auto",
+            overflowX: "hidden",
           }}
         >
-            <Box
-              $css={{
-                position: "relative",
-                marginTop: `${HERO_TOP_PX}px`,
-                width: "100%",
+          <Box
+            $css={{
+              position: "relative",
+              width: "100%",
               height: `${HERO_HEIGHT_PX}px`,
               overflow: "hidden",
               backgroundColor: "#0B1020",
             }}
           >
             <Box
-              render={<img src={heroImage} alt="" aria-hidden="true" />}
+              render={<img src={FIGMA_HERO_IMAGE} alt="" aria-hidden="true" />}
               $css={{
                 position: "absolute",
                 inset: 0,
-                width: "100%",
+                width: "127.31%",
                 height: "100%",
+                left: "-12.04%",
+                top: "-0.05%",
                 objectFit: "cover",
               }}
             />
@@ -372,46 +333,77 @@ export function JobDetailPage() {
                 position: "absolute",
                 inset: 0,
                 background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.6) 100%)",
+                  "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%)",
               }}
             />
 
             <VStack
               $css={{
                 position: "absolute",
-                left: "24px",
-                right: "24px",
-                top: "238px",
+                left: "16px",
+                right: "16px",
+                bottom: "49px",
                 gap: "8px",
               }}
             >
+              <Box
+                $css={{
+                  height: "32px",
+                  width: "fit-content",
+                  borderRadius: "999px",
+                  backgroundColor: "#EF6F25",
+                  paddingInline: "12px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  render={<p />}
+                  $css={{
+                    color: "#FFF6F1",
+                    fontFamily: TITLE_FONT,
+                    fontSize: "14px",
+                    lineHeight: "22px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  D - 20
+                </Text>
+              </Box>
+
               <Text
-                render={<h1 />}
+                render={
+                  <h1
+                    style={{
+                      display: "-webkit-box",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 2,
+                    }}
+                  />
+                }
                 $css={{
                   color: "#FFFFFF",
                   fontFamily: TITLE_FONT,
-                  fontSize: "30px",
+                  fontSize: "24px",
                   lineHeight: "36px",
                   fontWeight: 700,
-                  letterSpacing: "0.3955px",
+                  letterSpacing: "-0.3px",
                 }}
               >
-                해녀
+                금녕 해녀와 함께하는 전복따기금녕금녕 해녀와 함께하는 전복따기금녕
               </Text>
+
               <HStack
                 $css={{
                   gap: "3.999px",
                   alignItems: "center",
                 }}
               >
-                <Box
-                  render={<img src={locationIcon} alt="" aria-hidden="true" />}
-                  $css={{
-                    width: "15.995px",
-                    height: "15.995px",
-                    display: "block",
-                  }}
-                />
+                <UserOutlineIcon size={16} color="#FFFFFF" />
                 <Text
                   render={<p />}
                   $css={{
@@ -423,276 +415,167 @@ export function JobDetailPage() {
                     letterSpacing: "-0.1504px",
                   }}
                 >
-                  제주시 구좌읍
+                  5/8명
                 </Text>
               </HStack>
             </VStack>
           </Box>
 
-          <VStack
+          <Box
             $css={{
-              width: "100%",
-              maxWidth: `${CONTENT_WIDTH_PX}px`,
-              marginInline: "auto",
-              gap: "23.992px",
-              paddingInline: "15.995px",
-              paddingTop: `${CONTENT_TOP_PX - HERO_TOP_PX - HERO_HEIGHT_PX + 23.992}px`,
-              paddingBottom: "calc(148px + env(safe-area-inset-bottom))",
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: `${SHEET_TOP_PX}px`,
+              bottom: 0,
+              backgroundColor: "#FFFFFF",
+              borderTopLeftRadius: "30px",
+              borderTopRightRadius: "30px",
+              overflow: "hidden",
             }}
           >
-            <SectionCard
+            <Box
               $css={{
-                paddingTop: "23.992px",
-                paddingInline: "23.992px",
-                paddingBottom: "23.992px",
+                position: "absolute",
+                inset: 0,
+                overflowY: "auto",
+                overflowX: "hidden",
+                paddingTop: "28px",
+                paddingBottom: "calc(180px + env(safe-area-inset-bottom))",
               }}
             >
               <VStack
                 $css={{
-                  gap: "11.996px",
+                  width: "100%",
+                  gap: "24px",
+                  paddingInline: `${CONTENT_SIDE_PADDING_PX}px`,
                 }}
               >
-                <Text
-                  render={<h2 />}
+                <VStack
                   $css={{
-                    color: "#0F172B",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "18px",
-                    lineHeight: "28px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.4395px",
+                    gap: "16px",
                   }}
                 >
-                  직업 소개
-                </Text>
-                <Text
-                  render={<p />}
-                  $css={{
-                    color: "#45556C",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "16px",
-                    lineHeight: "26px",
-                    fontWeight: 400,
-                    letterSpacing: "-0.3125px",
-                    maxWidth: "294px",
-                  }}
-                >
-                  45년간 제주 바다를 지켜온 김영숙 해녀는 구좌읍 해녀회의
-                  회장을 역임하며 해녀 문화의 계승에 힘써왔습니다. 전통적인
-                  물질 기술부터 현대적인 안전 장비 활용법까지, 해녀로서 필요한
-                  모든 것을 배울 수 있습니다. 바다와 더불어 살아가는 지혜와
-                  해녀 공동체의 문화도 함께 경험하실 수 있습니다.
-                </Text>
-              </VStack>
-            </SectionCard>
-
-            <SectionCard
-              $css={{
-                paddingTop: "23.992px",
-                paddingInline: "23.992px",
-                paddingBottom: "23.992px",
-              }}
-            >
-              <VStack
-                $css={{
-                  gap: "15.995px",
-                }}
-              >
-                <HStack
-                  $css={{
-                    gap: "15.995px",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box
+                  <Text
+                    render={<h2 />}
                     $css={{
-                      width: "63.99px",
-                      height: "63.99px",
-                      borderRadius: "999px",
-                      backgroundColor: "#5D5D5D",
-                      display: "grid",
-                      placeItems: "center",
-                      flexShrink: 0,
+                      color: "#393939",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "18px",
+                      lineHeight: "26px",
+                      fontWeight: 700,
+                      letterSpacing: "-0.1px",
                     }}
                   >
-                    <Text
-                      render={<span />}
-                      $css={{
-                        color: "#FFFFFF",
-                        fontFamily: TITLE_FONT,
-                        fontSize: "24px",
-                        lineHeight: "32px",
-                        fontWeight: 700,
-                        letterSpacing: "0.0703px",
-                      }}
-                    >
-                      김
-                    </Text>
-                  </Box>
-
-                  <VStack
+                    제주의 말을 돌보는 하루
+                  </Text>
+                  <Text
+                    render={<p />}
                     $css={{
-                      gap: "0",
-                      minWidth: 0,
-                      flex: 1,
+                      color: "#767676",
+                      fontFamily: TITLE_FONT,
+                      fontSize: "16px",
+                      lineHeight: "24px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
                     }}
                   >
-                    <Text
-                      render={<h3 />}
-                      $css={{
-                        color: "#0F172B",
-                        fontFamily: TITLE_FONT,
-                        fontSize: "20px",
-                        lineHeight: "28px",
-                        fontWeight: 700,
-                        letterSpacing: "-0.4492px",
-                      }}
-                    >
-                      김영숙 멘토
-                    </Text>
-                    <Text
-                      render={<p />}
-                      $css={{
-                        color: "#45556C",
-                        fontFamily: TITLE_FONT,
-                        fontSize: "16px",
-                        lineHeight: "24px",
-                        fontWeight: 400,
-                        letterSpacing: "-0.3125px",
-                      }}
-                    >
-                      68세 · 45년 경력
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                <HStack
-                  $css={{
-                    gap: "7.997px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <BadgePill label="제주특별자치도 무형문화재" />
-                  <BadgePill label="해녀 기능 보유자" />
-                </HStack>
-              </VStack>
-            </SectionCard>
-
-            <SectionCard
-              $css={{
-                paddingTop: "23.992px",
-                paddingInline: "23.992px",
-                paddingBottom: "23.992px",
-              }}
-            >
-              <VStack
-                $css={{
-                  gap: "15.995px",
-                }}
-              >
-                <Text
-                  render={<h2 />}
-                  $css={{
-                    color: "#0F172B",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "18px",
-                    lineHeight: "28px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.4395px",
-                  }}
-                >
-                  배울 수 있는 기술
-                </Text>
-
-                <HStack
-                  $css={{
-                    gap: "7.997px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {SKILLS.map((skill) => (
-                    <SkillPill key={skill} label={skill} />
-                  ))}
-                </HStack>
+                    45년 경력의 김영숙 해녀님과 함께하는 물질 체험입니다. 전통 해녀복을 입고 바다에 들어가 직접 해산물을 채취하며 제주 해녀 문화를 체험할 수 있습니다. 초보자도 안전하게 참여할 수 있도록 구명조끼와 안전 장비가 제공되며, 해녀님의 세심한 지도 아래 진행됩니다.
+                  </Text>
+                </VStack>
 
                 <VStack
                   $css={{
-                    gap: "15.995px",
+                    gap: "16px",
                   }}
                 >
-                  <InfoRow
-                    iconSrc={clockIcon}
-                    title="근무 시간"
-                    value="오전 6시-10시 (물때에 따라 변동)"
-                  />
-                  <InfoRow iconSrc={effortIcon} title="체력 요구도" value="상" />
+                  <SectionTitle>배울 수 있는 기술</SectionTitle>
+                  <HStack
+                    $css={{
+                      gap: "8px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {SKILLS.map((skill) => (
+                      <SkillPill key={skill} label={skill} />
+                    ))}
+                  </HStack>
+                </VStack>
+
+                <VStack
+                  $css={{
+                    gap: "16px",
+                  }}
+                >
+                  <SectionTitle>해녀 멘토분들을 만나보세요</SectionTitle>
+                  <Box
+                    $css={{
+                      width: "100%",
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                    }}
+                  >
+                    <HStack
+                      $css={{
+                        gap: "10px",
+                        width: "max-content",
+                        paddingBottom: "4px",
+                      }}
+                    >
+                      <MentorCard
+                        title="김영숙 멘토"
+                        subtitle="68세 · 45년 경력"
+                        chipLabel="제주특별자치도 무형문화재"
+                      />
+                      <MentorCard
+                        title="임지은 멘토"
+                        subtitle="72세 · 45년 경력"
+                        chipLabel="해녀 기능 보유자"
+                      />
+                    </HStack>
+                  </Box>
                 </VStack>
               </VStack>
-            </SectionCard>
-
-            <HStack
-              $css={{
-                gap: "21px",
-                alignItems: "center",
-                width: "336px",
-              }}
-            >
-              <Box
-                $css={{
-                  width: "98px",
-                  height: "126px",
-                  backgroundColor: "#D9D9D9",
-                  flexShrink: 0,
-                }}
-              />
-              <Box
-                $css={{
-                  width: "98px",
-                  height: "126px",
-                  backgroundColor: "#D9D9D9",
-                  flexShrink: 0,
-                }}
-              />
-              <Box
-                $css={{
-                  width: "98px",
-                  height: "126px",
-                  backgroundColor: "#D9D9D9",
-                  flexShrink: 0,
-                }}
-              />
-            </HStack>
-          </VStack>
+            </Box>
+          </Box>
         </Box>
 
         <Box
           $css={{
             position: "absolute",
-            left: "16px",
-            right: "16px",
-            bottom: "20px",
+            left: "15.99px",
+            right: "15.99px",
+            bottom: "50.08px",
             zIndex: 20,
           }}
         >
-          <HStack
+          <Box
+            render={<button type="button" onClick={() => navigate(ROUTES.reservation)} />}
             $css={{
-              gap: "11.996px",
-              alignItems: "center",
+              width: "100%",
+              height: "58.923px",
+              border: "none",
+              borderRadius: "14px",
+              backgroundColor: "#1CB3CB",
+              color: "#FFFFFF",
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
             }}
           >
-            <ActionButton
-              iconSrc={calendarIcon}
-              label="체험 예약하기"
-              variant="filled"
-              onClick={() => navigate(ROUTES.reservation)}
-            />
-            <ActionButton
-              iconSrc={interestIcon}
-              label="관심 표현"
-              variant="outline"
-              onClick={() => {}}
-            />
-          </HStack>
+            <Text
+              $css={{
+                color: "inherit",
+                fontFamily: TITLE_FONT,
+                fontSize: "16px",
+                lineHeight: "24px",
+                fontWeight: 600,
+                letterSpacing: "-0.3125px",
+              }}
+            >
+              체험 예약하기
+            </Text>
+          </Box>
         </Box>
       </Box>
     </Box>

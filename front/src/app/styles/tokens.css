@@ -542,3 +542,17 @@ body::-webkit-scrollbar,
 .reservation-date-picker__hidden {
   visibility: hidden;
 }
+
+/* App shell: Mobile-first responsive layout */
+.app-shell {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+/* Desktop: Center phone-sized frame */
+@media (min-width: 480px) {
+  .app-shell {
+    max-width: 390px;
+    margin-inline: auto;
+  }
+}
