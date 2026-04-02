@@ -8,6 +8,7 @@ import { MatchingPage } from "@/pages/matching/ui/MatchingPage";
 import { MatchingDetailPage } from "@/pages/matching-detail";
 import { MentorPreviewPage } from "@/pages/mentor-preview/ui/MentorPreviewPage";
 import { MentorWritePage } from "@/pages/mentor-write/ui/MentorWritePage";
+import { MentorPostPage } from "@/pages/mentor-write/ui/MentorPostPage";
 import { MyPage } from "@/pages/my/ui/MyPage";
 import { MentorMyPage } from "@/pages/my/ui/MentorMyPage";
 import { NotFoundPage } from "@/pages/not-found/ui/NotFoundPage";
@@ -89,6 +90,10 @@ export const router = createBrowserRouter([
       {
         path: ROUTES.mentorWrite.slice(1),
         element: <MentorWritePage />,
+      },
+      {
+        path: ROUTES.mentorPost.slice(1),
+        element: <MentorPostPage />,
       },
       {
         path: "*",

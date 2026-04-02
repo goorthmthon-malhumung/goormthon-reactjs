@@ -53,21 +53,21 @@ const MENTOR_TABS = [
   {
     id: "home" as const,
     label: "홈",
-    route: ROUTES.home,
+    route: ROUTES.mentorHome,
     ActiveIcon: HomeIcon,
     InactiveIcon: HomeOutlineIcon,
   },
   {
     id: "management" as const,
-    label: "체험관리",
-    route: ROUTES.home, // TODO: 체험관리 route 추가 후 교체
+    label: "게시물",
+    route: ROUTES.mentorPost,
     ActiveIcon: AssignmentIcon,
     InactiveIcon: AssignmentOutlineIcon,
   },
   {
     id: "my" as const,
     label: "MY",
-    route: ROUTES.my,
+    route: ROUTES.mentorMy,
     ActiveIcon: UserIcon,
     InactiveIcon: UserOutlineIcon,
   },

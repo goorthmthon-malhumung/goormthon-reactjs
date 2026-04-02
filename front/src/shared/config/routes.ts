@@ -11,6 +11,7 @@ export const ROUTES = {
   login: "/login",
   my: "/my",
   mentorMy: "/mentor/my",
+  mentorPost: "/mentor/post",
   components: "/components",
   mentorPreview: "/mentors/stone-master",
   tokens: "/tokens",
