@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -14,6 +15,7 @@ import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { useSignUp } from "@/api/generated/user/user";
 import { isApiError } from "@/api/fetcher";
+import { resolvePostAuthRoute } from "@/features/auth/lib/postAuthRoute";
 
 type RegisterStep = 0 | 1 | 2;
 type RoleType = "mentor" | "successor" | null;
@@ -248,6 +250,7 @@ function Footer({
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const { mutate: signUp, isPending } = useSignUp();
 
@@ -316,8 +319,12 @@ export function RegisterPage() {
           data: signUpPayload,
         },
         {
-          onSuccess: () => {
-            navigate(ROUTES.home, { replace: true });
+          onSuccess: async () => {
+            const nextRoute = await resolvePostAuthRoute(
+              queryClient,
+              signUpPayload.isMentor,
+            );
+            navigate(nextRoute, { replace: true });
           },
           onError: (error) => {
             if (isApiError(error)) {
