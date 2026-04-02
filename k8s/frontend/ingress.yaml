@@ -6,16 +6,6 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: junhugaeapi.goorm.training
-      http:
-        paths:
-          - backend:
-              service:
-                name: backend-service
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
     - host: junhugae.goorm.training
       http:
         paths:
