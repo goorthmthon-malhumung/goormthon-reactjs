@@ -1,10 +1,12 @@
 import calendarIcon from "@/assets/my/calendar.svg";
-import completedImageOne from "@/assets/my/completed-1.jpg";
-import completedImageTwo from "@/assets/my/completed-2.jpg";
 import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
 import statMatchingIcon from "@/assets/my/stat-matching.svg";
+import {
+  useMyCompletedExperienceHistory,
+  useMyUpcomingExperienceReservations,
+} from "@/features/experiences/api/useMyBookingViews";
 import {
   DEFAULT_SESSION_PROFILE,
   useSessionProfile,
@@ -55,7 +57,7 @@ type HistoryItem = {
   location: string;
 };
 
-const UPCOMING_RESERVATIONS: readonly UpcomingReservation[] = [
+const UPCOMING_JOB_RESERVATIONS: readonly UpcomingReservation[] = [
   {
     id: "haenyeo-job",
     kind: "job",
@@ -71,45 +73,6 @@ const UPCOMING_RESERVATIONS: readonly UpcomingReservation[] = [
     scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
     statusLabel: "예약확정",
     participantLabel: "2명/2명",
-  },
-  {
-    id: "horse-experience",
-    kind: "experience",
-    title: "말 농장 하루 체험",
-    scheduleLabel: "2026년 4월 20일 · 오후 1:00 - 4:00",
-    statusLabel: "예약확정",
-    participantLabel: "4명/8명",
-  },
-  {
-    id: "tangerine-experience",
-    kind: "experience",
-    title: "귤 수확 체험",
-    scheduleLabel: "2026년 4월 27일 · 오전 10:00 - 12:00",
-    statusLabel: "예약확정",
-    participantLabel: "6명/10명",
-  },
-] as const;
-
-const HISTORY_ITEMS: readonly HistoryItem[] = [
-  {
-    id: "stone-history",
-    imageSrc: completedImageOne,
-    badgeLabel: "25년 이어온",
-    badgeTone: "cyan",
-    title: "제주의 돌을 쌓는 하루",
-    mentorLabel: "강** 장인",
-    deadlineLabel: "D-10",
-    location: "서귀포시 성산읍",
-  },
-  {
-    id: "haenyeo-history",
-    imageSrc: completedImageTwo,
-    badgeLabel: "정부지원금 30만원",
-    badgeTone: "orange",
-    title: "금녕 해녀와 함께하는 전복따기",
-    mentorLabel: "김** 해녀",
-    deadlineLabel: "D-10",
-    location: "제주시 구좌읍",
   },
 ] as const;
 
@@ -375,19 +338,21 @@ function UpcomingReservationCard({
             }}
           >
             <StatusBadge label={statusLabel} />
-            <Text
-              render={<p />}
-              $css={{
-                color: "#767676",
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                lineHeight: "22px",
-                fontWeight: 500,
-                letterSpacing: "-0.1px",
-              }}
-            >
-              {participantLabel}
-            </Text>
+            {participantLabel ? (
+              <Text
+                render={<p />}
+                $css={{
+                  color: "#767676",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                {participantLabel}
+              </Text>
+            ) : null}
           </HStack>
         </VStack>
 
@@ -584,8 +549,9 @@ function HistoryCard({
 export function MyPage() {
   const [selectedUpcomingKind, setSelectedUpcomingKind] = useState<UpcomingKind>("job");
   const profileQuery = useSessionProfile();
+  const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
+  const completedHistoryQuery = useMyCompletedExperienceHistory();
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
-  console.log("profile:", profile);
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
       tone: "error",
@@ -600,10 +566,42 @@ export function MyPage() {
         message: "회원 정보를 불러오는 중입니다.",
       }
       : null;
-
-  const upcomingReservations = UPCOMING_RESERVATIONS.filter(
-    (item) => item.kind === selectedUpcomingKind,
-  );
+  const upcomingReservations =
+    selectedUpcomingKind === "job"
+      ? [...UPCOMING_JOB_RESERVATIONS]
+      : (upcomingExperienceQuery.data ?? []);
+  const upcomingStatus =
+    selectedUpcomingKind === "experience"
+      ? upcomingExperienceQuery.isError
+        ? {
+          tone: "error" as const,
+          message: upcomingExperienceQuery.error.message,
+          onRetry: () => {
+            void upcomingExperienceQuery.refetch();
+          },
+        }
+        : upcomingExperienceQuery.isPending
+          ? {
+            tone: "loading" as const,
+            message: "체험 예약 내역을 불러오는 중입니다.",
+          }
+          : null
+      : null;
+  const completedHistory = completedHistoryQuery.data ?? [];
+  const completedStatus = completedHistoryQuery.isError
+    ? {
+      tone: "error" as const,
+      message: completedHistoryQuery.error.message,
+      onRetry: () => {
+        void completedHistoryQuery.refetch();
+      },
+    }
+    : completedHistoryQuery.isPending
+      ? {
+        tone: "loading" as const,
+        message: "완료 내역을 불러오는 중입니다.",
+      }
+      : null;
 
   return (
     <Box
@@ -851,6 +849,14 @@ export function MyPage() {
                 gap: "11px",
               }}
             >
+              {upcomingStatus ? (
+                <QueryNotice
+                  tone={upcomingStatus.tone}
+                  message={upcomingStatus.message}
+                  onRetry={upcomingStatus.onRetry}
+                />
+              ) : null}
+
               {upcomingReservations.map((item) => (
                 <UpcomingReservationCard
                   key={item.id}
@@ -892,9 +898,17 @@ export function MyPage() {
                 gap: "10px",
               }}
             >
-              {HISTORY_ITEMS.map((item) => (
-                <HistoryCard key={item.id} {...item} />
-              ))}
+              {completedStatus ? (
+                <QueryNotice
+                  tone={completedStatus.tone}
+                  message={completedStatus.message}
+                  onRetry={completedStatus.onRetry}
+                />
+              ) : (
+                completedHistory.map((item) => (
+                  <HistoryCard key={item.id} {...item} />
+                ))
+              )}
             </HStack>
           </VStack>
         </VStack>
