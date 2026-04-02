@@ -1,11 +1,3 @@
-import backIcon from "@/assets/job-detail/back.svg";
-import interestIcon from "@/assets/job-detail/interest.svg";
-import { isApiError } from "@/api/fetcher";
-import { useAddFavorite } from "@/api/generated/job/job";
-import {
-  DEFAULT_SESSION_PROFILE,
-  useSessionProfile,
-} from "@/features/auth/api/useSessionProfile";
 import {
   DEFAULT_JOB_DETAIL_VIEW,
   useJobDetailView,
@@ -13,67 +5,41 @@ import {
 import { ROUTES } from "@/shared/config/routes";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import { UserOutlineIcon } from "@vapor-ui/icons";
+import { GroupOutlineIcon } from "@vapor-ui/icons";
 import { useNavigate } from "react-router-dom";
 
 const JOB_ID = 1;
 const FALLBACK_EXPERIENCE_ID = 1;
 const HERO_HEIGHT_PX = 379;
-const SHEET_TOP_PX = 350;
+const CONTENT_OVERLAP_PX = 29;
 const CONTENT_SIDE_PADDING_PX = 24;
+const CTA_BOTTOM_OFFSET_PX = 50.08;
+const CTA_HEIGHT_PX = 58.923;
 const TITLE_FONT =
   '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
 
 const FIGMA_MENTOR_CARD_IMAGE =
-  "https://www.figma.com/api/mcp/asset/d9b1e0a7-96b6-4483-9318-38501fc7314f";
+  "https://www.figma.com/api/mcp/asset/3b96dd9e-019d-41df-96fb-49411b14e935";
 const FIGMA_MENTOR_BADGE_ICON =
-  "https://www.figma.com/api/mcp/asset/6777bff0-eb49-4c65-a319-bf0e829217cf";
+  "https://www.figma.com/api/mcp/asset/f8d9c380-c80d-4589-94cb-863f30b37c59";
 
-function TopCircleButton({
-  iconSrc,
-  ariaLabel,
-  onClick,
-  disabled = false,
-}: {
-  iconSrc: string;
-  ariaLabel: string;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <Box
-      render={
-        <button
-          type="button"
-          onClick={onClick}
-          aria-label={ariaLabel}
-          disabled={disabled}
-        />
-      }
-      $css={{
-        width: "39.998px",
-        height: "39.998px",
-        border: "none",
-        borderRadius: "999px",
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
-        display: "grid",
-        placeItems: "center",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.6 : 1,
-        padding: 0,
-      }}
-    >
-      <Box
-        render={<img src={iconSrc} alt="" aria-hidden="true" />}
-        $css={{
-          width: "19.993px",
-          height: "19.993px",
-          display: "block",
-        }}
-      />
-    </Box>
-  );
-}
+const DEADLINE_LABEL = "D - 20";
+const RESERVE_BUTTON_LABEL = "체험 예약하기";
+
+const MENTOR_CARD_ITEMS = [
+  {
+    title: "김영숙 멘토",
+    subtitleParts: ["68세", "45년 경력"],
+    chipLabel: "제주특별자치도 무형문화재",
+    chipWidth: "159.996px",
+  },
+  {
+    title: "임지은 멘토",
+    subtitleParts: ["72세", "45년 경력"],
+    chipLabel: "해녀 기능 보유자",
+    chipWidth: "110.996px",
+  },
+] as const;
 
 function SectionTitle({ children }: { children: string }) {
   return (
@@ -104,6 +70,7 @@ function SkillPill({ label }: { label: string }) {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
+        flexShrink: 0,
       }}
     >
       <Text
@@ -124,55 +91,73 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
-function MentorChip({ label }: { label: string }) {
+function MentorChip({
+  label,
+  width,
+}: {
+  label: string;
+  width: string;
+}) {
   return (
     <Box
       $css={{
-        height: "32px",
+        width,
+        height: "24px",
         borderRadius: "999px",
         backgroundColor: "#EEF9FB",
-        paddingInline: "12px",
+        paddingInline: "8px",
         display: "inline-flex",
         alignItems: "center",
-        gap: "4px",
-        width: "fit-content",
+        justifyContent: "center",
+        boxSizing: "border-box",
       }}
     >
-      <Box
-        render={<img src={FIGMA_MENTOR_BADGE_ICON} alt="" aria-hidden="true" />}
+      <HStack
         $css={{
-          width: "11.996px",
-          height: "11.996px",
-          display: "block",
-          flexShrink: 0,
-        }}
-      />
-      <Text
-        render={<span />}
-        $css={{
-          color: "#17A3BA",
-          fontFamily: TITLE_FONT,
-          fontSize: "12px",
-          lineHeight: "18px",
-          fontWeight: 500,
-          letterSpacing: "0",
-          whiteSpace: "nowrap",
+          gap: "4px",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
         }}
       >
-        {label}
-      </Text>
+        <Box
+          render={<img src={FIGMA_MENTOR_BADGE_ICON} alt="" aria-hidden="true" />}
+          $css={{
+            width: "11.996px",
+            height: "11.996px",
+            display: "block",
+            flexShrink: 0,
+          }}
+        />
+        <Text
+          render={<span />}
+          $css={{
+            color: "#17A3BA",
+            fontFamily: TITLE_FONT,
+            fontSize: "12px",
+            lineHeight: "18px",
+            fontWeight: 500,
+            letterSpacing: "0",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {label}
+        </Text>
+      </HStack>
     </Box>
   );
 }
 
 function MentorCard({
   title,
-  subtitle,
+  subtitleParts,
   chipLabel,
+  chipWidth,
 }: {
   title: string;
-  subtitle: string;
+  subtitleParts: readonly string[];
   chipLabel: string;
+  chipWidth: string;
 }) {
   return (
     <Box
@@ -183,7 +168,6 @@ function MentorCard({
         borderRadius: "16px",
         overflow: "hidden",
         flexShrink: 0,
-        scrollSnapAlign: "start",
         backgroundColor: "#FFFFFF",
       }}
     >
@@ -195,9 +179,9 @@ function MentorCard({
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          objectPosition: "center center",
         }}
       />
+
       <Box
         $css={{
           position: "absolute",
@@ -214,11 +198,14 @@ function MentorCard({
           bottom: "20px",
           width: "168px",
           gap: "8px",
+          alignItems: "flex-start",
         }}
       >
         <VStack
           $css={{
             gap: "2px",
+            alignItems: "flex-start",
+            width: "100%",
           }}
         >
           <Text
@@ -233,27 +220,40 @@ function MentorCard({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              width: "100%",
             }}
           >
             {title}
           </Text>
-          <Text
-            render={<p />}
+
+          <HStack
             $css={{
+              gap: "4px",
+              alignItems: "center",
               color: "#4C4C4C",
-              fontFamily: TITLE_FONT,
-              fontSize: "14px",
-              lineHeight: "22px",
-              fontWeight: 500,
-              letterSpacing: "-0.1px",
-              whiteSpace: "nowrap",
             }}
           >
-            {subtitle}
-          </Text>
+            {subtitleParts.map((part, index) => (
+              <Text
+                key={`${title}-${part}`}
+                render={<span />}
+                $css={{
+                  color: "inherit",
+                  fontFamily: TITLE_FONT,
+                  fontSize: "14px",
+                  lineHeight: "22px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {index > 0 ? `· ${part}` : part}
+              </Text>
+            ))}
+          </HStack>
         </VStack>
 
-        <MentorChip label={chipLabel} />
+        <MentorChip label={chipLabel} width={chipWidth} />
       </VStack>
     </Box>
   );
@@ -262,12 +262,7 @@ function MentorCard({
 export function JobDetailPage() {
   const navigate = useNavigate();
   const jobQuery = useJobDetailView(JOB_ID);
-  const sessionQuery = useSessionProfile();
-  const favoriteMutation = useAddFavorite();
   const job = jobQuery.data ?? DEFAULT_JOB_DETAIL_VIEW;
-  const sessionProfile = sessionQuery.data ?? DEFAULT_SESSION_PROFILE;
-  const jobId = job.jobId;
-  const memberId = sessionProfile.memberId;
   const title = job.title;
   const introduction = job.introduction;
   const heroImageSrc = job.heroImageSrc;
@@ -275,73 +270,29 @@ export function JobDetailPage() {
   const currentParticipants = job.currentParticipants;
   const maxParticipants = job.maxParticipants;
   const mentorName = job.mentorName;
-  const pageStatus = favoriteMutation.isError
+
+  const pageStatus = jobQuery.isError
     ? {
         tone: "error" as const,
-        message: favoriteMutation.error.message,
+        message: jobQuery.error.message,
+        onRetry: () => {
+          void jobQuery.refetch();
+        },
       }
-    : favoriteMutation.isSuccess
+    : jobQuery.isPending
       ? {
-          tone: "success" as const,
-          message: "관심 직업으로 등록했습니다.",
+          tone: "loading" as const,
+          message: "직업 정보를 불러오는 중입니다.",
         }
-      : jobQuery.isError
-        ? {
-            tone: "error" as const,
-            message: jobQuery.error.message,
-            onRetry: () => {
-              void jobQuery.refetch();
-            },
-          }
-        : jobQuery.isPending
-          ? {
-              tone: "loading" as const,
-              message: "직업 정보를 불러오는 중입니다.",
-            }
-          : null;
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    navigate(ROUTES.matching);
-  };
-
-  const handleFavorite = () => {
-    if (sessionQuery.isPending) {
-      return;
-    }
-
-    if (sessionQuery.isError) {
-      if (
-        isApiError(sessionQuery.error) &&
-        (sessionQuery.error.status === 401 || sessionQuery.error.status === 403)
-      ) {
-        navigate(ROUTES.login);
-      }
-
-      return;
-    }
-
-    if (!memberId) {
-      navigate(ROUTES.login);
-      return;
-    }
-
-    favoriteMutation.mutate({
-      jobId,
-      params: {
-        userId: memberId,
-      },
-    });
-  };
+      : null;
 
   return (
     <Box
       render={<main />}
       $css={{
+        width: "100%",
+        height: "100dvh",
+        minHeight: "100dvh",
         backgroundColor: "#FFFFFF",
         overflow: "hidden",
       }}
@@ -349,47 +300,19 @@ export function JobDetailPage() {
       <Box
         $css={{
           position: "relative",
-          minHeight: "100dvh",
-          backgroundColor: "#FFFFFF",
+          width: "100%",
+          height: "100%",
           overflow: "hidden",
+          backgroundColor: "#FFFFFF",
         }}
       >
-        <Box
-          $css={{
-            position: "absolute",
-            top: "max(16px, calc(env(safe-area-inset-top) + 8px))",
-            left: "16px",
-            right: "16px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 10,
-          }}
-        >
-          <TopCircleButton
-            iconSrc={backIcon}
-            ariaLabel="뒤로가기"
-            onClick={handleBack}
-          />
-          <TopCircleButton
-            iconSrc={interestIcon}
-            ariaLabel="관심 표현"
-            onClick={handleFavorite}
-            disabled={
-              favoriteMutation.isPending ||
-              sessionQuery.isPending ||
-              jobQuery.isPending ||
-              jobQuery.isError
-            }
-          />
-        </Box>
-
         <Box
           $css={{
             position: "absolute",
             inset: 0,
             overflowY: "auto",
             overflowX: "hidden",
+            backgroundColor: "#FFFFFF",
           }}
         >
           <Box
@@ -413,222 +336,211 @@ export function JobDetailPage() {
                 objectFit: "cover",
               }}
             />
+
             <Box
               $css={{
                 position: "absolute",
-                inset: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: "252px",
                 background:
                   "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%)",
               }}
             />
 
-            <VStack
+            <Box
               $css={{
                 position: "absolute",
                 left: "16px",
                 right: "16px",
                 bottom: "49px",
-                gap: "8px",
-              }}
-            >
-              <Box
-                $css={{
-                  height: "32px",
-                  width: "fit-content",
-                  borderRadius: "999px",
-                  backgroundColor: "#EF6F25",
-                  paddingInline: "12px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  render={<p />}
-                  $css={{
-                    color: "#FFF6F1",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "14px",
-                    lineHeight: "22px",
-                    fontWeight: 500,
-                    letterSpacing: "-0.1px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  D - 20
-                </Text>
-              </Box>
-
-              <Text
-                render={
-                  <h1
-                    style={{
-                      display: "-webkit-box",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                    }}
-                  />
-                }
-                $css={{
-                  color: "#FFFFFF",
-                  fontFamily: TITLE_FONT,
-                  fontSize: "24px",
-                  lineHeight: "36px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                  {title}
-              </Text>
-
-              <HStack
-                $css={{
-                  gap: "3.999px",
-                  alignItems: "center",
-                }}
-              >
-                <UserOutlineIcon size={16} color="#FFFFFF" />
-                <Text
-                  render={<p />}
-                  $css={{
-                    color: "#FFFFFF",
-                    fontFamily: TITLE_FONT,
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    fontWeight: 400,
-                    letterSpacing: "-0.1504px",
-                  }}
-                >
-                  {currentParticipants}/{maxParticipants}명
-                </Text>
-              </HStack>
-            </VStack>
-          </Box>
-
-          <Box
-            $css={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: `${SHEET_TOP_PX}px`,
-              bottom: 0,
-              backgroundColor: "#FFFFFF",
-              borderTopLeftRadius: "30px",
-              borderTopRightRadius: "30px",
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              $css={{
-                position: "absolute",
-                inset: 0,
-                overflowY: "auto",
-                overflowX: "hidden",
-                paddingTop: "28px",
-                paddingBottom: "calc(180px + env(safe-area-inset-bottom))",
               }}
             >
               <VStack
                 $css={{
                   width: "100%",
-                  gap: "24px",
-                  paddingInline: `${CONTENT_SIDE_PADDING_PX}px`,
+                  maxWidth: "358px",
+                  marginInline: "auto",
+                  gap: "8px",
+                  alignItems: "flex-start",
                 }}
               >
-                {pageStatus ? (
-                  <QueryNotice
-                    tone={pageStatus.tone}
-                    message={pageStatus.message}
-                    onRetry={pageStatus.onRetry}
-                  />
-                ) : null}
-                <VStack
+                <Box
                   $css={{
-                    gap: "16px",
+                    height: "32px",
+                    width: "fit-content",
+                    borderRadius: "999px",
+                    backgroundColor: "#EF6F25",
+                    paddingInline: "12px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
                   <Text
-                    render={<h2 />}
+                    render={<span />}
                     $css={{
-                      color: "#393939",
+                      color: "#FFF6F1",
                       fontFamily: TITLE_FONT,
-                      fontSize: "18px",
-                      lineHeight: "26px",
-                      fontWeight: 700,
+                      fontSize: "14px",
+                      lineHeight: "22px",
+                      fontWeight: 500,
                       letterSpacing: "-0.1px",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    제주의 말을 돌보는 하루
+                    {DEADLINE_LABEL}
                   </Text>
+                </Box>
+
+                <Text
+                  render={
+                    <h1
+                      style={{
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                      }}
+                    />
+                  }
+                  $css={{
+                    color: "#FFFFFF",
+                    fontFamily: TITLE_FONT,
+                    fontSize: "24px",
+                    lineHeight: "36px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.3px",
+                    width: "100%",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {title}
+                </Text>
+
+                <HStack
+                  $css={{
+                    gap: "3.999px",
+                    alignItems: "center",
+                  }}
+                >
+                  <GroupOutlineIcon size={16} color="#FFFFFF" aria-hidden="true" />
                   <Text
                     render={<p />}
                     $css={{
-                      color: "#767676",
+                      color: "#FFFFFF",
                       fontFamily: TITLE_FONT,
-                      fontSize: "16px",
-                      lineHeight: "24px",
-                      fontWeight: 500,
-                      letterSpacing: "-0.1px",
+                      fontSize: "14px",
+                      lineHeight: "20px",
+                      fontWeight: 400,
+                      letterSpacing: "-0.1504px",
                     }}
                   >
-                    {introduction}
+                    {currentParticipants}/{maxParticipants}명
                   </Text>
-                </VStack>
-
-                <VStack
-                  $css={{
-                    gap: "16px",
-                  }}
-                >
-                  <SectionTitle>배울 수 있는 기술</SectionTitle>
-                  <HStack
-                    $css={{
-                      gap: "8px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {skills.map((skill) => (
-                      <SkillPill key={skill} label={skill} />
-                    ))}
-                  </HStack>
-                </VStack>
-
-                <VStack
-                  $css={{
-                    gap: "16px",
-                  }}
-                >
-                  <SectionTitle>해녀 멘토분들을 만나보세요</SectionTitle>
-                  <Box
-                    $css={{
-                      width: "100%",
-                      overflowX: "auto",
-                      overflowY: "hidden",
-                    }}
-                  >
-                    <HStack
-                      $css={{
-                        gap: "10px",
-                        width: "max-content",
-                        paddingBottom: "4px",
-                      }}
-                    >
-                      <MentorCard
-                        title="김영숙 멘토"
-                        subtitle="68세 · 45년 경력"
-                        chipLabel="제주특별자치도 무형문화재"
-                      />
-                      <MentorCard
-                        title="임지은 멘토"
-                        subtitle="72세 · 45년 경력"
-                        chipLabel="해녀 기능 보유자"
-                      />
-                    </HStack>
-                  </Box>
-                </VStack>
+                </HStack>
               </VStack>
             </Box>
+          </Box>
+
+          <Box
+            $css={{
+              position: "relative",
+              marginTop: `-${CONTENT_OVERLAP_PX}px`,
+              backgroundColor: "#FFFFFF",
+              borderTopLeftRadius: "30px",
+              borderTopRightRadius: "30px",
+              paddingTop: "28px",
+              paddingInline: `${CONTENT_SIDE_PADDING_PX}px`,
+              paddingBottom: "calc(180px + env(safe-area-inset-bottom))",
+            }}
+          >
+            <VStack
+              $css={{
+                width: "100%",
+                gap: "24px",
+              }}
+            >
+              {pageStatus ? (
+                <QueryNotice
+                  tone={pageStatus.tone}
+                  message={pageStatus.message}
+                  onRetry={pageStatus.onRetry}
+                />
+              ) : null}
+
+              <VStack
+                $css={{
+                  gap: "16px",
+                }}
+              >
+                <SectionTitle>제주의 말을 돌보는 하루</SectionTitle>
+                <Text
+                  render={<p />}
+                  $css={{
+                    color: "#767676",
+                    fontFamily: TITLE_FONT,
+                    fontSize: "16px",
+                    lineHeight: "24px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {introduction}
+                </Text>
+              </VStack>
+
+              <VStack
+                $css={{
+                  gap: "16px",
+                }}
+              >
+                <SectionTitle>배울 수 있는 기술</SectionTitle>
+                <Box
+                  $css={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    columnGap: "10px",
+                    rowGap: "8px",
+                    alignItems: "center",
+                  }}
+                >
+                  {skills.map((skill, index) => (
+                    <SkillPill key={`${skill}-${index}`} label={skill} />
+                  ))}
+                </Box>
+              </VStack>
+
+              <VStack
+                $css={{
+                  gap: "16px",
+                }}
+              >
+                <SectionTitle>해녀 멘토분들을 만나보세요</SectionTitle>
+                <Box
+                  $css={{
+                    width: "100%",
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                  }}
+                >
+                  <HStack
+                    $css={{
+                      gap: "10px",
+                      width: "max-content",
+                      paddingBottom: "4px",
+                    }}
+                  >
+                    {MENTOR_CARD_ITEMS.map((item) => (
+                      <MentorCard key={item.title} {...item} />
+                    ))}
+                  </HStack>
+                </Box>
+              </VStack>
+            </VStack>
           </Box>
         </Box>
 
@@ -637,8 +549,8 @@ export function JobDetailPage() {
             position: "absolute",
             left: "15.99px",
             right: "15.99px",
-            bottom: "50.08px",
-            zIndex: 20,
+            bottom: `${CTA_BOTTOM_OFFSET_PX}px`,
+            zIndex: 10,
           }}
         >
           <Box
@@ -659,16 +571,16 @@ export function JobDetailPage() {
             }
             $css={{
               width: "100%",
-              height: "58.923px",
+              height: `${CTA_HEIGHT_PX}px`,
               border: "none",
               borderRadius: "14px",
               backgroundColor: "#1CB3CB",
               color: "#FFFFFF",
               display: "grid",
               placeItems: "center",
-              cursor:
-                jobQuery.isPending || jobQuery.isError ? "not-allowed" : "pointer",
+              cursor: jobQuery.isPending || jobQuery.isError ? "not-allowed" : "pointer",
               opacity: jobQuery.isPending || jobQuery.isError ? 0.6 : 1,
+              padding: 0,
             }}
           >
             <Text
@@ -681,7 +593,7 @@ export function JobDetailPage() {
                 letterSpacing: "-0.3125px",
               }}
             >
-              체험 예약하기
+              {RESERVE_BUTTON_LABEL}
             </Text>
           </Box>
         </Box>
