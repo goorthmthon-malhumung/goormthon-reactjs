@@ -10,7 +10,7 @@ import { MentorPreviewPage } from "@/pages/mentor-preview/ui/MentorPreviewPage";
 import { MyPage } from "@/pages/my";
 import { NotFoundPage } from "@/pages/not-found/ui/NotFoundPage";
 import { OnboardingPage } from "@/pages/onboarding/ui/OnboardingPage";
-import { RegisterPage } from "@/pages/register/RegisterPage";
+import { RegisterPage } from "@/pages/register/ui/RegisterPage";
 import { ReservationPage } from "@/pages/reservation";
 import { TokensPage } from "@/pages/tokens/ui/TokensPage";
 import { ROUTES } from "@/shared/config/routes";
