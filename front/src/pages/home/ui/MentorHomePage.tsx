@@ -1,5 +1,6 @@
 ﻿import calendarIcon from "@/assets/my/calendar.svg";
 import haenyeoMentorIcon from "@/shared/assets/haenyeoMentorIcon.svg";
+import { ROUTES } from "@/shared/config/routes";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Box, Button, HStack, Text, VStack } from "@vapor-ui/core";
 import {
@@ -9,6 +10,7 @@ import {
   PlusOutlineIcon,
 } from "@vapor-ui/icons";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type SummaryCardProps = {
   count: string;
@@ -461,10 +463,12 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
         }}
       >
         <Button
+          nativeButton={false}
+          render={<Link to={ROUTES.mentorWrite} />}
           size="md"
           $css={{
             display: "flex",
-            width: "142px",
+            width: "101px",
             height: "48px",
             padding: "0 14px",
             justifyContent: "center",
@@ -486,7 +490,7 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
             size={24}
             color="var(--vapor-color-foreground-button-primary, #ffffff)"
           />
-          체험 올리기
+          글쓰기
         </Button>
       </Box>
 
@@ -500,3 +504,5 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
     </Box>
   );
 }
+
+

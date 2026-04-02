@@ -1,6 +1,6 @@
 export const ROUTES = {
   home: "/",
-  mentorHome: "/mentorHome",
+  mentorHome: "/mentor/home",
   matching: "/matching",
   jobDetail: "/jobs/haenyeo",
   matchingDetail: "/matching/detail",
@@ -10,8 +10,9 @@ export const ROUTES = {
   register: "/register",
   login: "/login",
   my: "/my",
-  mentorMy: "/mentorMy",
+  mentorMy: "/mentor/my",
   components: "/components",
   mentorPreview: "/mentors/stone-master",
   tokens: "/tokens",
+  mentorWrite: "/mentor/write",
 } as const;
