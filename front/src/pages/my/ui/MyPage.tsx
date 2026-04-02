@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { useLogout } from "@/api/generated/user/user";
 import completedImageOne from "@/assets/my/completed-1.jpg";
 import completedImageTwo from "@/assets/my/completed-2.jpg";
@@ -452,6 +453,12 @@ export function MyPage() {
       },
     },
   });
+  useEffect(() => {
+    if (profileQuery.data?.isMentor) {
+      navigate(ROUTES.mentorMy, { replace: true });
+    }
+  }, [profileQuery.data, navigate]);
+
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
   const displayName = profile.displayName;
   const displayEmail = profile.displayEmail;

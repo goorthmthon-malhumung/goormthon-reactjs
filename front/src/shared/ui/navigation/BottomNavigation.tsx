@@ -43,7 +43,7 @@ const MENTEE_TABS = [
   {
     id: "my" as const,
     label: "MY",
-    route: ROUTES.my,
+    route: ROUTES.mentorMy,
     ActiveIcon: UserIcon,
     InactiveIcon: UserOutlineIcon,
   },
@@ -83,7 +83,10 @@ export function BottomNavigation({ isMentor = false }: BottomNavigationProps) {
   const tabs = isMentor ? MENTOR_TABS : MENTEE_TABS;
 
   const activeId =
-    pathname === ROUTES.my || pathname.startsWith(`${ROUTES.my}/`)
+    pathname === ROUTES.my ||
+    pathname.startsWith(`${ROUTES.my}/`) ||
+    pathname === ROUTES.mentorMy ||
+    pathname.startsWith(`${ROUTES.mentorMy}/`)
       ? "my"
       : !isMentor &&
           (pathname === ROUTES.matching ||
