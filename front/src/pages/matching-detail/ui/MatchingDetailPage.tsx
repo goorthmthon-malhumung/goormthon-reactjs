@@ -23,8 +23,6 @@ const SECONDARY_TEXT = "#767676";
 const MUTED_TEXT = "#45556C";
 const ACCENT = "#1CB3CB";
 const HERO_BADGE_BG = "#EF6F25";
-const REQUIREMENT_BG = "#FFF7E7";
-const REQUIREMENT_BORDER = "#FEE685";
 const HERO_HEIGHT = 379;
 const HERO_OVERLAY_BOTTOM = 49;
 const CONTENT_WIDTH_PX = 358;
@@ -51,7 +49,6 @@ type MatchingDetailContent = {
   meetingPlace: string;
   description: string;
   includedItems: readonly string[];
-  requirements: readonly string[];
   galleryImages: readonly MatchingDetailGalleryImage[];
   priceLabel: string;
   priceUnitLabel: string;
@@ -75,8 +72,12 @@ const DEFAULT_DETAIL_CONTENT: MatchingDetailContent = {
   meetingPlace: "제주시 구좌읍 하도리",
   description:
     "45년 경력의 김영숙 해녀님과 함께하는 물질 체험입니다. 전통 해녀복을 입고 바다에 들어가 직접 해산물을 채취하며 제주 해녀 문화를 체험할 수 있습니다. 초보자도 안전하게 참여할 수 있도록 구명조끼와 안전 장비가 제공되며, 해녀님의 세심한 지도 아래 진행됩니다.",
-  includedItems: ["해녀복 대여", "안전 장비", "해산물 시식", "사진 촬영 서비스"],
-  requirements: ["수영 가능자", "건강한 신체", "8세 이상"],
+  includedItems: [
+    "해녀복 대여",
+    "안전 장비",
+    "해산물 시식",
+    "사진 촬영 서비스",
+  ],
   galleryImages: [
     {
       src: heroImage,
@@ -284,39 +285,6 @@ function InclusionRow({ label }: { label: string }) {
   );
 }
 
-function RequirementRow({ label }: { label: string }) {
-  return (
-    <HStack
-      $css={{
-        gap: "12px",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        $css={{
-          width: "5.998px",
-          height: "5.998px",
-          borderRadius: "999px",
-          backgroundColor: SECONDARY_TEXT,
-          flexShrink: 0,
-        }}
-      />
-      <Text
-        render={<p />}
-        $css={{
-          color: TITLE_TEXT,
-          fontSize: "14px",
-          lineHeight: "20px",
-          fontWeight: 400,
-          letterSpacing: "-0.1504px",
-        }}
-      >
-        {label}
-      </Text>
-    </HStack>
-  );
-}
-
 function GalleryImage({ src, alt }: MatchingDetailGalleryImage) {
   return (
     <Box
@@ -404,7 +372,13 @@ export function MatchingDetailPage() {
           />
 
           <Box
-            render={<button type="button" onClick={handleBack} aria-label="뒤로가기" />}
+            render={
+              <button
+                type="button"
+                onClick={handleBack}
+                aria-label="뒤로가기"
+              />
+            }
             $css={{
               position: "absolute",
               top: "max(56px, calc(env(safe-area-inset-top) + 8px))",
@@ -423,7 +397,11 @@ export function MatchingDetailPage() {
               zIndex: 2,
             }}
           >
-            <ChevronLeftOutlineIcon size={20} color={PRIMARY_TEXT} aria-hidden="true" />
+            <ChevronLeftOutlineIcon
+              size={20}
+              color={PRIMARY_TEXT}
+              aria-hidden="true"
+            />
           </Box>
 
           <Box
@@ -522,7 +500,11 @@ export function MatchingDetailPage() {
                   alignItems: "center",
                 }}
               >
-                <GroupOutlineIcon size={16} color="#FFFFFF" aria-hidden="true" />
+                <GroupOutlineIcon
+                  size={16}
+                  color="#FFFFFF"
+                  aria-hidden="true"
+                />
                 <Text
                   render={<p />}
                   $css={{
@@ -576,17 +558,35 @@ export function MatchingDetailPage() {
                 }}
               >
                 <DetailInfoRow
-                  icon={<CalendarOutlineIcon size={20} color="#EF6F25" aria-hidden="true" />}
+                  icon={
+                    <CalendarOutlineIcon
+                      size={20}
+                      color="#EF6F25"
+                      aria-hidden="true"
+                    />
+                  }
                   label="날짜"
                   value={detail.scheduleLabel}
                 />
                 <DetailInfoRow
-                  icon={<TimeOutlineIcon size={20} color="#EF6F25" aria-hidden="true" />}
+                  icon={
+                    <TimeOutlineIcon
+                      size={20}
+                      color="#EF6F25"
+                      aria-hidden="true"
+                    />
+                  }
                   label="시간"
                   value={detail.timeLabel}
                 />
                 <DetailInfoRow
-                  icon={<LocationOutlineIcon size={20} color="#EF6F25" aria-hidden="true" />}
+                  icon={
+                    <LocationOutlineIcon
+                      size={20}
+                      color="#EF6F25"
+                      aria-hidden="true"
+                    />
+                  }
                   label="장소"
                   value={detail.meetingPlace}
                 />
@@ -667,7 +667,7 @@ export function MatchingDetailPage() {
                 </VStack>
               </SectionCard>
 
-              <SectionCard
+              {/* <SectionCard
                 backgroundColor={REQUIREMENT_BG}
                 borderColor={REQUIREMENT_BORDER}
                 padding="24.727px"
@@ -709,7 +709,7 @@ export function MatchingDetailPage() {
                     ))}
                   </VStack>
                 </VStack>
-              </SectionCard>
+              </SectionCard> */}
 
               <SectionCard>
                 <VStack
@@ -728,7 +728,10 @@ export function MatchingDetailPage() {
                       letterSpacing: "-0.4395px",
                     }}
                   >
-                    체험 사진 <Box render={<span />} $css={{ color: ACCENT }}>2</Box>
+                    체험 사진{" "}
+                    <Box render={<span />} $css={{ color: ACCENT }}>
+                      2
+                    </Box>
                   </Text>
 
                   <HStack
@@ -821,7 +824,12 @@ export function MatchingDetailPage() {
           </VStack>
 
           <Box
-            render={<button type="button" onClick={() => navigate(ROUTES.reservation)} />}
+            render={
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.reservation)}
+              />
+            }
             $css={{
               width: `${RESERVE_BUTTON_WIDTH}px`,
               height: `${RESERVE_BUTTON_HEIGHT}px`,
