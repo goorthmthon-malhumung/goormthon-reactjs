@@ -1,31 +1,23 @@
-import type { ReactNode } from "react";
-import { useLogout } from "@/api/generated/user/user";
+import { useState } from "react";
 import completedImageOne from "@/assets/my/completed-1.jpg";
 import completedImageTwo from "@/assets/my/completed-2.jpg";
-import starIcon from "@/assets/my/experiences-star.svg";
+import calendarIcon from "@/assets/my/calendar.svg";
+import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
-import statMatchingMedalIcon from "@/assets/my/stat-matching-medal.svg";
+import statCompletedIcon from "@/assets/my/stat-completed.svg";
+import statMatchingIcon from "@/assets/my/stat-matching.svg";
 import {
   DEFAULT_SESSION_PROFILE,
   useSessionProfile,
 } from "@/features/auth/api/useSessionProfile";
-import { ROUTES } from "@/shared/config/routes";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
-import { useQueryClient } from "@tanstack/react-query";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import {
-  CalendarOutlineIcon,
-  HeartOutlineIcon,
-  LocationOutlineIcon,
-} from "@vapor-ui/icons";
-import { useNavigate } from "react-router-dom";
+import { ChevronRightOutlineIcon } from "@vapor-ui/icons";
 
-const PAGE_BG = "#F8FAFC";
-const PROFILE_BG = "var(--vapor-color-cyan-200, #84d2e2)";
-const SHADOW =
-  "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.08)";
-const CONTENT_WIDTH = "344.528px";
+const CONTENT_WIDTH_PX = 358;
+const FONT_FAMILY =
+  '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif';
 
 type ProfileStatus = {
   tone: "error" | "loading";
@@ -33,103 +25,237 @@ type ProfileStatus = {
   onRetry?: () => void;
 };
 
+type UpcomingKind = "job" | "experience";
+
 type StatCardProps = {
-  icon: ReactNode;
+  iconSrc: string;
   value: string;
   label: string;
 };
 
-function StatCard({ icon, value, label }: StatCardProps) {
+type UpcomingReservation = {
+  id: string;
+  kind: UpcomingKind;
+  title: string;
+  scheduleLabel: string;
+  statusLabel: string;
+  participantLabel: string;
+};
+
+type HistoryCardTone = "cyan" | "orange";
+
+type HistoryItem = {
+  id: string;
+  imageSrc: string;
+  badgeLabel: string;
+  badgeTone: HistoryCardTone;
+  title: string;
+  mentorLabel: string;
+  deadlineLabel: string;
+  location: string;
+};
+
+const UPCOMING_RESERVATIONS: readonly UpcomingReservation[] = [
+  {
+    id: "haenyeo-job",
+    kind: "job",
+    title: "해녀 물질 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "8명/10명",
+  },
+  {
+    id: "stone-job",
+    kind: "job",
+    title: "돌담 쌓기 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "2명/2명",
+  },
+  {
+    id: "horse-experience",
+    kind: "experience",
+    title: "말 농장 하루 체험",
+    scheduleLabel: "2026년 4월 20일 · 오후 1:00 - 4:00",
+    statusLabel: "예약확정",
+    participantLabel: "4명/8명",
+  },
+  {
+    id: "tangerine-experience",
+    kind: "experience",
+    title: "귤 수확 체험",
+    scheduleLabel: "2026년 4월 27일 · 오전 10:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "6명/10명",
+  },
+] as const;
+
+const HISTORY_ITEMS: readonly HistoryItem[] = [
+  {
+    id: "stone-history",
+    imageSrc: completedImageOne,
+    badgeLabel: "25년 이어온",
+    badgeTone: "cyan",
+    title: "제주의 돌을 쌓는 하루",
+    mentorLabel: "강** 장인",
+    deadlineLabel: "D-10",
+    location: "서귀포시 성산읍",
+  },
+  {
+    id: "haenyeo-history",
+    imageSrc: completedImageTwo,
+    badgeLabel: "정부지원금 30만원",
+    badgeTone: "orange",
+    title: "금녕 해녀와 함께하는 전복따기",
+    mentorLabel: "김** 해녀",
+    deadlineLabel: "D-10",
+    location: "제주시 구좌읍",
+  },
+] as const;
+
+function MetaItem({
+  iconSrc,
+  label,
+}: {
+  iconSrc: string;
+  label: string;
+}) {
   return (
-    <Box
+    <HStack
       $css={{
-        flex: 1,
-        height: "111.974px",
-        borderRadius: "14px",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        paddingTop: "15.995px",
         gap: "4px",
+        alignItems: "center",
       }}
     >
       <Box
+        render={<img src={iconSrc} alt="" aria-hidden="true" />}
         $css={{
-          width: "19.993px",
-          height: "19.993px",
-          color: "#FFFFFF",
-          lineHeight: 0,
+          width: "15.995px",
+          height: "15.995px",
           display: "block",
+          flexShrink: 0,
         }}
-      >
-        {icon}
-      </Box>
+      />
       <Text
         render={<p />}
         $css={{
-          color: "#FFFFFF",
-          fontFamily:
-            '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-          fontSize: "24px",
-          lineHeight: "32px",
-          fontWeight: 700,
-          letterSpacing: "0.0703px",
-        }}
-      >
-        {value}
-      </Text>
-      <Text
-        render={<p />}
-        $css={{
-          color: "rgba(255, 255, 255, 0.8)",
-          fontFamily:
-            '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-          fontSize: "12px",
-          lineHeight: "16px",
+          color: "#262626",
+          fontFamily: FONT_FAMILY,
+          fontSize: "14px",
+          lineHeight: "20px",
           fontWeight: 400,
           letterSpacing: "-0.1504px",
+          whiteSpace: "nowrap",
         }}
       >
         {label}
       </Text>
+    </HStack>
+  );
+}
+
+function StatCard({ iconSrc, value, label }: StatCardProps) {
+  return (
+    <Box
+      $css={{
+        flex: 1,
+        minWidth: 0,
+        height: "112px",
+        borderRadius: "16px",
+        backgroundColor: "#1CB3CB",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <VStack
+        $css={{
+          position: "absolute",
+          left: "15.99px",
+          top: "16px",
+          gap: "8px",
+          alignItems: "flex-start",
+        }}
+      >
+        <Box
+          render={<img src={iconSrc} alt="" aria-hidden="true" />}
+          $css={{
+            width: "20px",
+            height: "20px",
+            display: "block",
+          }}
+        />
+        <VStack
+          $css={{
+            gap: "0",
+            alignItems: "flex-start",
+          }}
+        >
+          <Text
+            render={<p />}
+            $css={{
+              color: "#FFFFFF",
+              fontFamily: FONT_FAMILY,
+              fontSize: "24px",
+              lineHeight: "36px",
+              fontWeight: 700,
+              letterSpacing: "-0.3px",
+            }}
+          >
+            {value}
+          </Text>
+          <Text
+            render={<p />}
+            $css={{
+              color: "#EEF9FB",
+              fontFamily: FONT_FAMILY,
+              fontSize: "12px",
+              lineHeight: "18px",
+              fontWeight: 500,
+              letterSpacing: "0",
+            }}
+          >
+            {label}
+          </Text>
+        </VStack>
+      </VStack>
     </Box>
   );
 }
 
-type ChipProps = {
+function ToggleChip({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
   label: string;
-  selected?: boolean;
-  dashed?: boolean;
-};
-
-function Chip({ label, selected = false, dashed = false }: ChipProps) {
+  onClick: () => void;
+}) {
   return (
     <Box
-      render={<button type="button" />}
+      render={<button type="button" onClick={onClick} />}
       $css={{
+        height: "32px",
+        paddingInline: "12px",
+        borderRadius: "8px",
+        border: active ? "none" : "1px solid #C6C6C6",
+        backgroundColor: active ? "#262626" : "#FFFFFF",
+        color: active ? "#FFFFFF" : "#5D5D5D",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "38.929px",
-        paddingInline: dashed ? "15.994px" : "15.994px",
-        borderRadius: "14px",
-        border: dashed ? "1.471px dashed #CAD5E2" : "none",
-        backgroundColor: selected ? "#F0F9FF" : "#F0F9FF",
-        color: selected ? "#0069A8" : "#0069A8",
         cursor: "pointer",
       }}
     >
       <Text
         $css={{
           color: "inherit",
-          fontFamily:
-            '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+          fontFamily: FONT_FAMILY,
           fontSize: "14px",
-          lineHeight: "20px",
+          lineHeight: "22px",
           fontWeight: 500,
-          letterSpacing: "-0.1504px",
+          letterSpacing: "-0.1px",
+          whiteSpace: "nowrap",
         }}
       >
         {label}
@@ -138,156 +264,207 @@ function Chip({ label, selected = false, dashed = false }: ChipProps) {
   );
 }
 
-type ReservationCardProps = {
-  title: string;
-  dateTime: string;
-  location: string;
-};
-
-function ReservationCard({ title, dateTime, location }: ReservationCardProps) {
+function StatusBadge({ label }: { label: string }) {
   return (
     <Box
       $css={{
-        width: "100%",
-        borderRadius: "14px",
-        border: "0.735px solid #E2E8F0",
-        backgroundColor: "#FFFFFF",
-        paddingTop: "16.73px",
-        paddingRight: "16.73px",
-        paddingBottom: "0.735px",
-        paddingLeft: "16.73px",
+        backgroundColor: "#F1FAE8",
+        borderRadius: "10px",
+        paddingInline: "2px",
+        minWidth: "53px",
+        height: "22px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
       }}
     >
-      <HStack
+      <Text
         $css={{
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: "12px",
+          color: "#4C850E",
+          fontFamily: FONT_FAMILY,
+          fontSize: "12px",
+          lineHeight: "18px",
+          fontWeight: 500,
+          letterSpacing: "0",
+          textAlign: "center",
+          whiteSpace: "nowrap",
         }}
       >
-        <Text
-          render={<h3 />}
-          $css={{
-            color: "#0F172B",
-            fontFamily:
-              '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-            fontSize: "18px",
-            lineHeight: "27px",
-            fontWeight: 600,
-            letterSpacing: "-0.4395px",
-          }}
-        >
-          {title}
-        </Text>
-
-        <Box
-          $css={{
-            height: "23.992px",
-            paddingInline: "8px",
-            borderRadius: "999px",
-            backgroundColor: "#F0FDF4",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <Text
-            $css={{
-              color: "#008236",
-              fontFamily:
-                '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-              fontSize: "12px",
-              lineHeight: "16px",
-              fontWeight: 500,
-              letterSpacing: "-0.1504px",
-            }}
-          >
-            예약확정
-          </Text>
-        </Box>
-      </HStack>
-
-      <VStack
-        $css={{
-          gap: "4px",
-          marginTop: "7.997px",
-          paddingBottom: "0.735px",
-        }}
-      >
-        <HStack
-          $css={{
-            gap: "7.997px",
-            alignItems: "center",
-          }}
-        >
-          <CalendarOutlineIcon size={16} color="#45556C" aria-hidden="true" />
-          <Text
-            render={<p />}
-            $css={{
-              color: "#45556C",
-              fontFamily:
-                '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-              fontSize: "14px",
-              lineHeight: "20px",
-              fontWeight: 400,
-              letterSpacing: "-0.1504px",
-            }}
-          >
-            {dateTime}
-          </Text>
-        </HStack>
-
-        <HStack
-          $css={{
-            gap: "7.997px",
-            alignItems: "center",
-          }}
-        >
-          <LocationOutlineIcon size={16} color="#45556C" aria-hidden="true" />
-          <Text
-            render={<p />}
-            $css={{
-              color: "#45556C",
-              fontFamily:
-                '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-              fontSize: "14px",
-              lineHeight: "20px",
-              fontWeight: 400,
-              letterSpacing: "-0.1504px",
-            }}
-          >
-            {location}
-          </Text>
-        </HStack>
-      </VStack>
+        {label}
+      </Text>
     </Box>
   );
 }
 
-type CompletedCardProps = {
-  imageSrc: string;
-  title: string;
-  mentor: string;
-  date: string;
-};
-
-function CompletedCard({ imageSrc, title, mentor, date }: CompletedCardProps) {
+function UpcomingReservationCard({
+  title,
+  scheduleLabel,
+  statusLabel,
+  participantLabel,
+}: Omit<UpcomingReservation, "id" | "kind">) {
   return (
     <Box
       $css={{
-        width: "140.803px",
+        width: "100%",
+        height: "119px",
         borderRadius: "14px",
-        border: "0.735px solid #E2E8F0",
+        border: "1.18px solid #E2E8F0",
         backgroundColor: "#FFFFFF",
-        overflow: "hidden",
+        padding: "15.99px",
+        boxSizing: "border-box",
+      }}
+    >
+      <HStack
+        $css={{
+          width: "100%",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <VStack
+          $css={{
+            width: "calc(100% - 36px)",
+            gap: "8px",
+            alignItems: "flex-start",
+          }}
+        >
+          <VStack
+            $css={{
+              width: "100%",
+              gap: "2px",
+              alignItems: "flex-start",
+            }}
+          >
+            <Text
+              render={<h3 />}
+              $css={{
+                color: "#262626",
+                fontFamily: FONT_FAMILY,
+                fontSize: "18px",
+                lineHeight: "27px",
+                fontWeight: 600,
+                width: "100%",
+              }}
+            >
+              {title}
+            </Text>
+            <Text
+              render={<p />}
+              $css={{
+                color: "#4C4C4C",
+                fontFamily: FONT_FAMILY,
+                fontSize: "16px",
+                lineHeight: "24px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+                width: "100%",
+                wordBreak: "keep-all",
+              }}
+            >
+              {scheduleLabel}
+            </Text>
+          </VStack>
+
+          <HStack
+            $css={{
+              gap: "8px",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <StatusBadge label={statusLabel} />
+            <Text
+              render={<p />}
+              $css={{
+                color: "#767676",
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+              }}
+            >
+              {participantLabel}
+            </Text>
+          </HStack>
+        </VStack>
+
+        <ChevronRightOutlineIcon size={20} color="#94A3B8" aria-hidden="true" />
+      </HStack>
+    </Box>
+  );
+}
+
+function HistoryBadge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: HistoryCardTone;
+}) {
+  const isCyan = tone === "cyan";
+
+  return (
+    <Box
+      $css={{
+        position: "absolute",
+        top: "8px",
+        right: isCyan ? "9px" : "8px",
+        height: isCyan ? "32px" : "24px",
+        paddingInline: isCyan ? "12px" : "8px",
+        borderRadius: "999px",
+        backgroundColor: isCyan ? "#C2E8F0" : "#FFD9C8",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Text
+        $css={{
+          color: isCyan ? "#0D8298" : "#CD4D0A",
+          fontFamily: FONT_FAMILY,
+          fontSize: isCyan ? "14px" : "12px",
+          lineHeight: isCyan ? "22px" : "18px",
+          fontWeight: 500,
+          letterSpacing: isCyan ? "-0.1px" : "0",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </Text>
+    </Box>
+  );
+}
+
+function HistoryCard({
+  imageSrc,
+  badgeLabel,
+  badgeTone,
+  title,
+  mentorLabel,
+  deadlineLabel,
+  location,
+}: HistoryItem) {
+  return (
+    <VStack
+      $css={{
+        width: "174px",
+        gap: "16px",
+        alignItems: "flex-start",
+        flexShrink: 0,
       }}
     >
       <Box
         $css={{
-          position: "relative",
-          height: "127.991px",
+          width: "100%",
+          height: "130px",
+          borderRadius: "14px",
+          border: "1px solid #E1E1E1",
           overflow: "hidden",
+          position: "relative",
+          backgroundColor: "#F7F7F7",
         }}
       >
         <Box
@@ -295,182 +472,137 @@ function CompletedCard({ imageSrc, title, mentor, date }: CompletedCardProps) {
           $css={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
             display: "block",
+            objectFit: "cover",
           }}
         />
-        <Box
-          $css={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            height: "31.989px",
-            minWidth: "44.686px",
-            borderRadius: "999px",
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "3.999px",
-            paddingLeft: "7.997px",
-            paddingRight: "7.997px",
-          }}
-        >
-          <Box
-            render={<img src={starIcon} alt="" aria-hidden="true" />}
-            $css={{
-              width: "16.914px",
-              height: "23.992px",
-              display: "block",
-              flexShrink: 0,
-            }}
-          />
-          <Text
-            $css={{
-              color: "#0F172B",
-              fontFamily:
-                '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-              fontSize: "12px",
-              lineHeight: "16px",
-              fontWeight: 600,
-            }}
-          >
-            5
-          </Text>
-        </Box>
+        <HistoryBadge label={badgeLabel} tone={badgeTone} />
       </Box>
 
       <VStack
         $css={{
-          gap: "3.999px",
-          paddingTop: "11.996px",
-          paddingInline: "11.996px",
-          paddingBottom: "11.996px",
+          width: "100%",
+          gap: "2px",
+          alignItems: "flex-start",
         }}
       >
-        <Text
-          render={<h3 />}
+        <VStack
           $css={{
-            color: "#0F172B",
-            fontFamily:
-              '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-            fontSize: "14px",
-            lineHeight: "20px",
-            fontWeight: 600,
-            letterSpacing: "-0.1504px",
+            width: "100%",
+            gap: "4px",
+            alignItems: "flex-start",
           }}
         >
-          {title}
-        </Text>
+          <Text
+            render={<h3 />}
+            $css={{
+              width: "100%",
+              color: "#393939",
+              fontFamily: FONT_FAMILY,
+              fontSize: "18px",
+              lineHeight: "26px",
+              fontWeight: 700,
+              letterSpacing: "-0.1px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {title}
+          </Text>
+
+          <HStack
+            $css={{
+              gap: "4px",
+              alignItems: "center",
+              color: "#4C4C4C",
+            }}
+          >
+            <Text
+              render={<span />}
+              $css={{
+                color: "inherit",
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {mentorLabel}
+            </Text>
+            <Text
+              render={<span />}
+              $css={{
+                color: "inherit",
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              ·
+            </Text>
+            <Text
+              render={<span />}
+              $css={{
+                color: "inherit",
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {deadlineLabel}
+            </Text>
+          </HStack>
+        </VStack>
+
         <Text
           render={<p />}
           $css={{
-            color: "#45556C",
-            fontFamily:
-              '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+            color: "#A3A3A3",
+            fontFamily: FONT_FAMILY,
             fontSize: "12px",
-            lineHeight: "16px",
+            lineHeight: "18px",
             fontWeight: 400,
-            letterSpacing: "-0.1504px",
+            letterSpacing: "-0.1px",
           }}
         >
-          {mentor}
-        </Text>
-        <Text
-          render={<p />}
-          $css={{
-            color: "#62748E",
-            fontFamily:
-              '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-            fontSize: "12px",
-            lineHeight: "16px",
-            fontWeight: 400,
-            letterSpacing: "-0.1504px",
-          }}
-        >
-          {date}
+          {location}
         </Text>
       </VStack>
-    </Box>
-  );
-}
-
-function InterestFieldCard() {
-  return (
-    <Box
-      $css={{
-        width: "100%",
-        borderRadius: "16px",
-        backgroundColor: "#FFFFFF",
-        boxShadow: SHADOW,
-        paddingTop: "23.992px",
-        paddingInline: "23.992px",
-        paddingBottom: "23.992px",
-      }}
-    >
-      <Text
-        render={<h2 />}
-        $css={{
-          color: "#0F172B",
-          fontFamily:
-            '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-          fontSize: "18px",
-          lineHeight: "28px",
-          fontWeight: 700,
-          letterSpacing: "-0.4395px",
-          marginBottom: "15.995px",
-        }}
-      >
-        관심 분야
-      </Text>
-
-      <HStack
-        $css={{
-          gap: "7.997px",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <Chip label="해녀" selected />
-        <Chip label="귤 농가" selected />
-        <Chip label="+ 추가" dashed />
-      </HStack>
-    </Box>
+    </VStack>
   );
 }
 
 export function MyPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const [selectedUpcomingKind, setSelectedUpcomingKind] = useState<UpcomingKind>("job");
   const profileQuery = useSessionProfile();
-  const logoutMutation = useLogout({
-    mutation: {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ["/users/me"],
-        });
-        navigate(ROUTES.onboarding, { replace: true });
-      },
-    },
-  });
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
-  const displayName = profile.displayName;
-  const displayEmail = profile.displayEmail;
-  const displayLocation = profile.displayLocation;
-  const joinedLabel = profile.joinedLabel;
-  const completedCount = String(profile.completedCount);
-  const favoriteCount = String(profile.favoriteCount);
-  const matchingCount = String(profile.matchingCount);
-  const profileStatus: ProfileStatus | null = logoutMutation.isError
+  const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
-        tone: "error" as const,
-        message: logoutMutation.error.message,
+        tone: "error",
+        message: profileQuery.error.message,
+        onRetry: () => {
+          void profileQuery.refetch();
+        },
       }
     : profileQuery.isPending && !profileQuery.data
       ? {
-          tone: "loading" as const,
+          tone: "loading",
           message: "회원 정보를 불러오는 중입니다.",
         }
       : null;
+
+  const upcomingReservations = UPCOMING_RESERVATIONS.filter(
+    (item) => item.kind === selectedUpcomingKind,
+  );
 
   return (
     <Box
@@ -479,9 +611,9 @@ export function MyPage() {
         width: "100%",
         height: "100dvh",
         minHeight: "100dvh",
-        backgroundColor: PAGE_BG,
         display: "flex",
         flexDirection: "column",
+        backgroundColor: "#FFFFFF",
         overflow: "hidden",
       }}
     >
@@ -490,406 +622,280 @@ export function MyPage() {
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
-          backgroundColor: PAGE_BG,
-          paddingBottom: "env(safe-area-inset-bottom)",
+          backgroundColor: "#FFFFFF",
         }}
       >
-        <Box
+        <VStack
           $css={{
-            backgroundColor: PROFILE_BG,
-            paddingTop: "max(47.995px, calc(env(safe-area-inset-top) + 16px))",
-            paddingBottom: "124px",
+            width: "100%",
+            maxWidth: `${CONTENT_WIDTH_PX}px`,
+            marginInline: "auto",
+            paddingTop: "max(30px, calc(env(safe-area-inset-top) + 8px))",
+            paddingInline: "16px",
+            paddingBottom: "32px",
+            gap: "42px",
           }}
         >
           <VStack
             $css={{
               width: "100%",
-              maxWidth: CONTENT_WIDTH,
-              marginInline: "auto",
-              gap: "23.992px",
-              paddingInline: "15.995px",
+              gap: "28px",
+              alignItems: "flex-start",
             }}
           >
             <HStack
               $css={{
-                gap: "15.995px",
+                width: "100%",
+                gap: "28px",
                 alignItems: "center",
               }}
             >
               <Box
                 $css={{
-                  width: "95.991px",
-                  height: "95.991px",
-                  borderRadius: "16px",
-                  border: "3.677px solid #FFFFFF",
-                  boxShadow:
-                    "0px 10px 15px -3px rgba(0,0,0,0.1), 0px 4px 6px -4px rgba(0,0,0,0.1)",
-                  overflow: "hidden",
-                  flexShrink: 0,
+                  width: "50px",
+                  height: "50px",
+                  padding: "2px",
+                  borderRadius: "26px",
+                  border: "1px solid #262626",
                   backgroundColor: "#FFFFFF",
+                  boxSizing: "border-box",
+                  flexShrink: 0,
                 }}
               >
                 <Box
-                  render={<img src={profileAvatar} alt="이지영 프로필 사진" />}
                   $css={{
-                    width: "100%",
-                    height: "100%",
-                    display: "block",
-                    objectFit: "cover",
+                    width: "46px",
+                    height: "46px",
+                    borderRadius: "999px",
+                    overflow: "hidden",
+                    backgroundColor: "#F4864F",
                   }}
-                />
+                >
+                  <Box
+                    render={<img src={profileAvatar} alt={`${profile.displayName} 프로필 사진`} />}
+                    $css={{
+                      width: "100%",
+                      height: "100%",
+                      display: "block",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
               </Box>
 
               <VStack
                 $css={{
-                  gap: "0",
+                  gap: "4px",
+                  alignItems: "flex-start",
                   minWidth: 0,
                   flex: 1,
                 }}
               >
-                <Text
-                  render={<h1 />}
+                <VStack
                   $css={{
-                    color: "#FFFFFF",
-                    fontFamily:
-                      '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                    fontSize: "24px",
-                    lineHeight: "32px",
-                    fontWeight: 700,
-                    letterSpacing: "0.0703px",
+                    gap: "0",
+                    alignItems: "flex-start",
                   }}
                 >
-                  {displayName}
-                </Text>
-                <Text
-                  render={<p />}
-                  $css={{
-                    color: "rgba(255, 255, 255, 0.8)",
-                    fontFamily:
-                      '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    fontWeight: 400,
-                    letterSpacing: "-0.1504px",
-                  }}
-                >
-                  {displayEmail}
-                </Text>
+                  <Text
+                    render={<h1 />}
+                    $css={{
+                      color: "#393939",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "24px",
+                      lineHeight: "36px",
+                      fontWeight: 700,
+                      letterSpacing: "-0.3px",
+                    }}
+                  >
+                    {profile.displayName}
+                  </Text>
+                  <Text
+                    render={<p />}
+                    $css={{
+                      color: "#393939",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "16px",
+                      lineHeight: "24px",
+                      fontWeight: 500,
+                      letterSpacing: "-0.1px",
+                    }}
+                  >
+                    {profile.displayEmail}
+                  </Text>
+                </VStack>
 
                 <HStack
                   $css={{
-                    gap: "7.997px",
+                    gap: "12px",
                     alignItems: "center",
-                    marginTop: "3.999px",
                     flexWrap: "wrap",
                   }}
                 >
-                  <Box
-                    $css={{
-                      width: "15.995px",
-                      height: "15.995px",
-                      color: "#FFFFFF",
-                      display: "block",
-                    }}
-                  >
-                    <LocationOutlineIcon
-                      size={16}
-                      color="#FFFFFF"
-                      aria-hidden="true"
-                    />
-                  </Box>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#FFFFFF",
-                      fontFamily:
-                        '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {displayLocation}
-                  </Text>
-                  <Text
-                    render={<span />}
-                    $css={{
-                      color: "rgba(255, 255, 255, 0.6)",
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                    }}
-                  >
-                    ·
-                  </Text>
-                  <Box
-                    $css={{
-                      width: "15.995px",
-                      height: "15.995px",
-                      color: "#FFFFFF",
-                      display: "block",
-                    }}
-                  >
-                    <CalendarOutlineIcon
-                      size={16}
-                      color="#FFFFFF"
-                      aria-hidden="true"
-                    />
-                  </Box>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#FFFFFF",
-                      fontFamily:
-                        '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {joinedLabel}
-                  </Text>
+                  <MetaItem iconSrc={locationIcon} label={profile.displayLocation} />
+                  <MetaItem iconSrc={calendarIcon} label={profile.joinedLabel} />
                 </HStack>
-                {profileStatus ? (
-                  <Box
-                    $css={{
-                      width: "100%",
-                      marginTop: "11.996px",
-                    }}
-                  >
-                    <QueryNotice
-                      tone={profileStatus.tone}
-                      message={profileStatus.message}
-                      onRetry={profileStatus.onRetry}
-                    />
-                  </Box>
-                ) : null}
               </VStack>
             </HStack>
 
+            {profileStatus ? (
+              <Box $css={{ width: "100%" }}>
+                <QueryNotice
+                  tone={profileStatus.tone}
+                  message={profileStatus.message}
+                  onRetry={profileStatus.onRetry}
+                />
+              </Box>
+            ) : null}
+
             <HStack
               $css={{
-                gap: "11.996px",
+                width: "100%",
+                gap: "6px",
+                alignItems: "center",
               }}
             >
               <StatCard
-                icon={
-                  <CalendarOutlineIcon
-                    size={20}
-                    color="#FFFFFF"
-                    aria-hidden="true"
-                  />
-                }
-                value={completedCount}
+                iconSrc={statCompletedIcon}
+                value={`${profile.completedCount}회`}
                 label="완료한 체험"
               />
               <StatCard
-                icon={
-                  <HeartOutlineIcon
-                    size={20}
-                    color="#FFFFFF"
-                    aria-hidden="true"
-                  />
-                }
-                value={favoriteCount}
-                label="관심 직업"
-              />
-              <StatCard
-                icon={
-                  <img
-                    src={statMatchingMedalIcon}
-                    alt=""
-                    aria-hidden="true"
-                    style={{ width: "100%", height: "100%", display: "block" }}
-                  />
-                }
-                value={matchingCount}
+                iconSrc={statMatchingIcon}
+                value={`${profile.matchingCount}건`}
                 label="매칭 연결"
               />
             </HStack>
+
+            <Box
+              render={<button type="button" />}
+              $css={{
+                width: "100%",
+                height: "48px",
+                borderRadius: "8px",
+                border: "1px solid #C6C6C6",
+                backgroundColor: "#F7F7F7",
+                color: "#393939",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <Text
+                $css={{
+                  color: "inherit",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "16px",
+                  lineHeight: "24px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.1px",
+                }}
+              >
+                프로필 수정
+              </Text>
+            </Box>
           </VStack>
-        </Box>
 
-        <Box
-          $css={{
-            width: "100%",
-            maxWidth: CONTENT_WIDTH,
-            marginInline: "auto",
-            paddingInline: "15.995px",
-            marginTop: "-96px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <InterestFieldCard />
-        </Box>
-
-        <VStack
-          $css={{
-            width: "100%",
-            maxWidth: CONTENT_WIDTH,
-            marginInline: "auto",
-            gap: "23.992px",
-            paddingInline: "15.995px",
-            marginTop: "23.992px",
-            paddingBottom: "24px",
-          }}
-        >
-          <Box
+          <VStack
             $css={{
               width: "100%",
-              borderRadius: "16px",
-              backgroundColor: "#FFFFFF",
-              boxShadow: SHADOW,
-              paddingTop: "23.992px",
-              paddingInline: "23.992px",
-              paddingBottom: "23.992px",
+              gap: "10px",
+              alignItems: "flex-start",
             }}
           >
             <HStack
               $css={{
+                width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "15.995px",
               }}
             >
               <Text
                 render={<h2 />}
                 $css={{
-                  color: "#0F172B",
-                  fontFamily:
-                    '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+                  color: "#393939",
+                  fontFamily: FONT_FAMILY,
                   fontSize: "18px",
-                  lineHeight: "28px",
+                  lineHeight: "26px",
                   fontWeight: 700,
-                  letterSpacing: "-0.4395px",
+                  letterSpacing: "-0.1px",
                 }}
               >
                 다가오는 예약
               </Text>
-              <Box
-                render={<button type="button" />}
+
+              <HStack
                 $css={{
-                  border: "none",
-                  backgroundColor: "transparent",
-                  padding: "0",
-                  color: "#0084D1",
-                  cursor: "pointer",
+                  gap: "4px",
+                  alignItems: "center",
                 }}
               >
-                <Text
-                  $css={{
-                    color: "inherit",
-                    fontFamily:
-                      '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    fontWeight: 500,
-                    letterSpacing: "-0.1504px",
-                  }}
-                >
-                  전체보기
-                </Text>
-              </Box>
+                <ToggleChip
+                  active={selectedUpcomingKind === "job"}
+                  label="직업"
+                  onClick={() => setSelectedUpcomingKind("job")}
+                />
+                <ToggleChip
+                  active={selectedUpcomingKind === "experience"}
+                  label="체험"
+                  onClick={() => setSelectedUpcomingKind("experience")}
+                />
+              </HStack>
             </HStack>
 
             <VStack
               $css={{
-                gap: "11.996px",
+                width: "100%",
+                gap: "11px",
               }}
             >
-              <ReservationCard
-                title="해녀 물질 체험"
-                dateTime="2026년 4월 15일 오전 9:00"
-                location="제주시 구좌읍"
-              />
-              <ReservationCard
-                title="귤 수확 체험"
-                dateTime="2026년 4월 22일 오후 1:00"
-                location="서귀포시 남원읍"
-              />
+              {upcomingReservations.map((item) => (
+                <UpcomingReservationCard
+                  key={item.id}
+                  title={item.title}
+                  scheduleLabel={item.scheduleLabel}
+                  statusLabel={item.statusLabel}
+                  participantLabel={item.participantLabel}
+                />
+              ))}
             </VStack>
-          </Box>
+          </VStack>
 
-          <Box
+          <VStack
             $css={{
               width: "100%",
-              borderRadius: "16px",
-              backgroundColor: "#FFFFFF",
-              boxShadow: SHADOW,
-              paddingTop: "23.992px",
-              paddingInline: "23.992px",
-              paddingBottom: "23.992px",
+              gap: "16px",
+              alignItems: "flex-start",
             }}
           >
             <Text
               render={<h2 />}
               $css={{
-                color: "#0F172B",
-                fontFamily:
-                  '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+                color: "#393939",
+                fontFamily: FONT_FAMILY,
                 fontSize: "18px",
-                lineHeight: "28px",
+                lineHeight: "26px",
                 fontWeight: 700,
-                letterSpacing: "-0.4395px",
-                marginBottom: "15.995px",
+                letterSpacing: "-0.1px",
               }}
             >
-              완료한 체험
+              완료 내역
             </Text>
 
             <HStack
               $css={{
-                gap: "11.996px",
+                width: "100%",
+                justifyContent: "space-between",
                 alignItems: "flex-start",
+                gap: "10px",
               }}
             >
-              <CompletedCard
-                imageSrc={completedImageOne}
-                title="돌담 쌓기 체험"
-                mentor="박철수 멘토"
-                date="2026년 3월 28일"
-              />
-              <CompletedCard
-                imageSrc={completedImageTwo}
-                title="말 농장 체험"
-                mentor="이순이 멘토"
-                date="2026년 3월 20일"
-              />
+              {HISTORY_ITEMS.map((item) => (
+                <HistoryCard key={item.id} {...item} />
+              ))}
             </HStack>
-          </Box>
-
-          <Box
-            render={
-              <button
-                type="button"
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-              />
-            }
-            $css={{
-              width: "100%",
-              height: "58.923px",
-              borderRadius: "14px",
-              border: "1.471px solid #E2E8F0",
-              backgroundColor: "#FFFFFF",
-              color: logoutMutation.isPending ? "#94A3B8" : "#314158",
-              cursor: logoutMutation.isPending ? "not-allowed" : "pointer",
-            }}
-          >
-            <Text
-              $css={{
-                color: "inherit",
-                fontFamily:
-                  '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                fontSize: "16px",
-                lineHeight: "24px",
-                fontWeight: 600,
-                letterSpacing: "-0.3125px",
-              }}
-            >
-              {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
-            </Text>
-          </Box>
+          </VStack>
         </VStack>
       </Box>
 
