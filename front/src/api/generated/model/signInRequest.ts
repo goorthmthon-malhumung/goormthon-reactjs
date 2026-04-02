@@ -6,6 +6,6 @@
  */
 
 export interface SignInRequest {
-  phone?: string;
-  password?: string;
+  phone: string;
+  password: string;
 }

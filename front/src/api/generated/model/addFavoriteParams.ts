@@ -5,7 +5,6 @@
  * OpenAPI spec version: v0
  */
 
-export interface ErrorResponse {
-  code: string;
-  message: string;
-}
+export type AddFavoriteParams = {
+userId: number;
+};
