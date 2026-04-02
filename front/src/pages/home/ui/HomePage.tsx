@@ -7,6 +7,7 @@ import stoneIcon from "@/shared/assets/stoneIcon.svg";
 import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
+import { useNavigate } from "react-router-dom";
 
 const SMALL_CARD_IMAGE_URL =
   "https://www.figma.com/api/mcp/asset/652edba1-291d-40e3-b23e-9257796c661c";
@@ -14,10 +15,10 @@ const LARGE_CARD_IMAGE_URL =
   "https://www.figma.com/api/mcp/asset/378f6b43-2954-444a-919f-af0b0831f962";
 
 const CATEGORY_ITEMS = [
-  { iconSrc: haenyeoIcon, label: "해녀" },
-  { iconSrc: stoneIcon, label: "돌담 장인" },
-  { iconSrc: mandarinIcon, label: "감귤 농사" },
-  { iconSrc: horseIcon, label: "목장주" },
+  { iconSrc: haenyeoIcon, label: "해녀", to: "/jobs/haenyeo" },
+  { iconSrc: stoneIcon, label: "돌담 장인", to: "/jobs/stone" },
+  { iconSrc: mandarinIcon, label: "감귤 농사", to: "/jobs/tangerine" },
+  { iconSrc: horseIcon, label: "목장주", to: "/jobs/horse" },
 ] as const;
 
 const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
@@ -183,6 +184,8 @@ function LargeExperienceCard({
 }
 
 export function HomePage() {
+  const navigate = useNavigate();
+
   return (
     <Box
       render={<section />}
@@ -237,11 +240,23 @@ export function HomePage() {
             {CATEGORY_ITEMS.map((category) => (
               <Box
                 key={category.label}
+                render={
+                  <button
+                    type="button"
+                    onClick={() => navigate(category.to)}
+                    aria-label={`${category.label} 직업 상세 보기`}
+                  />
+                }
                 $css={{
                   width: "88px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
+                  margin: 0,
+                  padding: 0,
+                  border: "none",
+                  backgroundColor: "transparent",
+                  cursor: "pointer",
                 }}
               >
                 <Box

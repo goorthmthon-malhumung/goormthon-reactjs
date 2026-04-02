@@ -37,7 +37,7 @@ export const router = createBrowserRouter([
         element: <MatchingPage />,
       },
       {
-        path: ROUTES.jobDetail.slice(1),
+        path: "jobs/:jobSlug",
         element: <JobDetailPage />,
       },
       {
