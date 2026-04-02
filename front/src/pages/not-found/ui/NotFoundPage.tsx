@@ -37,7 +37,9 @@ export function NotFoundPage() {
               The route exists in the app shell now, but this page has not been built
               yet.
             </Text>
-            <Button render={<Link to={ROUTES.home} />}>Back to home</Button>
+            <Button nativeButton={false} render={<Link to={ROUTES.home} />}>
+              Back to home
+            </Button>
           </VStack>
         </Card.Body>
       </Card.Root>
