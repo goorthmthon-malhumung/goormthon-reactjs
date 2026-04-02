@@ -274,6 +274,7 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
         width: "100%",
         height: "100dvh",
         minHeight: "100dvh",
+        position: "relative",
         backgroundColor: "var(--vapor-color-background-surface-200, #f7f7f7)",
         display: "flex",
         flexDirection: "column",
@@ -436,7 +437,7 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
             gap: "12px",
             paddingInline: "16px",
             paddingTop: "12px",
-            paddingBottom: "24px",
+            paddingBottom: "132px",
           }}
         >
           {MOCK_SCHEDULES.map((item) => (
@@ -449,6 +450,44 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
             />
           ))}
         </VStack>
+      </Box>
+
+      <Box
+        $css={{
+          position: "absolute",
+          right: "16px",
+          bottom: "108px",
+          zIndex: 2,
+        }}
+      >
+        <Button
+          size="md"
+          $css={{
+            display: "flex",
+            width: "142px",
+            height: "48px",
+            padding: "0 14px",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "8px",
+            borderRadius: "28px",
+            background: "var(--vapor-color-cyan-300, #1cb3cb)",
+            color: "var(--vapor-color-foreground-button-primary, #ffffff)",
+            fontFamily: "var(--vapor-typography-fontFamily-sans)",
+            fontSize: "var(--vapor-typography-fontSize-200)",
+            fontStyle: "normal",
+            fontWeight: 700,
+            lineHeight: "var(--vapor-typography-lineHeight-200)",
+            letterSpacing: "var(--vapor-typography-letterSpacing-100)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <PlusOutlineIcon
+            size={24}
+            color="var(--vapor-color-foreground-button-primary, #ffffff)"
+          />
+          체험 올리기
+        </Button>
       </Box>
 
       <Box
