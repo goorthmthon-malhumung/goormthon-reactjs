@@ -393,6 +393,50 @@ function CompletedCard({ imageSrc, title, mentor, date }: CompletedCardProps) {
   );
 }
 
+function InterestFieldCard() {
+  return (
+    <Box
+      $css={{
+        width: "100%",
+        borderRadius: "16px",
+        backgroundColor: "#FFFFFF",
+        boxShadow: SHADOW,
+        paddingTop: "23.992px",
+        paddingInline: "23.992px",
+        paddingBottom: "23.992px",
+      }}
+    >
+      <Text
+        render={<h2 />}
+        $css={{
+          color: "#0F172B",
+          fontFamily:
+            '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+          fontSize: "18px",
+          lineHeight: "28px",
+          fontWeight: 700,
+          letterSpacing: "-0.4395px",
+          marginBottom: "15.995px",
+        }}
+      >
+        관심 분야
+      </Text>
+
+      <HStack
+        $css={{
+          gap: "7.997px",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <Chip label="해녀" selected />
+        <Chip label="귤 농가" selected />
+        <Chip label="+ 추가" dashed />
+      </HStack>
+    </Box>
+  );
+}
+
 export function MyPage() {
   const navigate = useNavigate();
 
@@ -424,7 +468,7 @@ export function MyPage() {
           $css={{
             backgroundColor: PROFILE_BG,
             paddingTop: "max(47.995px, calc(env(safe-area-inset-top) + 16px))",
-            paddingBottom: "24px",
+            paddingBottom: "104px",
           }}
         >
           <VStack
@@ -578,6 +622,20 @@ export function MyPage() {
           </VStack>
         </Box>
 
+        <Box
+          $css={{
+            width: "100%",
+            maxWidth: CONTENT_WIDTH,
+            marginInline: "auto",
+            paddingInline: "15.995px",
+            marginTop: "-96px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <InterestFieldCard />
+        </Box>
+
         <VStack
           $css={{
             width: "100%",
@@ -585,49 +643,9 @@ export function MyPage() {
             marginInline: "auto",
             gap: "23.992px",
             paddingInline: "15.995px",
-            marginTop: "15.995px",
+            marginTop: "23.992px",
           }}
         >
-          <Box
-            $css={{
-              width: "100%",
-              borderRadius: "16px",
-              backgroundColor: "#FFFFFF",
-              boxShadow: SHADOW,
-              paddingTop: "23.992px",
-              paddingInline: "23.992px",
-              paddingBottom: "23.992px",
-            }}
-          >
-            <Text
-              render={<h2 />}
-              $css={{
-                color: "#0F172B",
-                fontFamily:
-                  '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                fontSize: "18px",
-                lineHeight: "28px",
-                fontWeight: 700,
-                letterSpacing: "-0.4395px",
-                marginBottom: "15.995px",
-              }}
-            >
-              관심 분야
-            </Text>
-
-            <HStack
-              $css={{
-                gap: "7.997px",
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <Chip label="해녀" selected />
-              <Chip label="귤 농가" selected />
-              <Chip label="+ 추가" dashed />
-            </HStack>
-          </Box>
-
           <Box
             $css={{
               width: "100%",
