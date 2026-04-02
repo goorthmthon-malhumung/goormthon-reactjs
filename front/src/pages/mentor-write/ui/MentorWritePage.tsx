@@ -1263,7 +1263,7 @@ export function MentorWritePage() {
   const handlePrev = () => goToStep(step - 1);
   const handleBack = () => {
     if (step === 1) {
-      navigate(-1);
+      navigate(ROUTES.mentorHome);
     } else if (step === COMPLETE_STEP) {
       goToStep(TOTAL_STEPS);
     } else {
