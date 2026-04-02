@@ -4,10 +4,11 @@ import horseIcon from "@/shared/assets/horseIcon.svg";
 import logo from "@/shared/assets/logo.svg";
 import mandarinIcon from "@/shared/assets/mandarinIcon.svg";
 import stoneIcon from "@/shared/assets/stoneIcon.svg";
+import { ROUTES } from "@/shared/config/routes";
 import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SMALL_CARD_IMAGE_URL =
   "https://www.figma.com/api/mcp/asset/652edba1-291d-40e3-b23e-9257796c661c";
@@ -23,7 +24,7 @@ const CATEGORY_ITEMS = [
 
 const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   {
-    to: "/tokens",
+    to: ROUTES.matchingDetail,
     imageSrc: SMALL_CARD_IMAGE_URL,
     imageAlt: "금녕 해녀와 함께하는 전복따기",
     badgeLabel: "정부지원금 30만원",
@@ -32,7 +33,7 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "제주시 구좌읍",
   },
   {
-    to: "/tokens",
+    to: ROUTES.matchingDetail,
     imageSrc: SMALL_CARD_IMAGE_URL,
     imageAlt: "제주의 귤을 키우는 하루",
     badgeLabel: "정부지원금 30만원",
@@ -41,7 +42,7 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "서귀포시 남원읍",
   },
   {
-    to: "/tokens",
+    to: ROUTES.matchingDetail,
     imageSrc: SMALL_CARD_IMAGE_URL,
     imageAlt: "제주의 돌을 쌓는 하루",
     badgeLabel: "정부지원금 30만원",
@@ -53,11 +54,13 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
 
 const LARGE_EXPERIENCE_CARDS = [
   {
+    to: ROUTES.jobDetail,
     title: "제주의 말을 돌보는 하루",
     deadline: "D-24",
     location: "제주시 구좌읍",
   },
   {
+    to: ROUTES.jobDetail,
     title: "제주의 돌담을 이어가는 장인",
     deadline: "D-12",
     location: "서귀포시 성산읍",
@@ -65,18 +68,21 @@ const LARGE_EXPERIENCE_CARDS = [
 ] as const;
 
 type LargeExperienceCardProps = {
+  to: string;
   title: string;
   deadline: string;
   location: string;
 };
 
 function LargeExperienceCard({
+  to,
   title,
   deadline,
   location,
 }: LargeExperienceCardProps) {
   return (
     <Box
+      render={<Link to={to} aria-label={`${title} 상세 보기`} />}
       $css={{
         width: "283px",
         height: "268px",
@@ -85,6 +91,7 @@ function LargeExperienceCard({
         borderRadius: "14px",
         backgroundColor: "var(--vapor-color-gray-000, #ffffff)",
         overflow: "hidden",
+        textDecoration: "none",
       }}
     >
       <Box
@@ -428,6 +435,7 @@ export function HomePage() {
               {LARGE_EXPERIENCE_CARDS.map((card) => (
                 <LargeExperienceCard
                   key={card.title}
+                  to={card.to}
                   title={card.title}
                   deadline={card.deadline}
                   location={card.location}
