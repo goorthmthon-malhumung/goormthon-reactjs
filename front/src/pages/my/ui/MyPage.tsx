@@ -35,40 +35,6 @@ type StatCardProps = {
   label: string;
 };
 
-function StatCard({ icon, value, label }: StatCardProps) {
-  return (
-    <HStack
-      $css={{
-        gap: "4px",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        render={<img src={iconSrc} alt="" aria-hidden="true" />}
-        $css={{
-          width: "15.995px",
-          height: "15.995px",
-          display: "block",
-          flexShrink: 0,
-        }}
-      />
-      <Text
-        render={<p />}
-        $css={{
-          color: "#262626",
-          fontFamily: FONT_FAMILY,
-          fontSize: "14px",
-          lineHeight: "20px",
-          fontWeight: 400,
-          letterSpacing: "-0.1504px",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label}
-      </Text>
-    </HStack>
-  );
-}
 
 function StatCard({ iconSrc, value, label }: StatCardProps) {
   return (
