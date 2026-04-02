@@ -1,5 +1,6 @@
 export const ROUTES = {
   home: "/",
+  mentorHome: "/mentorHome",
   matching: "/matching",
   jobDetail: "/jobs/haenyeo",
   matchingDetail: "/matching/detail",

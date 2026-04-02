@@ -1,6 +1,7 @@
 import { ComponentsPage } from "@/pages/components/ui/ComponentsPage";
 import { ExperienceDetailPage } from "@/pages/experience-detail";
 import { HomePage } from "@/pages/home/ui/HomePage";
+import { MentorHomePage } from "@/pages/home/ui/MentorHomePage";
 import { JobDetailPage } from "@/pages/job-detail";
 import { LoginPage } from "@/pages/login/ui/LoginPage";
 import { MatchingPage } from "@/pages/matching/ui/MatchingPage";
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: ROUTES.mentorHome.slice(1),
+        element: <MentorHomePage />,
       },
       {
         path: ROUTES.matching.slice(1),
