@@ -1,23 +1,24 @@
-import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
+import { defineConfig, loadEnv } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 const API_PROXY_PREFIX = "/api";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const apiBaseUrl =
-    env.VITE_API_BASE_URL ??
-    env.VITE_OPENAPI_SPEC_URL?.replace(/\/v3\/api-docs\/?$/, "") ??
-    "";
+  // const apiBaseUrl =
+  //   env.VITE_API_BASE_URL ??
+  //   env.VITE_OPENAPI_SPEC_URL?.replace(/\/v3\/api-docs\/?$/, "") ??
+  //   "";
+  const apiBaseUrl = "https://junhugaeapi.goorm.training";
 
   let apiProxy:
     | {
-        target: string;
-        changeOrigin: boolean;
-        rewrite: (path: string) => string;
-      }
+      target: string;
+      changeOrigin: boolean;
+      rewrite: (path: string) => string;
+    }
     | undefined;
 
   if (apiBaseUrl) {
@@ -77,10 +78,10 @@ export default defineConfig(({ mode }) => {
     },
     server: apiProxy
       ? {
-          proxy: {
-            [API_PROXY_PREFIX]: apiProxy,
-          },
-        }
+        proxy: {
+          [API_PROXY_PREFIX]: apiProxy,
+        },
+      }
       : undefined,
   };
 });

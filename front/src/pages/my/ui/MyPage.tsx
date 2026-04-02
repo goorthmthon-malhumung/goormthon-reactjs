@@ -15,6 +15,7 @@ import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { ChevronRightOutlineIcon } from "@vapor-ui/icons";
+import { useState } from "react";
 
 const CONTENT_WIDTH_PX = 358;
 const FONT_FAMILY =
@@ -75,7 +76,7 @@ const UPCOMING_JOB_RESERVATIONS: readonly UpcomingReservation[] = [
   },
 ] as const;
 
-function MetaItem({ iconSrc, label }: { iconSrc: string; label: string }) {
+function MetaItem({ iconSrc, label }: { iconSrc: string; label: string; }) {
   return (
     <HStack
       $css={{
@@ -220,7 +221,7 @@ function ToggleChip({
   );
 }
 
-function StatusBadge({ label }: { label: string }) {
+function StatusBadge({ label }: { label: string; }) {
   return (
     <Box
       $css={{
@@ -540,25 +541,25 @@ function HistoryCard({
 }
 
 export function MyPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const [selectedUpcomingKind, setSelectedUpcomingKind] =
+    useState<UpcomingKind>("job");
   const profileQuery = useSessionProfile();
   const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
   const completedHistoryQuery = useMyCompletedExperienceHistory();
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
-        tone: "error",
-        message: profileQuery.error.message,
-        onRetry: () => {
-          void profileQuery.refetch();
-        },
-      }
+      tone: "error",
+      message: profileQuery.error.message,
+      onRetry: () => {
+        void profileQuery.refetch();
+      },
+    }
     : profileQuery.isPending && !profileQuery.data
       ? {
-          tone: "loading",
-          message: "회원 정보를 불러오는 중입니다.",
-        }
+        tone: "loading",
+        message: "회원 정보를 불러오는 중입니다.",
+      }
       : null;
   const upcomingReservations =
     selectedUpcomingKind === "job"
@@ -568,33 +569,33 @@ export function MyPage() {
     selectedUpcomingKind === "experience"
       ? upcomingExperienceQuery.isError
         ? {
-            tone: "error" as const,
-            message: upcomingExperienceQuery.error.message,
-            onRetry: () => {
-              void upcomingExperienceQuery.refetch();
-            },
-          }
+          tone: "error" as const,
+          message: upcomingExperienceQuery.error.message,
+          onRetry: () => {
+            void upcomingExperienceQuery.refetch();
+          },
+        }
         : upcomingExperienceQuery.isPending
           ? {
-              tone: "loading" as const,
-              message: "체험 예약 내역을 불러오는 중입니다.",
-            }
+            tone: "loading" as const,
+            message: "체험 예약 내역을 불러오는 중입니다.",
+          }
           : null
       : null;
   const completedHistory = completedHistoryQuery.data ?? [];
   const completedStatus = completedHistoryQuery.isError
     ? {
-        tone: "error" as const,
-        message: completedHistoryQuery.error.message,
-        onRetry: () => {
-          void completedHistoryQuery.refetch();
-        },
-      }
+      tone: "error" as const,
+      message: completedHistoryQuery.error.message,
+      onRetry: () => {
+        void completedHistoryQuery.refetch();
+      },
+    }
     : completedHistoryQuery.isPending
       ? {
-          tone: "loading" as const,
-          message: "완료 내역을 불러오는 중입니다.",
-        }
+        tone: "loading" as const,
+        message: "완료 내역을 불러오는 중입니다.",
+      }
       : null;
 
   return (
@@ -621,8 +622,8 @@ export function MyPage() {
         <VStack
           $css={{
             width: "100%",
-            // maxWidth: `${CONTENT_WIDTH_PX}px`,
-            // marginInline: "auto",
+            maxWidth: `${CONTENT_WIDTH_PX}px`,
+            marginInline: "auto",
             paddingTop: "max(30px, calc(env(safe-area-inset-top) + 8px))",
             paddingInline: "16px",
             paddingBottom: "32px",
@@ -656,14 +657,26 @@ export function MyPage() {
                 }}
               >
                 <Box
-                  render={<img src={profileAvatar} alt="이지영 프로필 사진" />}
                   $css={{
-                    width: "100%",
-                    height: "100%",
-                    display: "block",
-                    objectFit: "cover",
+                    width: "46px",
+                    height: "46px",
+                    borderRadius: "999px",
+                    overflow: "hidden",
+                    backgroundColor: "#F4864F",
                   }}
-                />
+                >
+                  <Box
+                    render={
+                      <img src={profileAvatar} alt={`${profile.displayName} 프로필 사진`} />
+                    }
+                    $css={{
+                      width: "100%",
+                      height: "100%",
+                      display: "block",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
               </Box>
 
               <VStack
@@ -715,70 +728,8 @@ export function MyPage() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <Box
-                    $css={{
-                      width: "15.995px",
-                      height: "15.995px",
-                      color: "#FFFFFF",
-                      display: "block",
-                    }}
-                  >
-                    <LocationOutlineIcon
-                      size={16}
-                      color="#FFFFFF"
-                      aria-hidden="true"
-                    />
-                  </Box>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#FFFFFF",
-                      fontFamily:
-                        '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {displayLocation}
-                  </Text>
-                  <Text
-                    render={<span />}
-                    $css={{
-                      color: "rgba(255, 255, 255, 0.6)",
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                    }}
-                  >
-                    ·
-                  </Text>
-                  <Box
-                    $css={{
-                      width: "15.995px",
-                      height: "15.995px",
-                      color: "#FFFFFF",
-                      display: "block",
-                    }}
-                  >
-                    <CalendarOutlineIcon
-                      size={16}
-                      color="#FFFFFF"
-                      aria-hidden="true"
-                    />
-                  </Box>
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#FFFFFF",
-                      fontFamily:
-                        '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                      fontSize: "14px",
-                      lineHeight: "20px",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {joinedLabel}
-                  </Text>
+                  <MetaItem iconSrc={locationIcon} label={profile.displayLocation} />
+                  <MetaItem iconSrc={calendarIcon} label={profile.joinedLabel} />
                 </HStack>
               </VStack>
             </HStack>
