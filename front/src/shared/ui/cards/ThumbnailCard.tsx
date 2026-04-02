@@ -49,18 +49,25 @@ export function ThumbnailCard({
       <Card.Root
         $css={{
           width: "100%",
-          overflow: "hidden",
-          borderRadius: "14px",
-          border: "1px solid #E2E8F0",
-          backgroundColor: "#FFFFFF",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          alignItems: "stretch",
+          minWidth: 0,
+          border: "none",
+          boxShadow: "none",
+          backgroundColor: "transparent",
         }}
       >
         <Box
           $css={{
             position: "relative",
-            aspectRatio: "281 / 160",
+            width: "100%",
+            height: "130px",
             overflow: "hidden",
-            backgroundColor: "#F8FAFC",
+            borderRadius: "14px",
+            border: "1px solid var(--vapor-color-gray-100, #E2E8F0)",
+            backgroundColor: "var(--vapor-color-gray-000, #FFFFFF)",
           }}
         >
           <Box
@@ -79,10 +86,10 @@ export function ThumbnailCard({
             colorPalette="warning"
             $css={{
               position: "absolute",
-              top: "12px",
-              right: "12px",
+              top: "8px",
+              right: "8px",
               backgroundColor: "#FFD9C8",
-              color: "#EF6F25",
+              color: "#CD4D0A",
               borderRadius: "999px",
               boxShadow: "none",
               fontWeight: 500,
@@ -94,56 +101,51 @@ export function ThumbnailCard({
 
         <Card.Body
           $css={{
-            minHeight: "107px",
-            padding: "16px",
+            width: "100%",
+            padding: 0,
+            gap: "2px",
             minWidth: 0,
+            alignItems: "stretch",
           }}
         >
           <VStack
             $css={{
-              gap: "2px",
+              gap: "4px",
               width: "100%",
               minWidth: 0,
+              alignItems: "stretch",
             }}
           >
-            <VStack
-              $css={{
-                gap: "4px",
-                width: "100%",
-                minWidth: 0,
-              }}
-            >
-              <Text
-                render={<h3 />}
-                typography="heading5"
-                $css={{
-                  color: "#393939",
-                  ...SINGLE_LINE_ELLIPSIS_STYLES,
-                }}
-              >
-                {title}
-              </Text>
-              <Text
-                typography="subtitle1"
-                $css={{
-                  color: "#4C4C4C",
-                  ...SINGLE_LINE_ELLIPSIS_STYLES,
-                }}
-              >
-                {statusLabel}
-              </Text>
-            </VStack>
-
             <Text
-              typography="body3"
+              render={<h3 />}
+              typography="heading5"
               $css={{
-                color: "#A3A3A3",
+                color: "#393939",
                 ...SINGLE_LINE_ELLIPSIS_STYLES,
               }}
             >
-              {caption}
+              {title}
+            </Text>
+            <Text
+              typography="subtitle1"
+              $css={{
+                color: "#4C4C4C",
+                ...SINGLE_LINE_ELLIPSIS_STYLES,
+              }}
+            >
+              {statusLabel}
             </Text>
           </VStack>
+
+          <Text
+            typography="body3"
+            $css={{
+              color: "#A3A3A3",
+              ...SINGLE_LINE_ELLIPSIS_STYLES,
+            }}
+          >
+            {caption}
+          </Text>
         </Card.Body>
       </Card.Root>
     </Box>
