@@ -58,6 +58,12 @@ if(createExperienceDetailBody.photoUrl !== undefined) {
 if(createExperienceDetailBody.photoUrl2 !== undefined) {
  formData.append(`photoUrl2`, createExperienceDetailBody.photoUrl2);
  }
+if(createExperienceDetailBody.mediaUrl !== undefined) {
+ formData.append(`mediaUrl`, createExperienceDetailBody.mediaUrl);
+ }
+if(createExperienceDetailBody.mediaUrl2 !== undefined) {
+ formData.append(`mediaUrl2`, createExperienceDetailBody.mediaUrl2);
+ }
 
   return customFetch<ApiResponseObject>(getCreateExperienceDetailUrl(),
   {
@@ -117,6 +123,105 @@ export const useCreateExperienceDetail = <TError = ErrorType<unknown>,
       return useMutation(getCreateExperienceDetailMutationOptions(options), queryClient);
     }
     /**
+ * 로그인한 사용자의 체험 예약 내역을 조회합니다. 로그인 세션이 필요합니다.
+ * @summary 예약 내역 조회
+ */
+export const getGetMyBookingsUrl = () => {
+
+
+
+
+  return `/experiences/bookings`
+}
+
+export const getMyBookings = async ( options?: RequestInit): Promise<ApiResponseObject> => {
+
+  return customFetch<ApiResponseObject>(getGetMyBookingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyBookingsQueryKey = () => {
+    return [
+    `/experiences/bookings`
+    ] as const;
+    }
+
+
+export const getGetMyBookingsQueryOptions = <TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyBookingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyBookings>>> = ({ signal }) => getMyBookings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyBookingsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyBookings>>>
+export type GetMyBookingsQueryError = ErrorType<unknown>
+
+
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyBookings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyBookings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 예약 내역 조회
+ */
+
+export function useGetMyBookings<TData = Awaited<ReturnType<typeof getMyBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyBookingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
  * 체험을 예약합니다. 로그인 세션이 필요합니다.
  * @summary 체험 예약
  */
@@ -277,6 +382,105 @@ export function useGetExperienceDetail<TData = Awaited<ReturnType<typeof getExpe
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetExperienceDetailQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * 로그인한 사용자의 완료된 체험 예약 내역을 조회합니다. 로그인 세션이 필요합니다.
+ * @summary 완료 내역 조회
+ */
+export const getGetMyCompletedBookingsUrl = () => {
+
+
+
+
+  return `/experiences/bookings/completed`
+}
+
+export const getMyCompletedBookings = async ( options?: RequestInit): Promise<ApiResponseObject> => {
+
+  return customFetch<ApiResponseObject>(getGetMyCompletedBookingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyCompletedBookingsQueryKey = () => {
+    return [
+    `/experiences/bookings/completed`
+    ] as const;
+    }
+
+
+export const getGetMyCompletedBookingsQueryOptions = <TData = Awaited<ReturnType<typeof getMyCompletedBookings>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyCompletedBookingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyCompletedBookings>>> = ({ signal }) => getMyCompletedBookings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyCompletedBookingsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyCompletedBookings>>>
+export type GetMyCompletedBookingsQueryError = ErrorType<unknown>
+
+
+export function useGetMyCompletedBookings<TData = Awaited<ReturnType<typeof getMyCompletedBookings>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyCompletedBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyCompletedBookings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyCompletedBookings<TData = Awaited<ReturnType<typeof getMyCompletedBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyCompletedBookings>>,
+          TError,
+          Awaited<ReturnType<typeof getMyCompletedBookings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyCompletedBookings<TData = Awaited<ReturnType<typeof getMyCompletedBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 완료 내역 조회
+ */
+
+export function useGetMyCompletedBookings<TData = Awaited<ReturnType<typeof getMyCompletedBookings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCompletedBookings>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyCompletedBookingsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

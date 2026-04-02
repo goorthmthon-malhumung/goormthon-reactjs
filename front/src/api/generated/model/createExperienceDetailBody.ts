@@ -10,4 +10,6 @@ export type CreateExperienceDetailBody = {
   data: CreateExperienceDetailRequest;
   photoUrl?: Blob;
   photoUrl2?: Blob;
+  mediaUrl?: Blob;
+  mediaUrl2?: Blob;
 };

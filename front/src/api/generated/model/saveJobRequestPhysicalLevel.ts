@@ -5,10 +5,10 @@
  * OpenAPI spec version: v0
  */
 
-export type CreateJobRequestPhysicalLevel = typeof CreateJobRequestPhysicalLevel[keyof typeof CreateJobRequestPhysicalLevel];
+export type SaveJobRequestPhysicalLevel = typeof SaveJobRequestPhysicalLevel[keyof typeof SaveJobRequestPhysicalLevel];
 
 
-export const CreateJobRequestPhysicalLevel = {
+export const SaveJobRequestPhysicalLevel = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
   HIGH: 'HIGH',

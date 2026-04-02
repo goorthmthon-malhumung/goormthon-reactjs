@@ -10,7 +10,7 @@ export interface SignUpRequest {
   phone: string;
   password: string;
   isMentor: boolean;
+  jobTitle: string;
+  experience: number;
   introduce: string;
-  interests: string;
-  workYear: number;
 }

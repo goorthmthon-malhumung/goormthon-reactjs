@@ -4,12 +4,12 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { CreateJobRequestPhysicalLevel } from './createJobRequestPhysicalLevel';
+import type { SaveJobRequestPhysicalLevel } from './saveJobRequestPhysicalLevel';
 
-export interface CreateJobRequest {
+export interface SaveJobRequest {
   title: string;
   jobType: string;
   skills: string;
   workHours: string;
-  physicalLevel: CreateJobRequestPhysicalLevel;
+  physicalLevel: SaveJobRequestPhysicalLevel;
 }

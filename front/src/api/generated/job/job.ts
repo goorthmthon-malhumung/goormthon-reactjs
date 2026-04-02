@@ -26,8 +26,8 @@ import type {
 import type {
   AddFavoriteParams,
   ApiResponseObject,
-  CreateJobBody,
-  GetJobsParams
+  GetJobsParams,
+  SaveJobBody
 } from '../model';
 
 import { customFetch } from '../../fetcher';
@@ -145,10 +145,10 @@ export function useGetJobs<TData = Awaited<ReturnType<typeof getJobs>>, TError =
 
 
 /**
- * 새로운 직업을 등록합니다. 로그인 세션이 필요합니다.
- * @summary 직업 등록
+ * 직업을 저장합니다. 신규 등록 및 기존 정보 수정에 모두 사용됩니다. 로그인 세션이 필요합니다.
+ * @summary 직업 저장
  */
-export const getCreateJobUrl = () => {
+export const getSaveJobUrl = () => {
 
 
 
@@ -156,23 +156,26 @@ export const getCreateJobUrl = () => {
   return `/jobs`
 }
 
-export const createJob = async (createJobBody: CreateJobBody, options?: RequestInit): Promise<ApiResponseObject> => {
+export const saveJob = async (saveJobBody: SaveJobBody, options?: RequestInit): Promise<ApiResponseObject> => {
     const formData = new FormData();
-formData.append(`data`, JSON.stringify(createJobBody.data));
-if(createJobBody.photoUrl !== undefined) {
- formData.append(`photoUrl`, createJobBody.photoUrl);
+formData.append(`data`, JSON.stringify(saveJobBody.data));
+if(saveJobBody.photoUrl !== undefined) {
+ formData.append(`photoUrl`, saveJobBody.photoUrl);
  }
-if(createJobBody.mainUrl !== undefined) {
- formData.append(`mainUrl`, createJobBody.mainUrl);
+if(saveJobBody.photo2Url !== undefined) {
+ formData.append(`photo2Url`, saveJobBody.photo2Url);
  }
-if(createJobBody.mediaUrl !== undefined) {
- formData.append(`mediaUrl`, createJobBody.mediaUrl);
+if(saveJobBody.mainUrl !== undefined) {
+ formData.append(`mainUrl`, saveJobBody.mainUrl);
  }
-if(createJobBody.mediaUrl2 !== undefined) {
- formData.append(`mediaUrl2`, createJobBody.mediaUrl2);
+if(saveJobBody.mediaUrl !== undefined) {
+ formData.append(`mediaUrl`, saveJobBody.mediaUrl);
+ }
+if(saveJobBody.mediaUrl2 !== undefined) {
+ formData.append(`mediaUrl2`, saveJobBody.mediaUrl2);
  }
 
-  return customFetch<ApiResponseObject>(getCreateJobUrl(),
+  return customFetch<ApiResponseObject>(getSaveJobUrl(),
   {
     ...options,
     method: 'POST'
@@ -185,11 +188,11 @@ if(createJobBody.mediaUrl2 !== undefined) {
 
 
 
-export const getCreateJobMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJob>>, TError,{data: BodyType<CreateJobBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createJob>>, TError,{data: BodyType<CreateJobBody>}, TContext> => {
+export const getSaveJobMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveJob>>, TError,{data: BodyType<SaveJobBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveJob>>, TError,{data: BodyType<SaveJobBody>}, TContext> => {
 
-const mutationKey = ['createJob'];
+const mutationKey = ['saveJob'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -199,10 +202,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createJob>>, {data: BodyType<CreateJobBody>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveJob>>, {data: BodyType<SaveJobBody>}> = (props) => {
           const {data} = props ?? {};
 
-          return  createJob(data,requestOptions)
+          return  saveJob(data,requestOptions)
         }
 
 
@@ -212,22 +215,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateJobMutationResult = NonNullable<Awaited<ReturnType<typeof createJob>>>
-    export type CreateJobMutationBody = BodyType<CreateJobBody>
-    export type CreateJobMutationError = ErrorType<unknown>
+    export type SaveJobMutationResult = NonNullable<Awaited<ReturnType<typeof saveJob>>>
+    export type SaveJobMutationBody = BodyType<SaveJobBody>
+    export type SaveJobMutationError = ErrorType<unknown>
 
     /**
- * @summary 직업 등록
+ * @summary 직업 저장
  */
-export const useCreateJob = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJob>>, TError,{data: BodyType<CreateJobBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useSaveJob = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveJob>>, TError,{data: BodyType<SaveJobBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createJob>>,
+        Awaited<ReturnType<typeof saveJob>>,
         TError,
-        {data: BodyType<CreateJobBody>},
+        {data: BodyType<SaveJobBody>},
         TContext
       > => {
-      return useMutation(getCreateJobMutationOptions(options), queryClient);
+      return useMutation(getSaveJobMutationOptions(options), queryClient);
     }
     /**
  * 사용자 ID와 직업 ID로 관심 직업을 등록합니다.

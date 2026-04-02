@@ -250,20 +250,20 @@ export const useLogout = <TError = ErrorType<unknown>,
       return useMutation(getLogoutMutationOptions(options), queryClient);
     }
     /**
- * 회원 ID로 이름, 멘토 여부, 소개 글을 조회합니다.
+ * 세션에 저장된 로그인 사용자의 이름, 멘토 여부, 소개 글을 조회합니다.
  * @summary 회원 정보 조회
  */
-export const getGetMemberInfoUrl = (memberId: number,) => {
+export const getGetMemberInfoUrl = () => {
 
 
 
 
-  return `/users/${memberId}`
+  return `/users`
 }
 
-export const getMemberInfo = async (memberId: number, options?: RequestInit): Promise<ApiResponseObject> => {
+export const getMemberInfo = async ( options?: RequestInit): Promise<ApiResponseObject> => {
 
-  return customFetch<ApiResponseObject>(getGetMemberInfoUrl(memberId),
+  return customFetch<ApiResponseObject>(getGetMemberInfoUrl(),
   {
     ...options,
     method: 'GET'
@@ -276,29 +276,29 @@ export const getMemberInfo = async (memberId: number, options?: RequestInit): Pr
 
 
 
-export const getGetMemberInfoQueryKey = (memberId: number,) => {
+export const getGetMemberInfoQueryKey = () => {
     return [
-    `/users/${memberId}`
+    `/users`
     ] as const;
     }
 
 
-export const getGetMemberInfoQueryOptions = <TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetMemberInfoQueryOptions = <TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetMemberInfoQueryKey(memberId);
+  const queryKey =  queryOptions?.queryKey ?? getGetMemberInfoQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMemberInfo>>> = ({ signal }) => getMemberInfo(memberId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMemberInfo>>> = ({ signal }) => getMemberInfo({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetMemberInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getMemberInfo>>>
@@ -306,7 +306,7 @@ export type GetMemberInfoQueryError = ErrorType<unknown>
 
 
 export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
- memberId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMemberInfo>>,
           TError,
@@ -316,7 +316,7 @@ export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
- memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMemberInfo>>,
           TError,
@@ -326,7 +326,7 @@ export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
- memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -334,11 +334,11 @@ export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo
  */
 
 export function useGetMemberInfo<TData = Awaited<ReturnType<typeof getMemberInfo>>, TError = ErrorType<unknown>>(
- memberId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMemberInfo>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetMemberInfoQueryOptions(memberId,options)
+  const queryOptions = getGetMemberInfoQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -4,11 +4,12 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { CreateJobRequest } from './createJobRequest';
+import type { SaveJobRequest } from './saveJobRequest';
 
-export type CreateJobBody = {
-  data: CreateJobRequest;
+export type SaveJobBody = {
+  data: SaveJobRequest;
   photoUrl?: Blob;
+  photo2Url?: Blob;
   mainUrl?: Blob;
   mediaUrl?: Blob;
   mediaUrl2?: Blob;
