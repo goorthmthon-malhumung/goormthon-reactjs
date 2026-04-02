@@ -1,7 +1,6 @@
-import { useState } from "react";
+import calendarIcon from "@/assets/my/calendar.svg";
 import completedImageOne from "@/assets/my/completed-1.jpg";
 import completedImageTwo from "@/assets/my/completed-2.jpg";
-import calendarIcon from "@/assets/my/calendar.svg";
 import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
@@ -14,6 +13,7 @@ import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { ChevronRightOutlineIcon } from "@vapor-ui/icons";
+import { useState } from "react";
 
 const CONTENT_WIDTH_PX = 358;
 const FONT_FAMILY =
@@ -264,7 +264,7 @@ function ToggleChip({
   );
 }
 
-function StatusBadge({ label }: { label: string }) {
+function StatusBadge({ label }: { label: string; }) {
   return (
     <Box
       $css={{
@@ -585,19 +585,20 @@ export function MyPage() {
   const [selectedUpcomingKind, setSelectedUpcomingKind] = useState<UpcomingKind>("job");
   const profileQuery = useSessionProfile();
   const profile = profileQuery.data ?? DEFAULT_SESSION_PROFILE;
+  console.log("profile:", profile);
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
-        tone: "error",
-        message: profileQuery.error.message,
-        onRetry: () => {
-          void profileQuery.refetch();
-        },
-      }
+      tone: "error",
+      message: profileQuery.error.message,
+      onRetry: () => {
+        void profileQuery.refetch();
+      },
+    }
     : profileQuery.isPending && !profileQuery.data
       ? {
-          tone: "loading",
-          message: "회원 정보를 불러오는 중입니다.",
-        }
+        tone: "loading",
+        message: "회원 정보를 불러오는 중입니다.",
+      }
       : null;
 
   const upcomingReservations = UPCOMING_RESERVATIONS.filter(

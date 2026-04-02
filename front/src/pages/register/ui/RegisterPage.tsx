@@ -12,6 +12,8 @@ import {
 } from "@vapor-ui/core";
 import { ChevronLeftOutlineIcon } from "@vapor-ui/icons";
 import { ROUTES } from "@/shared/config/routes";
+import { useSignUp } from "@/api/generated/user/user";
+import { isApiError } from "@/api/fetcher";
 
 type RegisterStep = 0 | 1 | 2;
 type RoleType = "mentor" | "successor" | null;
@@ -163,11 +165,13 @@ function Footer({
   disabled,
   onClick,
   compact = false,
+  errorMessage,
 }: {
   buttonLabel: string;
   disabled: boolean;
   onClick: () => void;
   compact?: boolean;
+  errorMessage?: string;
 }) {
   return (
     <VStack
@@ -178,6 +182,19 @@ function Footer({
         paddingBottom: "59px",
       }}
     >
+      {errorMessage && (
+        <Text
+          $css={{
+            color: "var(--vapor-color-red-500, #d4333f)",
+            fontSize: "14px",
+            lineHeight: "22px",
+            fontWeight: 400,
+            textAlign: "center",
+          }}
+        >
+          {errorMessage}
+        </Text>
+      )}
       <Button
         type="button"
         disabled={disabled}
@@ -232,6 +249,7 @@ function Footer({
 export function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { mutate: signUp, isPending } = useSignUp();
 
   const stepParam = searchParams.get("step");
   const step: RegisterStep =
@@ -245,6 +263,7 @@ export function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const hasPasswordConfirm = passwordConfirm.trim().length > 0;
   const isPasswordMatched = password === passwordConfirm;
   const isInfoStep = step === 2;
@@ -276,8 +295,39 @@ export function RegisterPage() {
     }
 
     if (step === 2) {
-      sessionStorage.setItem("app:isLoggedIn", "true");
-      navigate(ROUTES.home, { replace: true });
+      setErrorMessage("");
+      const signUpPayload = {
+        name,
+        phone,
+        password,
+        isMentor: role === "mentor",
+        jobTitle: job ?? "",
+        experience: Number(career) || 0,
+      };
+
+      console.log("[RegisterPage] signUp payload", {
+        ...signUpPayload,
+        password: "*".repeat(signUpPayload.password.length),
+        passwordLength: signUpPayload.password.length,
+      });
+
+      signUp(
+        {
+          data: signUpPayload,
+        },
+        {
+          onSuccess: () => {
+            navigate(ROUTES.home, { replace: true });
+          },
+          onError: (error) => {
+            if (isApiError(error)) {
+              setErrorMessage(error.message);
+            } else {
+              setErrorMessage("회원가입에 실패했습니다.");
+            }
+          },
+        }
+      );
       return;
     }
 
@@ -571,9 +621,10 @@ export function RegisterPage() {
           <Box $css={{ paddingInline: "16px" }}>
             <Footer
               buttonLabel={step === 2 ? "회원가입 완료" : "다음"}
-              disabled={!canProceed}
+              disabled={!canProceed || isPending}
               onClick={handleNext}
               compact={isInfoStep}
+              errorMessage={errorMessage}
             />
           </Box>
         </VStack>
