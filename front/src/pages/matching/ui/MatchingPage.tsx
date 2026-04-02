@@ -79,6 +79,7 @@ function buildMatchingDetailState(item: MatchingItem): MatchingDetailState {
   const { mentorInitial, mentorName, deadlineLabel } = getMentorSummary(item.card.metaLabel);
 
   return {
+    kindLabel: item.kind === "job" ? "직업" : "체험",
     deadlineLabel,
     title: item.card.title,
     participantLabel: MATCHING_DETAIL_PARTICIPANTS,
