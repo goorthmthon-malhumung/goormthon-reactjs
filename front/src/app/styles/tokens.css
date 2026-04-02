@@ -352,3 +352,193 @@ body::-webkit-scrollbar,
 .u-hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.reservation-date-picker {
+  width: 100%;
+  position: relative;
+}
+
+.reservation-date-picker__month {
+  width: 100%;
+}
+
+.reservation-date-picker__month-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.reservation-date-picker__caption-label {
+  color: #393939;
+  font-family:
+    "Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+
+.reservation-date-picker__nav {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reservation-date-picker__nav-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.reservation-date-picker__month-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.reservation-date-picker__weekdays th {
+  padding: 0 0 8px;
+}
+
+.reservation-date-picker__weekday {
+  width: calc(100% / 7);
+  color: #121212;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.reservation-date-picker__weekdays th:first-child,
+.reservation-date-picker__weekdays th:last-child {
+  color: #f36a6a;
+}
+
+.reservation-date-picker__week td {
+  padding: 0;
+}
+
+.reservation-date-picker__day {
+  position: relative;
+  width: calc(100% / 7);
+  text-align: center;
+}
+
+.reservation-date-picker__day-button {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #858585;
+  font-family:
+    "Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.reservation-date-picker__day--holiday
+  .reservation-date-picker__day-button:not(:disabled) {
+  color: #f36a6a;
+}
+
+.reservation-date-picker__day--accent
+  .reservation-date-picker__day-button:not(:disabled) {
+  color: #ef6f25;
+  font-weight: 600;
+}
+
+.reservation-date-picker__day--event
+  .reservation-date-picker__day-button:not(:disabled)::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #62d0a2;
+}
+
+.reservation-date-picker__range-middle {
+  background: #fff6f1;
+}
+
+.reservation-date-picker__range-middle .reservation-date-picker__day-button {
+  color: #ef6f25;
+}
+
+.reservation-date-picker__range-start {
+  background: #ef6f25;
+  border-radius: 8px 0 0 8px;
+}
+
+.reservation-date-picker__range-end {
+  background: #ef6f25;
+  border-radius: 0 8px 8px 0;
+}
+
+.reservation-date-picker__range-start
+  .reservation-date-picker__day-button:not(:disabled),
+.reservation-date-picker__range-end
+  .reservation-date-picker__day-button:not(:disabled),
+.reservation-date-picker__range-start.reservation-date-picker__range-end
+  .reservation-date-picker__day-button:not(:disabled) {
+  color: #ffffff;
+  background: transparent;
+}
+
+.reservation-date-picker__selected:not(.reservation-date-picker__range-start):not(
+    .reservation-date-picker__range-middle
+  ):not(.reservation-date-picker__range-end)
+  .reservation-date-picker__day-button {
+  color: #ffffff;
+  background: #ef6f25;
+}
+
+.reservation-date-picker__range-start .reservation-date-picker__day-button {
+  border-radius: 8px 0 0 8px;
+}
+
+.reservation-date-picker__range-end .reservation-date-picker__day-button {
+  border-radius: 0 8px 8px 0;
+}
+
+.reservation-date-picker__range-start.reservation-date-picker__range-end {
+  background: #ef6f25;
+  border-radius: 8px;
+}
+
+.reservation-date-picker__range-start.reservation-date-picker__range-end
+  .reservation-date-picker__day-button {
+  border-radius: 8px;
+}
+
+.reservation-date-picker__range-start.reservation-date-picker__day--event
+  .reservation-date-picker__day-button::after,
+.reservation-date-picker__range-end.reservation-date-picker__day--event
+  .reservation-date-picker__day-button::after,
+.reservation-date-picker__selected.reservation-date-picker__day--event
+  .reservation-date-picker__day-button::after {
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.reservation-date-picker__hidden {
+  visibility: hidden;
+}
