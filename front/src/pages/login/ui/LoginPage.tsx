@@ -1,4 +1,4 @@
-﻿import type { FormEvent } from "react";
+import type { FormEvent } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -28,6 +28,7 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
 
   const canSubmit = phone.trim().length > 0 && password.trim().length > 0;
+  const disabled = !canSubmit;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,13 +39,13 @@ export function LoginPage() {
       render={<main />}
       $css={{
         width: "100%",
-        height: "100%",
+        minHeight: "100dvh",
         backgroundColor: "var(--vapor-color-background-surface-200, #f7f7f7)",
       }}
     >
       <VStack
         $css={{
-          height: "100%",
+          minHeight: "100dvh",
           alignItems: "stretch",
         }}
       >
@@ -55,7 +56,6 @@ export function LoginPage() {
           }}
         >
           <Button
-            type="button"
             variant="ghost"
             onClick={() => navigate(-1)}
             $css={{
@@ -149,7 +149,9 @@ export function LoginPage() {
                     autoComplete="tel"
                     placeholder="01012345678"
                     value={phone}
-                    onValueChange={(value) => setPhone(value.replace(/[^0-9]/g, ""))}
+                    onValueChange={(value) =>
+                      setPhone(value.replace(/[^0-9]/g, ""))
+                    }
                     $css={FIELD_INPUT_STYLES}
                   />
                 </VStack>
@@ -201,31 +203,36 @@ export function LoginPage() {
               marginTop: "auto",
               gap: "10px",
               alignItems: "stretch",
-              paddingBottom: "20px",
+              paddingBottom: "59px",
             }}
           >
             <Button
               type="submit"
               variant="fill"
               colorPalette="primary"
-              disabled={!canSubmit}
+              disabled={disabled}
               $css={{
                 width: "100%",
                 height: "56px",
                 minHeight: "56px",
                 borderRadius: "14px",
-                backgroundColor: "var(--vapor-color-cyan-300, #1cb3cb)",
+                backgroundColor: disabled
+                  ? "var(--vapor-color-cyan-200, #84d2e2)"
+                  : "var(--vapor-color-cyan-300, #1cb3cb)",
                 color: "var(--vapor-color-white, #ffffff)",
                 fontSize: "16px",
                 lineHeight: "24px",
                 fontWeight: 600,
                 letterSpacing: "-0.3px",
+                boxShadow: "none",
+                border: "none",
+                opacity: 1,
+                cursor: disabled ? "not-allowed" : "pointer",
               }}
             >
               로그인
             </Button>
             <Button
-              type="button"
               variant="outline"
               colorPalette="secondary"
               render={<Link to={ROUTES.register} />}
