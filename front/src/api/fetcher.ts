@@ -3,10 +3,11 @@ const FALLBACK_BASE_URL = SPEC_URL?.replace(/\/v3\/api-docs\/?$/, "") ?? "";
 const RUNTIME_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? FALLBACK_BASE_URL;
 // In the Vite dev server, route API calls through the local proxy so the browser
 // treats the request as same-origin and accepts the session cookie.
-const BASE_URL = (import.meta.env.DEV ? "/api" : RUNTIME_BASE_URL).replace(
-  /\/$/,
-  "",
-);
+// const BASE_URL = (import.meta.env.DEV ? "/api" : RUNTIME_BASE_URL).replace(
+//   /\/$/,
+//   "",
+// );
+const BASE_URL = "https://junhugaeapi.goorm.training";
 const AUTH_ERROR_STATUSES = new Set([401, 403]);
 
 type PrimitiveQueryValue = string | number | boolean | null | undefined | Date;
