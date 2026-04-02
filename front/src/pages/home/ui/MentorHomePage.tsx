@@ -44,6 +44,7 @@ const SUMMARY_CARDS: ReadonlyArray<SummaryCardProps> = [
 
 type ScheduleItem = {
   id: number;
+  kind: "직업" | "체험";
   title: string;
   date: string;
   currentCount: number;
@@ -53,6 +54,7 @@ type ScheduleItem = {
 const MOCK_SCHEDULES: ReadonlyArray<ScheduleItem> = [
   {
     id: 1,
+    kind: "체험",
     title: "해녀 물질 체험",
     date: "2026년 4월 15일 · 오전 9:00 - 12:00",
     currentCount: 8,
@@ -60,6 +62,7 @@ const MOCK_SCHEDULES: ReadonlyArray<ScheduleItem> = [
   },
   {
     id: 2,
+    kind: "체험",
     title: "돌담 쌓기 체험",
     date: "2026년 4월 15일 · 오전 9:00 - 12:00",
     currentCount: 2,
@@ -67,10 +70,11 @@ const MOCK_SCHEDULES: ReadonlyArray<ScheduleItem> = [
   },
   {
     id: 3,
-    title: "돌담 쌓기 체험",
-    date: "2026년 4월 15일 · 오전 9:00 - 12:00",
-    currentCount: 2,
-    maxCount: 2,
+    kind: "직업",
+    title: "해녀 직업 멘토링",
+    date: "2026년 4월 16일 · 오전 10:00 - 12:00",
+    currentCount: 1,
+    maxCount: 3,
   },
 ];
 
@@ -183,9 +187,8 @@ function SummaryCard({ count, label, icon }: SummaryCardProps) {
     <Box
       $css={{
         display: "flex",
-        width: "104px",
-        flex: "0 0 auto",
-        padding: "16px 56px 14px 16px",
+        flex: 1,
+        padding: "16px 16px 14px 16px",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "flex-start",
@@ -442,7 +445,7 @@ export function MentorHomePage({ mentorName }: MentorHomePageProps) {
             paddingBottom: "132px",
           }}
         >
-          {MOCK_SCHEDULES.map((item) => (
+          {MOCK_SCHEDULES.filter((item) => item.kind === activeFilter).map((item) => (
             <ScheduleCard
               key={item.id}
               title={item.title}
