@@ -1,11 +1,11 @@
-import type { PropsWithChildren } from "react";
+import { queryClient } from "@/api/query-client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@vapor-ui/core";
-import { queryClient } from "@/api/query-client";
+import type { PropsWithChildren } from "react";
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
-    <ThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>
