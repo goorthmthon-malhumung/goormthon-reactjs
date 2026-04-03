@@ -1,11 +1,16 @@
 import { isApiError } from "@/api/fetcher";
 import { getMeQueryKey, useLogout } from "@/api/generated/user/user";
 import calendarIcon from "@/assets/my/calendar.svg";
+import completedImageOne from "@/assets/my/completed-1.jpg";
+import completedImageTwo from "@/assets/my/completed-2.jpg";
 import locationIcon from "@/assets/my/location.svg";
 import profileAvatar from "@/assets/my/profile-avatar.jpg";
 import statCompletedIcon from "@/assets/my/stat-completed.svg";
 import statMatchingIcon from "@/assets/my/stat-matching.svg";
-import { useSessionProfile } from "@/features/auth/api/useSessionProfile";
+import {
+  DEFAULT_SESSION_PROFILE,
+  useSessionProfile,
+} from "@/features/auth/api/useSessionProfile";
 import {
   useMyCompletedExperienceHistory,
   useMyUpcomingExperienceReservations,
@@ -50,6 +55,11 @@ type UpcomingReservation = {
   participantLabel?: string;
 };
 
+type FallbackUpcomingReservation = UpcomingReservation & {
+  id: string;
+  kind: UpcomingKind;
+};
+
 type HistoryCardTone = "cyan" | "orange";
 
 type HistoryItem = {
@@ -61,6 +71,68 @@ type HistoryItem = {
   deadlineLabel?: string;
   location?: string;
 };
+
+type FallbackHistoryItem = HistoryItem & {
+  id: string;
+};
+
+const UPCOMING_RESERVATIONS: readonly FallbackUpcomingReservation[] = [
+  {
+    id: "haenyeo-job",
+    kind: "job",
+    title: "해녀 물질 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "8명/10명",
+  },
+  {
+    id: "stone-job",
+    kind: "job",
+    title: "돌담 쌓기 체험",
+    scheduleLabel: "2026년 4월 15일 · 오전 9:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "2명/2명",
+  },
+  {
+    id: "horse-experience",
+    kind: "experience",
+    title: "말 농장 하루 체험",
+    scheduleLabel: "2026년 4월 20일 · 오후 1:00 - 4:00",
+    statusLabel: "예약확정",
+    participantLabel: "4명/8명",
+  },
+  {
+    id: "tangerine-experience",
+    kind: "experience",
+    title: "귤 수확 체험",
+    scheduleLabel: "2026년 4월 27일 · 오전 10:00 - 12:00",
+    statusLabel: "예약확정",
+    participantLabel: "6명/10명",
+  },
+] as const;
+
+const HISTORY_ITEMS: readonly FallbackHistoryItem[] = [
+  {
+    id: "stone-history",
+    imageSrc: completedImageOne,
+    badgeLabel: "25년 이어온",
+    badgeTone: "cyan",
+    title: "제주의 돌을 쌓는 하루",
+    mentorLabel: "강** 장인",
+    deadlineLabel: "D-10",
+    location: "서귀포시 성산읍",
+  },
+  {
+    id: "haenyeo-history",
+    imageSrc: completedImageTwo,
+    badgeLabel: "정부지원금 30만원",
+    badgeTone: "orange",
+    title: "금녕 해녀와 함께하는 전복따기",
+    mentorLabel: "김** 해녀",
+    deadlineLabel: "D-10",
+    location: "제주시 구좌읍",
+  },
+] as const;
 
 function MetaItem({ iconSrc, label }: { iconSrc: string; label: string; }) {
   return (
@@ -579,13 +651,17 @@ export function MyPage() {
   const upcomingExperienceQuery = useMyUpcomingExperienceReservations();
   const completedHistoryQuery = useMyCompletedExperienceHistory();
   const profile = asRecord(profileQuery.data?.data);
-  const displayName = getString(profile, "name");
-  const displayPhone = getString(profile, "phone");
-  const displayLocation = getString(profile, "location");
+  const displayName = getString(profile, "name") ?? DEFAULT_SESSION_PROFILE.name;
+  const displayPhone = getString(profile, "phone") ?? DEFAULT_SESSION_PROFILE.phone;
+  const displayLocation = getString(profile, "location") ?? DEFAULT_SESSION_PROFILE.location;
   const joinedLabel =
-    getString(profile, "joinedLabel") ?? getString(profile, "joinedAt");
-  const completedCount = getNumber(profile, "completedCount");
-  const matchingCount = getNumber(profile, "matchingCount");
+    getString(profile, "joinedLabel") ??
+    getString(profile, "joinedAt") ??
+    DEFAULT_SESSION_PROFILE.joinedLabel;
+  const completedCount =
+    getNumber(profile, "completedCount") ?? DEFAULT_SESSION_PROFILE.completedCount;
+  const matchingCount =
+    getNumber(profile, "matchingCount") ?? DEFAULT_SESSION_PROFILE.matchingCount;
   const profileStatus: ProfileStatus | null = profileQuery.isError
     ? {
       tone: "error",
@@ -600,7 +676,7 @@ export function MyPage() {
         message: "회원 정보를 불러오는 중입니다.",
       }
       : null;
-  const upcomingReservations: UpcomingReservation[] = getRecordCollection(
+  const apiUpcomingReservations: UpcomingReservation[] = getRecordCollection(
     upcomingExperienceQuery.data?.data,
   ).reduce<UpcomingReservation[]>((acc, item) => {
       const title = getString(item, "title");
@@ -623,6 +699,19 @@ export function MyPage() {
 
       return acc;
     }, []);
+  const fallbackUpcomingReservations = UPCOMING_RESERVATIONS
+    .filter((item) => item.kind === selectedUpcomingKind)
+    .map((item) => ({
+      title: item.title,
+      scheduleLabel: item.scheduleLabel,
+      statusLabel: item.statusLabel,
+      participantLabel: item.participantLabel,
+    }));
+  const upcomingReservations = selectedUpcomingKind === "job"
+    ? fallbackUpcomingReservations
+    : apiUpcomingReservations.length > 0
+      ? apiUpcomingReservations
+      : fallbackUpcomingReservations;
   const upcomingStatus =
     selectedUpcomingKind === "experience"
       ? upcomingExperienceQuery.isError
@@ -640,7 +729,7 @@ export function MyPage() {
           }
           : null
       : null;
-  const completedHistory: HistoryItem[] = getRecordCollection(
+  const apiCompletedHistory: HistoryItem[] = getRecordCollection(
     completedHistoryQuery.data?.data,
   ).reduce<HistoryItem[]>((acc, item) => {
       const title = getString(item, "title");
@@ -662,6 +751,17 @@ export function MyPage() {
 
       return acc;
     }, []);
+  const completedHistory = apiCompletedHistory.length > 0
+    ? apiCompletedHistory
+    : HISTORY_ITEMS.map((item) => ({
+      imageSrc: item.imageSrc,
+      badgeLabel: item.badgeLabel,
+      badgeTone: item.badgeTone,
+      title: item.title,
+      mentorLabel: item.mentorLabel,
+      deadlineLabel: item.deadlineLabel,
+      location: item.location,
+    }));
   const completedStatus = completedHistoryQuery.isError
     ? {
       tone: "error" as const,
@@ -680,11 +780,10 @@ export function MyPage() {
   const showStats =
     typeof completedCount === "number" || typeof matchingCount === "number";
   const showUpcomingEmptyState =
-    !upcomingStatus &&
-    (selectedUpcomingKind === "job" || upcomingReservations.length === 0);
+    !upcomingStatus && upcomingReservations.length === 0;
   const upcomingEmptyMessage =
     selectedUpcomingKind === "job"
-      ? "직업 예약 API가 없어 표시할 수 없습니다."
+      ? "예약된 직업이 없습니다."
       : "예약된 체험이 없습니다.";
   const showCompletedEmptyState =
     !completedStatus && completedHistory.length === 0;
@@ -1033,17 +1132,15 @@ export function MyPage() {
                 </Box>
               ) : null}
 
-              {!upcomingStatus && selectedUpcomingKind === "experience"
-                ? upcomingReservations.map((item, index) => (
-                  <UpcomingReservationCard
-                    key={`${item.title}-${index}`}
-                    title={item.title}
-                    scheduleLabel={item.scheduleLabel}
-                    statusLabel={item.statusLabel}
-                    participantLabel={item.participantLabel}
-                  />
-                ))
-                : null}
+              {upcomingReservations.map((item, index) => (
+                <UpcomingReservationCard
+                  key={`${item.title}-${index}`}
+                  title={item.title}
+                  scheduleLabel={item.scheduleLabel}
+                  statusLabel={item.statusLabel}
+                  participantLabel={item.participantLabel}
+                />
+              ))}
             </VStack>
           </VStack>
 
@@ -1068,12 +1165,11 @@ export function MyPage() {
               완료 내역
             </Text>
 
-            <HStack
+            <VStack
               $css={{
                 width: "100%",
-                justifyContent: "space-between",
                 alignItems: "flex-start",
-                gap: "10px",
+                gap: "12px",
               }}
             >
               {completedStatus ? (
@@ -1082,7 +1178,9 @@ export function MyPage() {
                   message={completedStatus.message}
                   onRetry={completedStatus.onRetry}
                 />
-              ) : showCompletedEmptyState ? (
+              ) : null}
+
+              {showCompletedEmptyState ? (
                 <Box
                   $css={{
                     width: "100%",
@@ -1108,14 +1206,23 @@ export function MyPage() {
                   </Text>
                 </Box>
               ) : (
-                completedHistory.map((item) => (
-                  <HistoryCard
-                    key={`${item.title}-${item.deadlineLabel ?? item.location ?? "history"}`}
-                    {...item}
-                  />
-                ))
+                <HStack
+                  $css={{
+                    width: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                  }}
+                >
+                  {completedHistory.map((item) => (
+                    <HistoryCard
+                      key={`${item.title}-${item.deadlineLabel ?? item.location ?? "history"}`}
+                      {...item}
+                    />
+                  ))}
+                </HStack>
               )}
-            </HStack>
+            </VStack>
           </VStack>
         </VStack>
       </Box>

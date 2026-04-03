@@ -1,10 +1,21 @@
+import completedImageOne from "@/assets/my/completed-1.jpg";
+import completedImageTwo from "@/assets/my/completed-2.jpg";
 import { isApiError } from "@/api/fetcher";
 import { getMeQueryKey, useLogout } from "@/api/generated/user/user";
-import { useSessionProfile } from "@/features/auth/api/useSessionProfile";
+import {
+  DEFAULT_SESSION_PROFILE,
+  useSessionProfile,
+} from "@/features/auth/api/useSessionProfile";
 import haenyeoMentorIcon from "@/shared/assets/haenyeoMentorIcon.svg";
 import { ROUTES } from "@/shared/config/routes";
 import { asRecord, getString } from "@/shared/lib/apiData";
-import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
+import {
+  BottomNavigation,
+} from "@/shared/ui/navigation/BottomNavigation";
+import {
+  ThumbnailCard,
+  type ThumbnailCardProps,
+} from "@/shared/ui/cards";
 import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { useQueryClient } from "@tanstack/react-query";
 import { Box, Button, HStack, Text, VStack } from "@vapor-ui/core";
@@ -13,6 +24,53 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PROFILE_BLOCK_WIDTH_PX = 358;
+const DEFAULT_MENTOR_PROFILE = {
+  ...DEFAULT_SESSION_PROFILE,
+  isMentor: true,
+} as const;
+
+const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
+  {
+    to: ROUTES.experienceDetail,
+    imageSrc: completedImageOne,
+    imageAlt: "제주의 돌을 쌓는 하루",
+    badgeLabel: "25년 이어온",
+    badgeTone: "cyan",
+    title: "제주의 돌을 쌓는 하루",
+    statusLabel: "강** 장인 · D-10",
+    caption: "서귀포시 성산읍",
+  },
+  {
+    to: ROUTES.experienceDetail,
+    imageSrc: completedImageTwo,
+    imageAlt: "금녕 해녀와 함께하는 하루",
+    badgeLabel: "정부지원금 30만원",
+    badgeTone: "orange",
+    title: "금녕 해녀와 함께하는 하루",
+    statusLabel: "김** 해녀 · D-10",
+    caption: "제주시 구좌읍",
+  },
+  {
+    to: ROUTES.experienceDetail,
+    imageSrc: completedImageOne,
+    imageAlt: "제주의 돌을 쌓는 하루",
+    badgeLabel: "25년 이어온",
+    badgeTone: "cyan",
+    title: "제주의 돌을 쌓는 하루",
+    statusLabel: "강** 장인 · D-10",
+    caption: "서귀포시 성산읍",
+  },
+  {
+    to: ROUTES.experienceDetail,
+    imageSrc: completedImageTwo,
+    imageAlt: "금녕 해녀와 함께하는 하루",
+    badgeLabel: "정부지원금 30만원",
+    badgeTone: "orange",
+    title: "금녕 해녀와 함께하는 하루",
+    statusLabel: "김** 해녀 · D-10",
+    caption: "제주시 구좌읍",
+  },
+] as const;
 
 export function MentorMyPage() {
   const navigate = useNavigate();
@@ -21,12 +79,16 @@ export function MentorMyPage() {
   const profileQuery = useSessionProfile();
   const { mutate: logout, isPending: isLogoutPending } = useLogout();
   const profile = asRecord(profileQuery.data?.data);
-  const displayName = getString(profile, "name");
-  const displayPhone = getString(profile, "phone");
-  const displayLocation = getString(profile, "location");
+  const displayName = getString(profile, "name") ?? DEFAULT_MENTOR_PROFILE.name;
+  const displayPhone = getString(profile, "phone") ?? DEFAULT_MENTOR_PROFILE.phone;
+  const displayLocation =
+    getString(profile, "location") ?? DEFAULT_MENTOR_PROFILE.location;
   const joinedLabel =
-    getString(profile, "joinedLabel") ?? getString(profile, "joinedAt");
-  const isMentor = profile?.isMentor === true;
+    getString(profile, "joinedLabel") ??
+    getString(profile, "joinedAt") ??
+    DEFAULT_MENTOR_PROFILE.joinedLabel;
+  const isMentor =
+    profile?.isMentor === true || DEFAULT_MENTOR_PROFILE.isMentor;
   const profileStatus =
     profileQuery.isError && !profileQuery.data
       ? {
@@ -389,27 +451,21 @@ export function MentorMyPage() {
             <Box
               $css={{
                 width: "100%",
-                borderRadius: "16px",
-                border: "1px solid #E2E8F0",
-                backgroundColor: "#FFFFFF",
-                padding: "20px",
-                boxSizing: "border-box",
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: "16px",
               }}
             >
-              <Text
-                render={<p />}
-                $css={{
-                  color: "#767676",
-                  fontFamily: "var(--vapor-typography-fontFamily-sans)",
-                  fontSize: "14px",
-                  fontStyle: "normal",
-                  fontWeight: 500,
-                  lineHeight: "22px",
-                  letterSpacing: "-0.1px",
-                }}
-              >
-                연동된 멘토 전용 완료 내역 API가 없어 목록을 표시하지 않습니다.
-              </Text>
+              {COMPLETED_HISTORY_CARDS.map((card, index) => (
+                <Box
+                  key={`${card.title}-${index}`}
+                  $css={{
+                    width: "100%",
+                  }}
+                >
+                  <ThumbnailCard {...card} />
+                </Box>
+              ))}
             </Box>
           </VStack>
         </VStack>
