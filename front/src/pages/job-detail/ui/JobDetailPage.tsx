@@ -10,8 +10,7 @@ import {
   getString,
   getStringList,
 } from "@/shared/lib/apiData";
-import { Box, HStack, Text, VStack } from "@vapor-ui/core";
-import { GroupOutlineIcon } from "@vapor-ui/icons";
+import { Box, Text, VStack } from "@vapor-ui/core";
 import { useNavigate, useParams } from "react-router-dom";
 
 const DEFAULT_JOB_ID = 1;
@@ -74,36 +73,14 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
-function formatParticipantLabel(
-  participantCount?: number,
-  maxParticipants?: number,
-) {
-  if (
-    typeof participantCount === "number" &&
-    typeof maxParticipants === "number"
-  ) {
-    return `${participantCount}/${maxParticipants}명`;
-  }
-
-  if (typeof participantCount === "number") {
-    return `${participantCount}명`;
-  }
-
-  if (typeof maxParticipants === "number") {
-    return `정원 ${maxParticipants}명`;
-  }
-
-  return undefined;
-}
-
 export function JobDetailPage() {
   const navigate = useNavigate();
   const { jobSlug } = useParams();
   const parsedJobId = Number(jobSlug);
-  const isNumericJobRoute =
-    Number.isInteger(parsedJobId) && parsedJobId > 0;
+  const isNumericJobRoute = Number.isInteger(parsedJobId) && parsedJobId > 0;
   const jobId = isNumericJobRoute ? parsedJobId : DEFAULT_JOB_ID;
-  const mockJobDetail = getMockJobDetailBySlug(jobSlug) ?? DEFAULT_MOCK_JOB_DETAIL;
+  const mockJobDetail =
+    getMockJobDetailBySlug(jobSlug) ?? DEFAULT_MOCK_JOB_DETAIL;
   const jobQuery = useJobDetailView(jobId, isNumericJobRoute);
   const job = asRecord(jobQuery.data?.data);
   const experienceId =
@@ -114,10 +91,6 @@ export function JobDetailPage() {
   const heroImageSrc = getString(job, "mainUrl") ?? mockJobDetail.mainUrl;
   const skills = getStringList(job, "skills");
   const resolvedSkills = skills.length > 0 ? skills : [...mockJobDetail.skills];
-  const participantLabel = formatParticipantLabel(
-    getNumber(job, "participantCount") ?? mockJobDetail.participantCount,
-    getNumber(job, "maxParticipants") ?? mockJobDetail.maxParticipants,
-  );
   const mentorName = getString(job, "mentorName") ?? mockJobDetail.mentorName;
   const jobType = getString(job, "jobType") ?? mockJobDetail.jobType;
   const workHours = getString(job, "workHours") ?? mockJobDetail.workHours;
@@ -264,30 +237,6 @@ export function JobDetailPage() {
                 >
                   {title ?? ""}
                 </Text>
-
-                {participantLabel ? (
-                  <HStack
-                    $css={{
-                      gap: "3.999px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <GroupOutlineIcon size={16} color="#FFFFFF" aria-hidden="true" />
-                    <Text
-                      render={<p />}
-                      $css={{
-                        color: "#FFFFFF",
-                        fontFamily: TITLE_FONT,
-                        fontSize: "14px",
-                        lineHeight: "20px",
-                        fontWeight: 400,
-                        letterSpacing: "-0.1504px",
-                      }}
-                    >
-                      {participantLabel}
-                    </Text>
-                  </HStack>
-                ) : null}
               </VStack>
             </Box>
           </Box>

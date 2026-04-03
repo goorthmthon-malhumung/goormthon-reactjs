@@ -8,7 +8,6 @@ export function AppLayout() {
       render={<main />}
       $css={{
         minHeight: "100dvh",
-        backgroundColor: "transparent",
       }}
     >
       <Outlet />

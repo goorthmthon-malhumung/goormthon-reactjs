@@ -543,6 +543,15 @@ body::-webkit-scrollbar,
   visibility: hidden;
 }
 
+/* Browser background */
+body {
+  background-image: url("../../shared/assets/hero.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 /* App shell: Mobile-first responsive layout */
 .app-shell {
   width: 100%;
