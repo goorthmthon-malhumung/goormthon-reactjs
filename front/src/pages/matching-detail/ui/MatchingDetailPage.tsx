@@ -4,7 +4,6 @@ import {
   CheckCircleOutlineIcon,
   ChevronLeftOutlineIcon,
   GroupOutlineIcon,
-  InfoCircleOutlineIcon,
   LocationOutlineIcon,
   TimeOutlineIcon,
 } from "@vapor-ui/icons";
@@ -28,6 +27,28 @@ const HERO_OVERLAY_BOTTOM = 49;
 const CONTENT_WIDTH_PX = 358;
 const RESERVE_BUTTON_HEIGHT = 55.981;
 const RESERVE_BUTTON_WIDTH = 119.328;
+const TODAY = new Date();
+
+function addDaysFromToday(days: number) {
+  const date = new Date(TODAY);
+
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+
+  return date;
+}
+
+function formatKoreanDate(date: Date) {
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
+function formatDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 type MatchingDetailGalleryImage = {
   src: string;
@@ -53,6 +74,10 @@ type MatchingDetailContent = {
   priceLabel: string;
   priceUnitLabel: string;
   reserveLabel: string;
+  experienceId: number;
+  unitPriceValue: number;
+  availableFromDate: string;
+  availableToDate: string;
 };
 
 export type MatchingDetailState = Partial<MatchingDetailContent>;
@@ -61,13 +86,13 @@ const DEFAULT_DETAIL_CONTENT: MatchingDetailContent = {
   kindLabel: "직업",
   heroImageSrc: heroImage,
   heroImageAlt: "바닷가에서 작업 중인 해녀들의 모습",
-  deadlineLabel: "D - 20",
+  deadlineLabel: "D-12",
   title: "금녕 해녀와 함께하는 전복따기",
   participantLabel: "5/8명",
   mentorInitial: "김",
   mentorName: "김영숙 해녀",
   mentorCareer: "해녀 45년차",
-  scheduleLabel: "2026년 4월 15일 ~ 2026년 5월 15일",
+  scheduleLabel: `${formatKoreanDate(addDaysFromToday(12))} ~ ${formatKoreanDate(addDaysFromToday(42))}`,
   timeLabel: "오전 9:00 - 12:00 (3시간)",
   meetingPlace: "제주시 구좌읍 하도리",
   description:
@@ -91,6 +116,10 @@ const DEFAULT_DETAIL_CONTENT: MatchingDetailContent = {
   priceLabel: "50,000원",
   priceUnitLabel: "/ 인",
   reserveLabel: "예약하기",
+  experienceId: 1,
+  unitPriceValue: 50000,
+  availableFromDate: formatDateKey(addDaysFromToday(12)),
+  availableToDate: formatDateKey(addDaysFromToday(42)),
 };
 
 function SectionCard({
@@ -476,7 +505,17 @@ export function MatchingDetailPage() {
               </HStack>
 
               <Text
-                render={<h1 />}
+                render={
+                  <h1
+                    style={{
+                      display: "-webkit-box",
+                      overflow: "hidden",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 2,
+                      wordBreak: "keep-all",
+                    }}
+                  />
+                }
                 $css={{
                   width: "100%",
                   color: "#FFFFFF",
@@ -484,11 +523,6 @@ export function MatchingDetailPage() {
                   lineHeight: "36px",
                   fontWeight: 700,
                   letterSpacing: "-0.3px",
-                  display: "-webkit-box",
-                  overflow: "hidden",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 2,
-                  wordBreak: "keep-all",
                 }}
               >
                 {detail.title}
@@ -667,50 +701,6 @@ export function MatchingDetailPage() {
                 </VStack>
               </SectionCard>
 
-              {/* <SectionCard
-                backgroundColor={REQUIREMENT_BG}
-                borderColor={REQUIREMENT_BORDER}
-                padding="24.727px"
-              >
-                <VStack
-                  $css={{
-                    gap: "12px",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <HStack
-                    $css={{
-                      gap: "6px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      render={<h2 />}
-                      $css={{
-                        color: TITLE_TEXT,
-                        fontSize: "18px",
-                        lineHeight: "28px",
-                        fontWeight: 700,
-                        letterSpacing: "-0.4395px",
-                      }}
-                    >
-                      참가 요건
-                    </Text>
-                    <InfoCircleOutlineIcon size={20} color={SECONDARY_TEXT} aria-hidden="true" />
-                  </HStack>
-
-                  <VStack
-                    $css={{
-                      gap: "12px",
-                    }}
-                  >
-                    {detail.requirements.map((item) => (
-                      <RequirementRow key={item} label={item} />
-                    ))}
-                  </VStack>
-                </VStack>
-              </SectionCard> */}
-
               <SectionCard>
                 <VStack
                   $css={{
@@ -827,7 +817,19 @@ export function MatchingDetailPage() {
             render={
               <button
                 type="button"
-                onClick={() => navigate(ROUTES.reservation)}
+                onClick={() =>
+                  navigate(ROUTES.reservation, {
+                    state: {
+                      experienceId: detail.experienceId,
+                      summaryTitle: detail.title,
+                      summaryMentor: detail.mentorName,
+                      summaryImageSrc: detail.heroImageSrc,
+                      unitPrice: detail.unitPriceValue,
+                      availableFromDate: detail.availableFromDate,
+                      availableToDate: detail.availableToDate,
+                    },
+                  })
+                }
               />
             }
             $css={{

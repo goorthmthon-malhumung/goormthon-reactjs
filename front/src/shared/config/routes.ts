@@ -4,7 +4,7 @@ export const ROUTES = {
   matching: "/matching",
   jobDetail: "/jobs/haenyeo",
   matchingDetail: "/matching/detail",
-  experienceDetail: "/experiences/haenyeo",
+  experienceDetail: "/experiences/horse-farm-day",
   reservation: "/reservation",
   onboarding: "/onboarding",
   register: "/register",

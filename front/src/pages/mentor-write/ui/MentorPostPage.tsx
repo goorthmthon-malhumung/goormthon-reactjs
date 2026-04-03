@@ -1,5 +1,8 @@
-﻿import mentorCardImage from "@/assets/matching/mentor-card.jpg";
-import { useMatchingJobListView } from "@/features/jobs/api/useMatchingJobListView";
+﻿import { useMatchingJobListView } from "@/features/jobs/api/useMatchingJobListView";
+import {
+  FALLBACK_MATCHING_EXPERIENCE_ITEMS,
+  FALLBACK_MATCHING_JOB_ITEMS,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
 import {
   getNumber,
@@ -19,33 +22,6 @@ type MatchingKind = "job" | "experience";
 
 const CONTENT_WIDTH_PX = 358;
 const TOP_SURFACE_BG = "rgba(255, 255, 255, 0.9)";
-
-const EXPERIENCE_ITEMS: readonly MentorCardProps[] = [
-  {
-    to: ROUTES.matchingDetail,
-    imageSrc: mentorCardImage,
-    imageAlt: "제주의 말을 돌보는 체험",
-    badgeLabel: "45년 이어온",
-    title: "제주의 말을 돌보는 하루",
-    metaLabel: "김** 해녀 · D-20",
-    description:
-      "제주 바다의 본질을 캐는 해녀의 삶을 배워보세요. 물질의 기술과 해산물에 대한 깊은 지식을 전수합니다.",
-    location: "제주시 구좌읍",
-    tags: ["물질", "체산물 채취", "바다 안전"],
-  },
-  {
-    to: ROUTES.matchingDetail,
-    imageSrc: mentorCardImage,
-    imageAlt: "돌담 장인 체험",
-    badgeLabel: "25년 이어온",
-    title: "돌담 장인",
-    metaLabel: "김** 해녀 · D-20",
-    description:
-      "제주의 상징인 돌담 쌓는 전통 기술을 배워보세요. 바람을 등지키는 제주의 독특한 쌓기 방식을 알려드립니다.",
-    location: "제주시 구좌읍",
-    tags: ["쌓기", "전통 기술", "제주"],
-  },
-] as const;
 
 function ToggleButton({
   active,
@@ -160,7 +136,7 @@ export function MentorPostPage() {
     navigate(ROUTES.home);
   };
 
-  const jobCards: MentorCardProps[] = getRecordCollection(jobListQuery.data?.data).map((item) => {
+  const apiJobCards: MentorCardProps[] = getRecordCollection(jobListQuery.data?.data).map((item) => {
     const id = getNumber(item, "id");
     const title = getString(item, "title") ?? "";
     const metaLabel = [
@@ -182,11 +158,17 @@ export function MentorPostPage() {
       tags: getStringList(item, "skills"),
     };
   });
-  const cards = selectedKind === "job" ? jobCards : [...EXPERIENCE_ITEMS];
+  const fallbackJobCards = FALLBACK_MATCHING_JOB_ITEMS.map((item) => item.card);
+  const fallbackExperienceCards = FALLBACK_MATCHING_EXPERIENCE_ITEMS.map(
+    (item) => item.card,
+  );
+  const cards = selectedKind === "job"
+    ? (apiJobCards.length > 0 ? apiJobCards : fallbackJobCards)
+    : fallbackExperienceCards;
 
   const listStatus =
     selectedKind === "job"
-      ? jobListQuery.isError
+      ? jobListQuery.isError && fallbackJobCards.length === 0
         ? {
             tone: "error" as const,
             message: jobListQuery.error.message,
@@ -194,19 +176,11 @@ export function MentorPostPage() {
               void jobListQuery.refetch();
             },
           }
-        : jobListQuery.isPending
-          ? {
-              tone: "loading" as const,
-              message: "직업 목록을 불러오는 중입니다.",
-            }
-          : null
+        : null
       : null;
 
   const showEmptyState = !listStatus && cards.length === 0;
-  const totalLabel =
-    selectedKind === "job" && jobListQuery.isPending
-      ? "불러오는 중"
-      : `총 ${cards.length}개`;
+  const totalLabel = `총 ${cards.length}개`;
 
   return (
     <Box

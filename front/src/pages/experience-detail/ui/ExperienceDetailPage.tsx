@@ -1,4 +1,8 @@
 import { useExperienceDetailView } from "@/features/experiences/api/useExperienceDetailView";
+import {
+  DEFAULT_MOCK_EXPERIENCE_DETAIL,
+  getMockExperienceDetailBySlug,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
 import {
   asRecord,
@@ -6,13 +10,12 @@ import {
   getString,
   getStringList,
 } from "@/shared/lib/apiData";
-import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import {
   ChevronLeftOutlineIcon,
   UserOutlineIcon,
 } from "@vapor-ui/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const PAGE_BG = "#FFFFFF";
 const EXPERIENCE_ID = 1;
@@ -97,36 +100,45 @@ function formatParticipantLabel(
 
 export function ExperienceDetailPage() {
   const navigate = useNavigate();
-  const experienceQuery = useExperienceDetailView(EXPERIENCE_ID);
+  const { experienceSlug } = useParams();
+  const parsedExperienceId = Number(experienceSlug);
+  const isNumericExperienceRoute =
+    Number.isInteger(parsedExperienceId) && parsedExperienceId > 0;
+  const experienceIdParam = isNumericExperienceRoute
+    ? parsedExperienceId
+    : EXPERIENCE_ID;
+  const mockExperienceDetail =
+    getMockExperienceDetailBySlug(experienceSlug) ?? DEFAULT_MOCK_EXPERIENCE_DETAIL;
+  const experienceQuery = useExperienceDetailView(
+    experienceIdParam,
+    isNumericExperienceRoute,
+  );
   const experience = asRecord(experienceQuery.data?.data);
-  const experienceId = getNumber(experience, "id") ?? EXPERIENCE_ID;
-  const title = getString(experience, "title");
-  const introduction = getString(experience, "introduction");
-  const heroImageSrc = getString(experience, "photoUrl");
-  const mentorName = getString(experience, "mentorName");
-  const experienceType = getString(experience, "experienceType");
-  const location = getString(experience, "location");
-  const schedule = getString(experience, "schedule");
+  const experienceId =
+    getNumber(experience, "id") ?? mockExperienceDetail.id;
+  const title = getString(experience, "title") ?? mockExperienceDetail.title;
+  const introduction =
+    getString(experience, "introduction") ?? mockExperienceDetail.introduction;
+  const heroImageSrc =
+    getString(experience, "photoUrl") ?? mockExperienceDetail.photoUrl;
+  const mentorName =
+    getString(experience, "mentorName") ?? mockExperienceDetail.mentorName;
+  const experienceType =
+    getString(experience, "experienceType") ?? mockExperienceDetail.experienceType;
+  const location = getString(experience, "location") ?? mockExperienceDetail.location;
+  const schedule = getString(experience, "schedule") ?? mockExperienceDetail.schedule;
   const inclusions = getStringList(experience, "inclusions");
   const requirements = getStringList(experience, "requirements");
+  const resolvedInclusions =
+    inclusions.length > 0 ? inclusions : [...mockExperienceDetail.inclusions];
+  const resolvedRequirements =
+    requirements.length > 0
+      ? requirements
+      : [...mockExperienceDetail.requirements];
   const participantLabel = formatParticipantLabel(
-    getNumber(experience, "participantCount"),
-    getNumber(experience, "maxParticipants"),
+    getNumber(experience, "participantCount") ?? mockExperienceDetail.participantCount,
+    getNumber(experience, "maxParticipants") ?? mockExperienceDetail.maxParticipants,
   );
-  const pageStatus = experienceQuery.isError
-    ? {
-        tone: "error" as const,
-        message: experienceQuery.error.message,
-        onRetry: () => {
-          void experienceQuery.refetch();
-        },
-      }
-    : experienceQuery.isPending
-      ? {
-          tone: "loading" as const,
-          message: "체험 정보를 불러오는 중입니다.",
-        }
-      : null;
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -335,13 +347,6 @@ export function ExperienceDetailPage() {
                   paddingInline: CONTENT_SIDE_PADDING,
                 }}
               >
-                {pageStatus ? (
-                  <QueryNotice
-                    tone={pageStatus.tone}
-                    message={pageStatus.message}
-                    onRetry={pageStatus.onRetry}
-                  />
-                ) : null}
                 {introduction ? (
                   <VStack
                     $css={{
@@ -411,7 +416,7 @@ export function ExperienceDetailPage() {
                   </VStack>
                 ) : null}
 
-                {inclusions.length > 0 ? (
+                {resolvedInclusions.length > 0 ? (
                   <VStack
                     $css={{
                       gap: "16px",
@@ -425,14 +430,14 @@ export function ExperienceDetailPage() {
                         alignItems: "center",
                       }}
                     >
-                      {inclusions.map((item) => (
+                      {resolvedInclusions.map((item) => (
                         <SkillPill key={item} label={item} />
                       ))}
                     </HStack>
                   </VStack>
                 ) : null}
 
-                {requirements.length > 0 ? (
+                {resolvedRequirements.length > 0 ? (
                   <VStack
                     $css={{
                       gap: "16px",
@@ -446,43 +451,11 @@ export function ExperienceDetailPage() {
                         alignItems: "center",
                       }}
                     >
-                      {requirements.map((item) => (
+                      {resolvedRequirements.map((item) => (
                         <SkillPill key={item} label={item} />
                       ))}
                     </HStack>
                   </VStack>
-                ) : null}
-
-                {!pageStatus &&
-                !introduction &&
-                !schedule &&
-                !location &&
-                inclusions.length === 0 &&
-                requirements.length === 0 ? (
-                  <Box
-                    $css={{
-                      width: "100%",
-                      borderRadius: "16px",
-                      border: "1px solid #E2E8F0",
-                      backgroundColor: "#FFFFFF",
-                      padding: "16px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <Text
-                      render={<p />}
-                      $css={{
-                        color: "#767676",
-                        fontFamily: TITLE_FONT,
-                        fontSize: "14px",
-                        lineHeight: "22px",
-                        fontWeight: 500,
-                        letterSpacing: "-0.1px",
-                      }}
-                    >
-                      서버 응답에 표시할 체험 상세 정보가 없습니다.
-                    </Text>
-                  </Box>
                 ) : null}
               </VStack>
             </Box>
@@ -499,10 +472,12 @@ export function ExperienceDetailPage() {
                     experienceId,
                     summaryTitle: title ?? "",
                     summaryMentor: mentorName,
+                    summaryImageSrc: heroImageSrc,
+                    unitPrice: mockExperienceDetail.unitPrice,
                   },
                 })
               }
-              disabled={experienceQuery.isPending}
+              disabled={typeof experienceId !== "number"}
             />
           }
           $css={{
@@ -515,8 +490,8 @@ export function ExperienceDetailPage() {
             borderRadius: "14px",
             backgroundColor: "#1CB3CB",
             color: "#FFFFFF",
-            cursor: experienceQuery.isPending ? "not-allowed" : "pointer",
-            opacity: experienceQuery.isPending ? 0.6 : 1,
+            cursor: typeof experienceId !== "number" ? "not-allowed" : "pointer",
+            opacity: typeof experienceId !== "number" ? 0.6 : 1,
             zIndex: 5,
             display: "grid",
             placeItems: "center",

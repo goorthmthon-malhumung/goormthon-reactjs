@@ -10,6 +10,10 @@ import {
   useMatchingJobListView,
   type MatchingCategoryKey,
 } from "@/features/jobs/api/useMatchingJobListView";
+import {
+  FALLBACK_MATCHING_EXPERIENCE_ITEMS,
+  FALLBACK_MATCHING_JOB_ITEMS,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
 import {
   getNumber,
@@ -241,7 +245,7 @@ export function MatchingPage() {
   const [selectedKind, setSelectedKind] = useState<MatchingKind>("job");
   const [selectedCategory, setSelectedCategory] = useState<MatchingCategory>("all");
   const jobListQuery = useMatchingJobListView();
-  const jobItems = getRecordCollection(jobListQuery.data?.data)
+  const apiJobItems = getRecordCollection(jobListQuery.data?.data)
     .filter((item) => matchesCategory(getString(item, "jobType"), selectedCategory))
     .map((item) => {
       const id = getNumber(item, "id");
@@ -265,9 +269,18 @@ export function MatchingPage() {
         tags: getStringList(item, "skills"),
       } satisfies MentorCardProps;
     });
+  const fallbackJobItems = FALLBACK_MATCHING_JOB_ITEMS
+    .filter((item) => selectedCategory === "all" || item.category === selectedCategory)
+    .map((item) => item.card);
+  const fallbackExperienceItems = FALLBACK_MATCHING_EXPERIENCE_ITEMS
+    .filter((item) => selectedCategory === "all" || item.category === selectedCategory)
+    .map((item) => item.card);
+  const visibleItems = selectedKind === "job"
+    ? (apiJobItems.length > 0 ? apiJobItems : fallbackJobItems)
+    : fallbackExperienceItems;
 
   const listStatus = selectedKind === "job"
-    ? jobListQuery.isError
+    ? jobListQuery.isError && fallbackJobItems.length === 0
       ? {
         tone: "error" as const,
         message: jobListQuery.error.message,
@@ -275,26 +288,18 @@ export function MatchingPage() {
           void jobListQuery.refetch();
         },
       }
-      : jobListQuery.isPending
-        ? {
-          tone: "loading" as const,
-          message: "직업 목록을 불러오는 중입니다.",
-        }
-        : null
+      : null
     : null;
 
-  const totalCount = selectedKind === "job" ? jobItems.length : 0;
+  const totalCount = visibleItems.length;
   const emptyMessage = selectedKind === "job"
     ? "등록된 직업 매칭이 없습니다."
-    : "체험 목록 API가 없어 표시할 수 없습니다.";
+    : "등록된 체험 매칭이 없습니다.";
   const showEmptyState = !listStatus && totalCount === 0;
+  const totalLabel = `총 ${totalCount}개`;
 
-  const totalLabel = selectedKind === "job" && jobListQuery.isPending
-    ? "불러오는 중"
-    : `총 ${totalCount}개`;
-
-  const renderJobCards = () =>
-    jobItems.map((item) => (
+  const renderCards = () =>
+    visibleItems.map((item) => (
       <MentorCard
         key={`${item.to}-${item.title}`}
         {...item}
@@ -450,7 +455,7 @@ export function MatchingPage() {
               </Box>
             ) : null}
 
-            {!listStatus && selectedKind === "job" ? renderJobCards() : null}
+            {!showEmptyState ? renderCards() : null}
           </VStack>
         </VStack>
       </Box>

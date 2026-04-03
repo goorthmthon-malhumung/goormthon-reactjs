@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
         element: <MatchingDetailPage />,
       },
       {
-        path: ROUTES.experienceDetail.slice(1),
+        path: "experiences/:experienceSlug",
         element: <ExperienceDetailPage />,
       },
       {

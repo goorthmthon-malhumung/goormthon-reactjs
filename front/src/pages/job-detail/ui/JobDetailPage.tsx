@@ -1,4 +1,8 @@
 import { useJobDetailView } from "@/features/jobs/api/useJobDetailView";
+import {
+  DEFAULT_MOCK_JOB_DETAIL,
+  getMockJobDetailBySlug,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
 import {
   asRecord,
@@ -6,7 +10,6 @@ import {
   getString,
   getStringList,
 } from "@/shared/lib/apiData";
-import { QueryNotice } from "@/shared/ui/states/QueryNotice";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { GroupOutlineIcon } from "@vapor-ui/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -97,45 +100,32 @@ export function JobDetailPage() {
   const navigate = useNavigate();
   const { jobSlug } = useParams();
   const parsedJobId = Number(jobSlug);
-  const jobId =
-    Number.isInteger(parsedJobId) && parsedJobId > 0
-      ? parsedJobId
-      : DEFAULT_JOB_ID;
-  const jobQuery = useJobDetailView(jobId);
+  const isNumericJobRoute =
+    Number.isInteger(parsedJobId) && parsedJobId > 0;
+  const jobId = isNumericJobRoute ? parsedJobId : DEFAULT_JOB_ID;
+  const mockJobDetail = getMockJobDetailBySlug(jobSlug) ?? DEFAULT_MOCK_JOB_DETAIL;
+  const jobQuery = useJobDetailView(jobId, isNumericJobRoute);
   const job = asRecord(jobQuery.data?.data);
-  const experienceId = getNumber(job, "experienceId");
-  const title = getString(job, "title");
-  const introduction = getString(job, "introduction");
-  const heroImageSrc = getString(job, "mainUrl");
+  const experienceId =
+    getNumber(job, "experienceId") ?? mockJobDetail.experienceId;
+  const title = getString(job, "title") ?? mockJobDetail.title;
+  const introduction =
+    getString(job, "introduction") ?? mockJobDetail.introduction;
+  const heroImageSrc = getString(job, "mainUrl") ?? mockJobDetail.mainUrl;
   const skills = getStringList(job, "skills");
+  const resolvedSkills = skills.length > 0 ? skills : [...mockJobDetail.skills];
   const participantLabel = formatParticipantLabel(
-    getNumber(job, "participantCount"),
-    getNumber(job, "maxParticipants"),
+    getNumber(job, "participantCount") ?? mockJobDetail.participantCount,
+    getNumber(job, "maxParticipants") ?? mockJobDetail.maxParticipants,
   );
-  const mentorName = getString(job, "mentorName");
-  const jobType = getString(job, "jobType");
-  const workHours = getString(job, "workHours");
-  const physicalLevel = getString(job, "physicalLevel");
+  const mentorName = getString(job, "mentorName") ?? mockJobDetail.mentorName;
+  const jobType = getString(job, "jobType") ?? mockJobDetail.jobType;
+  const workHours = getString(job, "workHours") ?? mockJobDetail.workHours;
+  const physicalLevel =
+    getString(job, "physicalLevel") ?? mockJobDetail.physicalLevel;
   const detailTags = [workHours, physicalLevel].filter(
     (value): value is string => Boolean(value),
   );
-  const canReserve =
-    !jobQuery.isPending && typeof experienceId === "number";
-
-  const pageStatus = jobQuery.isError
-    ? {
-        tone: "error" as const,
-        message: jobQuery.error.message,
-        onRetry: () => {
-          void jobQuery.refetch();
-        },
-      }
-    : jobQuery.isPending
-      ? {
-          tone: "loading" as const,
-          message: "직업 정보를 불러오는 중입니다.",
-        }
-      : null;
 
   return (
     <Box
@@ -320,14 +310,6 @@ export function JobDetailPage() {
                 gap: "24px",
               }}
             >
-              {pageStatus ? (
-                <QueryNotice
-                  tone={pageStatus.tone}
-                  message={pageStatus.message}
-                  onRetry={pageStatus.onRetry}
-                />
-              ) : null}
-
               {detailTags.length > 0 ? (
                 <VStack
                   $css={{
@@ -375,7 +357,7 @@ export function JobDetailPage() {
                 </VStack>
               ) : null}
 
-              {skills.length > 0 ? (
+              {resolvedSkills.length > 0 ? (
                 <VStack
                   $css={{
                     gap: "16px",
@@ -391,41 +373,11 @@ export function JobDetailPage() {
                       alignItems: "center",
                     }}
                   >
-                    {skills.map((skill, index) => (
+                    {resolvedSkills.map((skill, index) => (
                       <SkillPill key={`${skill}-${index}`} label={skill} />
                     ))}
                   </Box>
                 </VStack>
-              ) : null}
-
-              {!pageStatus &&
-              detailTags.length === 0 &&
-              !introduction &&
-              skills.length === 0 ? (
-                <Box
-                  $css={{
-                    width: "100%",
-                    borderRadius: "16px",
-                    border: "1px solid #E2E8F0",
-                    backgroundColor: "#FFFFFF",
-                    padding: "16px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <Text
-                    render={<p />}
-                    $css={{
-                      color: "#767676",
-                      fontFamily: TITLE_FONT,
-                      fontSize: "14px",
-                      lineHeight: "22px",
-                      fontWeight: 500,
-                      letterSpacing: "-0.1px",
-                    }}
-                  >
-                    서버 응답에 표시할 직업 상세 정보가 없습니다.
-                  </Text>
-                </Box>
               ) : null}
             </VStack>
           </Box>
@@ -450,10 +402,11 @@ export function JobDetailPage() {
                       experienceId,
                       summaryTitle: title ?? "",
                       summaryMentor: mentorName,
+                      summaryImageSrc: heroImageSrc,
+                      unitPrice: mockJobDetail.unitPrice,
                     },
                   })
                 }
-                disabled={!canReserve}
               />
             }
             $css={{
@@ -461,12 +414,11 @@ export function JobDetailPage() {
               height: `${CTA_HEIGHT_PX}px`,
               border: "none",
               borderRadius: "14px",
-              backgroundColor: "#1CB3CB",
+              backgroundColor: "var(--vapor-color-cyan-300)",
               color: "#FFFFFF",
               display: "grid",
               placeItems: "center",
-              cursor: canReserve ? "pointer" : "not-allowed",
-              opacity: canReserve ? 1 : 0.6,
+              cursor: "pointer",
               padding: 0,
             }}
           >
