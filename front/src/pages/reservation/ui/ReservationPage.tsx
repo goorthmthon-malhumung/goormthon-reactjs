@@ -39,12 +39,12 @@ const DEFAULT_EXPERIENCE_ID = 1;
 const SUMMARY_TITLE = "금녕 해녀와 함께하는 전복따기";
 const SUMMARY_MENTOR = "김영숙 해녀";
 const UNIT_PRICE = 50000;
-const DEFAULT_DATE_RANGE = {
-  from: new Date(2022, 11, 22),
-  to: new Date(2022, 11, 30),
-} satisfies DateRange;
-const EVENT_DATES = [8, 14, 19, 30].map((day) => new Date(2022, 11, day));
-const ACCENT_DATE = new Date(2022, 11, 15);
+const TODAY = new Date();
+const CURRENT_MONTH_START = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+const EVENT_DATES = [8, 14, 19, 30].map((day) =>
+  createDateInCurrentMonth(day),
+);
+const ACCENT_DATE = TODAY;
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const reservationDatePickerClassNames = {
@@ -93,6 +93,20 @@ function formatApiDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+function parseDateKey(dateKey?: string) {
+  if (!dateKey) {
+    return undefined;
+  }
+
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return undefined;
+  }
+
+  return new Date(year, month - 1, day);
+}
+
 function formatDateRange(range?: DateRange) {
   if (!range?.from) {
     return "기간을 선택해주세요";
@@ -103,6 +117,20 @@ function formatDateRange(range?: DateRange) {
   }
 
   return `${formatDate(range.from)} ~ ${formatDate(range.to)}`;
+}
+
+function getReservationDurationDays(range?: DateRange) {
+  if (!range?.from || !range.to) {
+    return 0;
+  }
+
+  const startDate = new Date(range.from);
+  const endDate = new Date(range.to);
+
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
+
+  return Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
 }
 
 function cloneDateRange(range?: DateRange): DateRange | undefined {
@@ -118,6 +146,16 @@ function cloneDateRange(range?: DateRange): DateRange | undefined {
 
 function getMonthStart(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function createDateInCurrentMonth(day: number) {
+  const lastDateOfMonth = new Date(
+    TODAY.getFullYear(),
+    TODAY.getMonth() + 1,
+    0,
+  ).getDate();
+
+  return new Date(TODAY.getFullYear(), TODAY.getMonth(), Math.min(day, lastDateOfMonth));
 }
 
 function formatMonthCaption(date: Date) {
@@ -271,19 +309,27 @@ export function ReservationPage() {
         experienceId?: number;
         summaryTitle?: string;
         summaryMentor?: string;
+        summaryImageSrc?: string;
+        unitPrice?: number;
+        availableFromDate?: string;
+        availableToDate?: string;
       }
     | null) ?? null;
   const [participantCount, setParticipantCount] = useState(1);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
-  const [draftRange, setDraftRange] = useState<DateRange | undefined>(
-    cloneDateRange(DEFAULT_DATE_RANGE),
-  );
-  const [displayMonth, setDisplayMonth] = useState(() =>
-    getMonthStart(DEFAULT_DATE_RANGE.from),
-  );
+  const [draftRange, setDraftRange] = useState<DateRange | undefined>();
+  const [displayMonth, setDisplayMonth] = useState(CURRENT_MONTH_START);
   const bookingMutation = useCreateBooking();
-  const totalPrice = UNIT_PRICE * participantCount;
+  const availableFromDate = parseDateKey(routeState?.availableFromDate);
+  const availableToDate = parseDateKey(routeState?.availableToDate);
+  const unitPrice = routeState?.unitPrice ?? UNIT_PRICE;
+  const reservationDays = getReservationDurationDays(selectedRange);
+  const totalPrice = unitPrice * participantCount * reservationDays;
+  const priceBreakdownLabel =
+    reservationDays > 0
+      ? `${formatCurrency(unitPrice)} x ${participantCount}명 x ${reservationDays}일`
+      : `${formatCurrency(unitPrice)} x ${participantCount}명 x 기간`;
   const hasCompleteDraftRange = Boolean(draftRange?.from && draftRange.to);
   const canSubmitBooking = Boolean(selectedRange?.from && selectedRange.to);
   const isBookingDisabled =
@@ -309,17 +355,19 @@ export function ReservationPage() {
   };
 
   const handleOpenDatePicker = () => {
-    const initialRange = cloneDateRange(selectedRange ?? DEFAULT_DATE_RANGE);
+    const initialRange = cloneDateRange(selectedRange);
 
     setDraftRange(initialRange);
     setDisplayMonth(
-      getMonthStart(initialRange?.from ?? DEFAULT_DATE_RANGE.from),
+      getMonthStart(
+        initialRange?.from ?? availableFromDate ?? CURRENT_MONTH_START,
+      ),
     );
     setIsDatePickerOpen(true);
   };
 
   const handleCloseDatePicker = () => {
-    setDraftRange(cloneDateRange(selectedRange ?? DEFAULT_DATE_RANGE));
+    setDraftRange(cloneDateRange(selectedRange));
     setIsDatePickerOpen(false);
   };
 
@@ -477,8 +525,8 @@ export function ReservationPage() {
               <Box
                 render={
                   <img
-                    src={summaryImage}
-                    alt="금녕 해녀와 함께하는 전복따기 대표 이미지"
+                    src={routeState?.summaryImageSrc ?? summaryImage}
+                    alt={`${routeState?.summaryTitle ?? SUMMARY_TITLE} 대표 이미지`}
                   />
                 }
                 $css={{
@@ -678,20 +726,41 @@ export function ReservationPage() {
                 총 결제 금액
               </Text>
 
-              <Text
-                render={<p />}
+              <VStack
                 $css={{
-                  color: "#FFFFFF",
-                  fontFamily:
-                    '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
-                  fontSize: "24px",
-                  lineHeight: "36px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.3px",
+                  gap: "2px",
+                  alignItems: "flex-end",
                 }}
               >
-                {formatCurrency(totalPrice)}
-              </Text>
+                <Text
+                  render={<p />}
+                  $css={{
+                    color: "#FFFFFF",
+                    fontFamily:
+                      '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+                    fontSize: "24px",
+                    lineHeight: "36px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.3px",
+                  }}
+                >
+                  {formatCurrency(totalPrice)}
+                </Text>
+                <Text
+                  render={<p />}
+                  $css={{
+                    color: "rgba(255, 255, 255, 0.72)",
+                    fontFamily:
+                      '"Inter", "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", sans-serif',
+                    fontSize: "12px",
+                    lineHeight: "18px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                  }}
+                >
+                  {priceBreakdownLabel}
+                </Text>
+              </VStack>
             </Box>
           </VStack>
 
@@ -904,6 +973,10 @@ export function ReservationPage() {
                     onMonthChange={setDisplayMonth}
                     selected={draftRange}
                     onSelect={setDraftRange}
+                    disabled={[
+                      ...(availableFromDate ? [{ before: availableFromDate }] : []),
+                      ...(availableToDate ? [{ after: availableToDate }] : []),
+                    ]}
                     classNames={reservationDatePickerClassNames}
                     components={{
                       Chevron: CalendarChevron,
