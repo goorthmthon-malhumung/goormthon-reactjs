@@ -1,5 +1,10 @@
 import banner from "@/shared/assets/banner.png";
 import haenyeoIcon from "@/shared/assets/haenyeoIcon.svg";
+import homeExperienceHaenyeoImage from "@/shared/assets/home/home-experience-haenyeo.jpg";
+import homeExperienceMandarinImage from "@/shared/assets/home/home-experience-mandarin.jpg";
+import homeExperienceStoneImage from "@/shared/assets/home/home-experience-stone.jpg";
+import homeJobHorseImage from "@/shared/assets/home/home-job-horse.jpg";
+import homeJobStoneImage from "@/shared/assets/home/home-job-stone.jpg";
 import horseIcon from "@/shared/assets/horseIcon.svg";
 import logo from "@/shared/assets/logo.svg";
 import mandarinIcon from "@/shared/assets/mandarinIcon.svg";
@@ -9,11 +14,6 @@ import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
 import { Link, useNavigate } from "react-router-dom";
-
-const SMALL_CARD_IMAGE_URL =
-  "https://www.figma.com/api/mcp/asset/652edba1-291d-40e3-b23e-9257796c661c";
-const LARGE_CARD_IMAGE_URL =
-  "https://www.figma.com/api/mcp/asset/378f6b43-2954-444a-919f-af0b0831f962";
 
 const CATEGORY_ITEMS = [
   { iconSrc: haenyeoIcon, label: "해녀", to: "/jobs/haenyeo" },
@@ -25,7 +25,7 @@ const CATEGORY_ITEMS = [
 const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   {
     to: ROUTES.matchingDetail,
-    imageSrc: SMALL_CARD_IMAGE_URL,
+    imageSrc: homeExperienceHaenyeoImage,
     imageAlt: "금녕 해녀와 함께하는 전복따기",
     badgeLabel: "정부지원금 30만원",
     title: "금녕 해녀와 함께하는 전복따기",
@@ -34,7 +34,7 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   },
   {
     to: ROUTES.matchingDetail,
-    imageSrc: SMALL_CARD_IMAGE_URL,
+    imageSrc: homeExperienceMandarinImage,
     imageAlt: "제주의 귤을 키우는 하루",
     badgeLabel: "정부지원금 30만원",
     title: "제주의 귤을 키우는 하루",
@@ -43,7 +43,7 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   },
   {
     to: ROUTES.matchingDetail,
-    imageSrc: SMALL_CARD_IMAGE_URL,
+    imageSrc: homeExperienceStoneImage,
     imageAlt: "제주의 돌을 쌓는 하루",
     badgeLabel: "정부지원금 30만원",
     title: "제주의 돌을 쌓는 하루",
@@ -55,12 +55,16 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
 const LARGE_EXPERIENCE_CARDS = [
   {
     to: ROUTES.jobDetail,
+    imageSrc: homeJobHorseImage,
+    imageAlt: "제주의 말을 돌보는 하루",
     title: "제주의 말을 돌보는 하루",
     deadline: "D-24",
     location: "제주시 구좌읍",
   },
   {
     to: ROUTES.jobDetail,
+    imageSrc: homeJobStoneImage,
+    imageAlt: "제주의 돌담을 이어가는 장인",
     title: "제주의 돌담을 이어가는 장인",
     deadline: "D-12",
     location: "서귀포시 성산읍",
@@ -69,6 +73,8 @@ const LARGE_EXPERIENCE_CARDS = [
 
 type LargeExperienceCardProps = {
   to: string;
+  imageSrc: string;
+  imageAlt: string;
   title: string;
   deadline: string;
   location: string;
@@ -76,6 +82,8 @@ type LargeExperienceCardProps = {
 
 function LargeExperienceCard({
   to,
+  imageSrc,
+  imageAlt,
   title,
   deadline,
   location,
@@ -102,7 +110,7 @@ function LargeExperienceCard({
         }}
       >
         <Box
-          render={<img src={LARGE_CARD_IMAGE_URL} alt="" aria-hidden="true" />}
+          render={<img src={imageSrc} alt={imageAlt} />}
           $css={{
             width: "100%",
             height: "100%",
@@ -436,6 +444,8 @@ export function HomePage() {
                 <LargeExperienceCard
                   key={card.title}
                   to={card.to}
+                  imageSrc={card.imageSrc}
+                  imageAlt={card.imageAlt}
                   title={card.title}
                   deadline={card.deadline}
                   location={card.location}

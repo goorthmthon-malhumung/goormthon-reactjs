@@ -1163,12 +1163,10 @@ function BottomButton({
   step,
   disabled,
   onNext,
-  onPrev,
 }: {
   step: number;
   disabled: boolean;
   onNext: () => void;
-  onPrev: () => void;
 }) {
   return (
     <Box
@@ -1260,7 +1258,6 @@ export function MentorWritePage() {
       goToStep(step + 1);
     }
   };
-  const handlePrev = () => goToStep(step - 1);
   const handleBack = () => {
     if (step === 1) {
       navigate(ROUTES.mentorHome);
@@ -1439,7 +1436,6 @@ export function MentorWritePage() {
         step={step}
         disabled={!canProceed}
         onNext={handleNext}
-        onPrev={handlePrev}
       />
 
       {isDatePickerOpen && (
@@ -1642,5 +1638,3 @@ export function MentorWritePage() {
     </Box>
   );
 }
-
-
