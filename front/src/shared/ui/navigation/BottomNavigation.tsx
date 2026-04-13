@@ -137,9 +137,9 @@ export function BottomNavigation() {
   const tabs = isMentor ? MENTOR_TABS : MENTEE_TABS;
   const activeId = getActiveId(pathname, isMentor);
 
-  if (meQuery.isPending || (meQuery.isError && !isAuthError)) {
-    return null;
-  }
+  // if (meQuery.isPending || (meQuery.isError && !isAuthError)) {
+  //   return null;
+  // }
 
   const handleTabClick = (tab: Tab) => {
     if (tab.id === "my" && shouldRedirectMyToLogin) {
