@@ -140,7 +140,16 @@ export function JobDetailPage() {
           >
             {heroImageSrc ? (
               <Box
-                render={<img src={heroImageSrc} alt="" aria-hidden="true" />}
+                render={
+                  <img
+                    src={heroImageSrc}
+                    alt=""
+                    aria-hidden="true"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                }
                 $css={{
                   position: "absolute",
                   inset: 0,

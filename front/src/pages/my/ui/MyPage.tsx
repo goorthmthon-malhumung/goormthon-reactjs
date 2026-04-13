@@ -486,7 +486,18 @@ function HistoryCard({
       >
         <Box
           render={
-            imageSrc ? <img src={imageSrc} alt="" aria-hidden="true" /> : <div aria-hidden="true" />
+            imageSrc ? (
+              <img
+                src={imageSrc}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+            ) : (
+              <div aria-hidden="true" />
+            )
           }
           $css={{
             width: "100%",
@@ -888,7 +899,13 @@ export function MyPage() {
                 >
                   <Box
                     render={
-                      <img src={profileAvatar} alt="프로필 사진" />
+                      <img
+                        src={profileAvatar}
+                        alt="프로필 사진"
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
+                      />
                     }
                     $css={{
                       width: "100%",

@@ -202,7 +202,15 @@ export function MentorMyPage() {
                   }}
                 >
                   <Box
-                    render={<img src={haenyeoMentorIcon} alt="멘토 프로필" />}
+                    render={
+                      <img
+                        src={haenyeoMentorIcon}
+                        alt="멘토 프로필"
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
+                      />
+                    }
                     $css={{
                       width: "100%",
                       height: "100%",

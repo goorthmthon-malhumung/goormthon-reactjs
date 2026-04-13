@@ -317,7 +317,15 @@ function InclusionRow({ label }: { label: string }) {
 function GalleryImage({ src, alt }: MatchingDetailGalleryImage) {
   return (
     <Box
-      render={<img src={src} alt={alt} />}
+      render={
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+        />
+      }
       $css={{
         width: "148px",
         height: "160px",
@@ -380,7 +388,15 @@ export function MatchingDetailPage() {
           }}
         >
           <Box
-            render={<img src={detail.heroImageSrc} alt={detail.heroImageAlt} />}
+            render={
+              <img
+                src={detail.heroImageSrc}
+                alt={detail.heroImageAlt}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+              />
+            }
             $css={{
               position: "absolute",
               inset: 0,

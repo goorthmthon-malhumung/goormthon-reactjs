@@ -31,6 +31,11 @@ const SINGLE_LINE_ELLIPSIS_STYLES = {
   textOverflow: "ellipsis",
 } as const;
 
+const THUMBNAIL_CARD_IMAGE_DIMENSIONS = {
+  width: 165,
+  height: 130,
+} as const;
+
 export function ThumbnailCard({
   to,
   imageSrc,
@@ -77,7 +82,16 @@ export function ThumbnailCard({
         >
           <Box
             render={
-              imageSrc ? <img src={imageSrc} alt={imageAlt ?? title} /> : <div aria-hidden="true" />
+              imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={imageAlt ?? title}
+                  loading="lazy"
+                  decoding="async"
+                  width={THUMBNAIL_CARD_IMAGE_DIMENSIONS.width}
+                  height={THUMBNAIL_CARD_IMAGE_DIMENSIONS.height}
+                />
+              ) : <div aria-hidden="true" />
             }
             $css={{
               display: "block",

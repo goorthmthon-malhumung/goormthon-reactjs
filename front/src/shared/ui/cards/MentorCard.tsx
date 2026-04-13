@@ -33,6 +33,11 @@ const DESCRIPTION_CLAMP_STYLES = {
   WebkitLineClamp: 2,
 } as const;
 
+const MENTOR_CARD_IMAGE_DIMENSIONS = {
+  width: 356,
+  height: 192,
+} as const;
+
 export function MentorCard({
   to,
   state,
@@ -76,7 +81,16 @@ export function MentorCard({
         >
           <Box
             render={
-              imageSrc ? <img src={imageSrc} alt={imageAlt ?? title} /> : <div aria-hidden="true" />
+              imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={imageAlt ?? title}
+                  loading="lazy"
+                  decoding="async"
+                  width={MENTOR_CARD_IMAGE_DIMENSIONS.width}
+                  height={MENTOR_CARD_IMAGE_DIMENSIONS.height}
+                />
+              ) : <div aria-hidden="true" />
             }
             $css={{
               display: "block",

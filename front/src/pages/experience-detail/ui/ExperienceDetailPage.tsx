@@ -185,7 +185,15 @@ export function ExperienceDetailPage() {
           >
             {heroImageSrc ? (
               <Box
-                render={<img src={heroImageSrc} alt="" />}
+                render={
+                  <img
+                    src={heroImageSrc}
+                    alt=""
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                }
                 aria-hidden="true"
                 $css={{
                   position: "absolute",

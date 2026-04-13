@@ -527,6 +527,11 @@ export function ReservationPage() {
                   <img
                     src={routeState?.summaryImageSrc ?? summaryImage}
                     alt={`${routeState?.summaryTitle ?? SUMMARY_TITLE} 대표 이미지`}
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    width={90}
+                    height={90}
                   />
                 }
                 $css={{
