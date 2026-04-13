@@ -7,11 +7,14 @@ import {
   LocationOutlineIcon,
   TimeOutlineIcon,
 } from "@vapor-ui/icons";
+import {
+  DEFAULT_MOCK_MATCHING_DETAIL_STATE,
+  getMockMatchingDetailStateBySlug,
+  type MatchingDetailState,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import galleryBeachImage from "@/assets/matching-detail/gallery-beach.jpg";
-import heroImage from "@/assets/matching-detail/hero.jpg";
-import { ROUTES } from "@/shared/config/routes";
+import { parseMatchingDetailRouteSearch, ROUTES } from "@/shared/config/routes";
 
 const PAGE_BG = "#FFFFFF";
 const CONTENT_BG = "var(--vapor-color-background-surface-200, #f7f7f7)";
@@ -27,28 +30,6 @@ const HERO_OVERLAY_BOTTOM = 49;
 const CONTENT_WIDTH_PX = 358;
 const RESERVE_BUTTON_HEIGHT = 55.981;
 const RESERVE_BUTTON_WIDTH = 119.328;
-const TODAY = new Date();
-
-function addDaysFromToday(days: number) {
-  const date = new Date(TODAY);
-
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() + days);
-
-  return date;
-}
-
-function formatKoreanDate(date: Date) {
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-}
-
-function formatDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
 
 type MatchingDetailGalleryImage = {
   src: string;
@@ -56,6 +37,7 @@ type MatchingDetailGalleryImage = {
 };
 
 type MatchingDetailContent = {
+  experienceSlug: string;
   kindLabel: string;
   heroImageSrc: string;
   heroImageAlt: string;
@@ -70,6 +52,7 @@ type MatchingDetailContent = {
   meetingPlace: string;
   description: string;
   includedItems: readonly string[];
+  requirements: readonly string[];
   galleryImages: readonly MatchingDetailGalleryImage[];
   priceLabel: string;
   priceUnitLabel: string;
@@ -80,47 +63,40 @@ type MatchingDetailContent = {
   availableToDate: string;
 };
 
-export type MatchingDetailState = Partial<MatchingDetailContent>;
+function toMatchingDetailContent(
+  state?: MatchingDetailState | null,
+): MatchingDetailContent {
+  return {
+    experienceSlug: state?.experienceSlug ?? "horse-farm-day",
+    kindLabel: state?.kindLabel ?? "체험",
+    heroImageSrc: state?.heroImageSrc ?? "",
+    heroImageAlt: state?.heroImageAlt ?? "",
+    deadlineLabel: state?.deadlineLabel ?? "D-7",
+    title: state?.title ?? "",
+    participantLabel: state?.participantLabel ?? "",
+    mentorInitial: state?.mentorInitial ?? "제",
+    mentorName: state?.mentorName ?? "",
+    mentorCareer: state?.mentorCareer ?? "",
+    scheduleLabel: state?.scheduleLabel ?? "",
+    timeLabel: state?.timeLabel ?? "",
+    meetingPlace: state?.meetingPlace ?? "",
+    description: state?.description ?? "",
+    includedItems: [...(state?.includedItems ?? [])],
+    requirements: [...(state?.requirements ?? [])],
+    galleryImages: [...(state?.galleryImages ?? [])],
+    priceLabel: state?.priceLabel ?? "0원",
+    priceUnitLabel: state?.priceUnitLabel ?? "/ 인",
+    reserveLabel: state?.reserveLabel ?? "예약하기",
+    experienceId: state?.experienceId ?? 1,
+    unitPriceValue: state?.unitPriceValue ?? 0,
+    availableFromDate: state?.availableFromDate ?? "",
+    availableToDate: state?.availableToDate ?? "",
+  };
+}
 
-const DEFAULT_DETAIL_CONTENT: MatchingDetailContent = {
-  kindLabel: "직업",
-  heroImageSrc: heroImage,
-  heroImageAlt: "바닷가에서 작업 중인 해녀들의 모습",
-  deadlineLabel: "D-12",
-  title: "금녕 해녀와 함께하는 전복따기",
-  participantLabel: "5/8명",
-  mentorInitial: "김",
-  mentorName: "김영숙 해녀",
-  mentorCareer: "해녀 45년차",
-  scheduleLabel: `${formatKoreanDate(addDaysFromToday(12))} ~ ${formatKoreanDate(addDaysFromToday(42))}`,
-  timeLabel: "오전 9:00 - 12:00 (3시간)",
-  meetingPlace: "제주시 구좌읍 하도리",
-  description:
-    "45년 경력의 김영숙 해녀님과 함께하는 물질 체험입니다. 전통 해녀복을 입고 바다에 들어가 직접 해산물을 채취하며 제주 해녀 문화를 체험할 수 있습니다. 초보자도 안전하게 참여할 수 있도록 구명조끼와 안전 장비가 제공되며, 해녀님의 세심한 지도 아래 진행됩니다.",
-  includedItems: [
-    "해녀복 대여",
-    "안전 장비",
-    "해산물 시식",
-    "사진 촬영 서비스",
-  ],
-  galleryImages: [
-    {
-      src: heroImage,
-      alt: "해녀 체험 대표 사진",
-    },
-    {
-      src: galleryBeachImage,
-      alt: "체험 장소 바다 풍경",
-    },
-  ],
-  priceLabel: "50,000원",
-  priceUnitLabel: "/ 인",
-  reserveLabel: "예약하기",
-  experienceId: 1,
-  unitPriceValue: 50000,
-  availableFromDate: formatDateKey(addDaysFromToday(12)),
-  availableToDate: formatDateKey(addDaysFromToday(42)),
-};
+const DEFAULT_DETAIL_CONTENT = toMatchingDetailContent(
+  DEFAULT_MOCK_MATCHING_DETAIL_STATE,
+);
 
 function SectionCard({
   children,
@@ -340,12 +316,21 @@ function GalleryImage({ src, alt }: MatchingDetailGalleryImage) {
 
 export function MatchingDetailPage() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-
-  const detail: MatchingDetailContent = {
+  const { state, search } = useLocation();
+  const routeState = (state as MatchingDetailState | null) ?? null;
+  const resolvedRoute = parseMatchingDetailRouteSearch(search);
+  const resolvedSlug = resolvedRoute.experienceSlug ?? routeState?.experienceSlug;
+  const mockDetailState = getMockMatchingDetailStateBySlug(resolvedSlug);
+  const detail = toMatchingDetailContent({
     ...DEFAULT_DETAIL_CONTENT,
-    ...((state as MatchingDetailState | null) ?? {}),
-  };
+    ...mockDetailState,
+    ...routeState,
+    experienceSlug:
+      routeState?.experienceSlug ??
+      mockDetailState?.experienceSlug ??
+      resolvedSlug ??
+      DEFAULT_DETAIL_CONTENT.experienceSlug,
+  });
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -717,6 +702,40 @@ export function MatchingDetailPage() {
                 </VStack>
               </SectionCard>
 
+              {detail.requirements.length > 0 ? (
+                <SectionCard>
+                  <VStack
+                    $css={{
+                      gap: "15.995px",
+                      alignItems: "stretch",
+                    }}
+                  >
+                    <Text
+                      render={<h2 />}
+                      $css={{
+                        color: PRIMARY_TEXT,
+                        fontSize: "18px",
+                        lineHeight: "26px",
+                        fontWeight: 700,
+                        letterSpacing: "-0.1px",
+                      }}
+                    >
+                      참여 조건
+                    </Text>
+
+                    <VStack
+                      $css={{
+                        gap: "12px",
+                      }}
+                    >
+                      {detail.requirements.map((item) => (
+                        <InclusionRow key={item} label={item} />
+                      ))}
+                    </VStack>
+                  </VStack>
+                </SectionCard>
+              ) : null}
+
               <SectionCard>
                 <VStack
                   $css={{
@@ -736,7 +755,7 @@ export function MatchingDetailPage() {
                   >
                     체험 사진{" "}
                     <Box render={<span />} $css={{ color: ACCENT }}>
-                      2
+                      {detail.galleryImages.length}
                     </Box>
                   </Text>
 
@@ -836,6 +855,7 @@ export function MatchingDetailPage() {
                 onClick={() =>
                   navigate(ROUTES.reservation, {
                     state: {
+                      experienceSlug: detail.experienceSlug,
                       experienceId: detail.experienceId,
                       summaryTitle: detail.title,
                       summaryMentor: detail.mentorName,

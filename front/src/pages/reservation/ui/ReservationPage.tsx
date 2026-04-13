@@ -4,6 +4,10 @@ import calendarIcon from "@/assets/reservation/calendar.svg";
 import infoIcon from "@/assets/reservation/info.svg";
 import peopleIcon from "@/assets/reservation/people.svg";
 import summaryImage from "@/assets/reservation/summary-image.png";
+import {
+  getMockExperienceDetailBySlug,
+  getMockMatchingDetailStateBySlug,
+} from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
 import { Box, Text, VStack } from "@vapor-ui/core";
 import {
@@ -306,6 +310,7 @@ export function ReservationPage() {
   const location = useLocation();
   const routeState = (location.state as
     | {
+        experienceSlug?: string;
         experienceId?: number;
         summaryTitle?: string;
         summaryMentor?: string;
@@ -315,15 +320,49 @@ export function ReservationPage() {
         availableToDate?: string;
       }
     | null) ?? null;
+  const fallbackExperienceDetail = getMockExperienceDetailBySlug(
+    routeState?.experienceSlug,
+  );
+  const fallbackMatchingDetail = getMockMatchingDetailStateBySlug(
+    routeState?.experienceSlug,
+  );
   const [participantCount, setParticipantCount] = useState(1);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [draftRange, setDraftRange] = useState<DateRange | undefined>();
   const [displayMonth, setDisplayMonth] = useState(CURRENT_MONTH_START);
   const bookingMutation = useCreateBooking();
-  const availableFromDate = parseDateKey(routeState?.availableFromDate);
-  const availableToDate = parseDateKey(routeState?.availableToDate);
-  const unitPrice = routeState?.unitPrice ?? UNIT_PRICE;
+  const resolvedExperienceId =
+    routeState?.experienceId ??
+    fallbackMatchingDetail?.experienceId ??
+    fallbackExperienceDetail?.id ??
+    DEFAULT_EXPERIENCE_ID;
+  const resolvedSummaryTitle =
+    routeState?.summaryTitle ??
+    fallbackExperienceDetail?.summaryTitle ??
+    fallbackMatchingDetail?.title ??
+    SUMMARY_TITLE;
+  const resolvedSummaryMentor =
+    routeState?.summaryMentor ??
+    fallbackExperienceDetail?.summaryMentor ??
+    fallbackMatchingDetail?.mentorName ??
+    SUMMARY_MENTOR;
+  const resolvedSummaryImageSrc =
+    routeState?.summaryImageSrc ??
+    fallbackExperienceDetail?.summaryImageSrc ??
+    fallbackMatchingDetail?.heroImageSrc ??
+    summaryImage;
+  const availableFromDate = parseDateKey(
+    routeState?.availableFromDate ?? fallbackMatchingDetail?.availableFromDate,
+  );
+  const availableToDate = parseDateKey(
+    routeState?.availableToDate ?? fallbackMatchingDetail?.availableToDate,
+  );
+  const unitPrice =
+    routeState?.unitPrice ??
+    fallbackMatchingDetail?.unitPriceValue ??
+    fallbackExperienceDetail?.unitPrice ??
+    UNIT_PRICE;
   const reservationDays = getReservationDurationDays(selectedRange);
   const totalPrice = unitPrice * participantCount * reservationDays;
   const priceBreakdownLabel =
@@ -387,7 +426,7 @@ export function ReservationPage() {
 
     bookingMutation.mutate({
       data: {
-        experienceId: routeState?.experienceId ?? DEFAULT_EXPERIENCE_ID,
+        experienceId: resolvedExperienceId,
         startDate: formatApiDate(selectedRange.from),
         endDate: formatApiDate(selectedRange.to),
       },
@@ -525,8 +564,8 @@ export function ReservationPage() {
               <Box
                 render={
                   <img
-                    src={routeState?.summaryImageSrc ?? summaryImage}
-                    alt={`${routeState?.summaryTitle ?? SUMMARY_TITLE} 대표 이미지`}
+                    src={resolvedSummaryImageSrc}
+                    alt={`${resolvedSummaryTitle} 대표 이미지`}
                     loading="eager"
                     decoding="async"
                     fetchPriority="high"
@@ -564,7 +603,7 @@ export function ReservationPage() {
                     letterSpacing: "-0.1px",
                   }}
                 >
-                  {routeState?.summaryTitle ?? SUMMARY_TITLE}
+                  {resolvedSummaryTitle}
                 </Text>
                 <Text
                   render={<p />}
@@ -578,7 +617,7 @@ export function ReservationPage() {
                     letterSpacing: "-0.1px",
                   }}
                 >
-                  {routeState?.summaryMentor ?? SUMMARY_MENTOR}
+                  {resolvedSummaryMentor}
                 </Text>
               </VStack>
             </Box>

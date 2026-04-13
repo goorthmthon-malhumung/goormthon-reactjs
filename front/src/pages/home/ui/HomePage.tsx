@@ -9,22 +9,48 @@ import horseIcon from "@/shared/assets/horseIcon.svg";
 import logo from "@/shared/assets/logo.svg";
 import mandarinIcon from "@/shared/assets/mandarinIcon.svg";
 import stoneIcon from "@/shared/assets/stoneIcon.svg";
-import { ROUTES } from "@/shared/config/routes";
+import {
+  getCanonicalExperienceSlug,
+  getCanonicalJobSlug,
+} from "@/features/jobs/lib/detailContentRegistry";
+import {
+  getJobDetailRoute,
+  getMatchingDetailRoute,
+} from "@/shared/config/routes";
 import { ThumbnailCard, type ThumbnailCardProps } from "@/shared/ui/cards";
 import { BottomNavigation } from "@/shared/ui/navigation/BottomNavigation";
 import { Badge, Box, Text } from "@vapor-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 
 const CATEGORY_ITEMS = [
-  { iconSrc: haenyeoIcon, label: "해녀", to: "/jobs/haenyeo" },
-  { iconSrc: stoneIcon, label: "돌담 장인", to: "/jobs/stone" },
-  { iconSrc: mandarinIcon, label: "감귤 농사", to: "/jobs/tangerine" },
-  { iconSrc: horseIcon, label: "목장주", to: "/jobs/horse" },
+  {
+    iconSrc: haenyeoIcon,
+    label: "해녀",
+    to: getJobDetailRoute(getCanonicalJobSlug("haenyeo")),
+  },
+  {
+    iconSrc: stoneIcon,
+    label: "돌담 장인",
+    to: getJobDetailRoute(getCanonicalJobSlug("stone")),
+  },
+  {
+    iconSrc: mandarinIcon,
+    label: "감귤 농사",
+    to: getJobDetailRoute(getCanonicalJobSlug("tangerine")),
+  },
+  {
+    iconSrc: horseIcon,
+    label: "목장주",
+    to: getJobDetailRoute(getCanonicalJobSlug("horse")),
+  },
 ] as const;
 
 const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   {
-    to: ROUTES.matchingDetail,
+    to: getMatchingDetailRoute({
+      experienceSlug: getCanonicalExperienceSlug("haenyeo"),
+      category: "haenyeo",
+    }),
     imageSrc: homeExperienceHaenyeoImage,
     imageAlt: "금녕 해녀와 함께하는 전복따기",
     badgeLabel: "정부지원금 30만원",
@@ -33,7 +59,10 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "제주시 구좌읍",
   },
   {
-    to: ROUTES.matchingDetail,
+    to: getMatchingDetailRoute({
+      experienceSlug: getCanonicalExperienceSlug("tangerine"),
+      category: "tangerine",
+    }),
     imageSrc: homeExperienceMandarinImage,
     imageAlt: "제주의 귤을 키우는 하루",
     badgeLabel: "정부지원금 30만원",
@@ -42,7 +71,10 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "서귀포시 남원읍",
   },
   {
-    to: ROUTES.matchingDetail,
+    to: getMatchingDetailRoute({
+      experienceSlug: getCanonicalExperienceSlug("stone"),
+      category: "stone",
+    }),
     imageSrc: homeExperienceStoneImage,
     imageAlt: "제주의 돌을 쌓는 하루",
     badgeLabel: "정부지원금 30만원",
@@ -54,7 +86,7 @@ const SMALL_EXPERIENCE_CARDS: ReadonlyArray<ThumbnailCardProps> = [
 
 const LARGE_EXPERIENCE_CARDS = [
   {
-    to: ROUTES.jobDetail,
+    to: getJobDetailRoute(getCanonicalJobSlug("horse")),
     imageSrc: homeJobHorseImage,
     imageAlt: "제주의 말을 돌보는 하루",
     title: "제주의 말을 돌보는 하루",
@@ -62,7 +94,7 @@ const LARGE_EXPERIENCE_CARDS = [
     location: "제주시 구좌읍",
   },
   {
-    to: ROUTES.jobDetail,
+    to: getJobDetailRoute(getCanonicalJobSlug("stone")),
     imageSrc: homeJobStoneImage,
     imageAlt: "제주의 돌담을 이어가는 장인",
     title: "제주의 돌담을 이어가는 장인",

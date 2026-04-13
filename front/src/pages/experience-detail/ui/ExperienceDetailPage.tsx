@@ -1,6 +1,7 @@
 import { useExperienceDetailView } from "@/features/experiences/api/useExperienceDetailView";
 import {
   DEFAULT_MOCK_EXPERIENCE_DETAIL,
+  getMockMatchingDetailStateBySlug,
   getMockExperienceDetailBySlug,
 } from "@/features/jobs/lib/fallbackMatchingCards";
 import { ROUTES } from "@/shared/config/routes";
@@ -109,6 +110,7 @@ export function ExperienceDetailPage() {
     : EXPERIENCE_ID;
   const mockExperienceDetail =
     getMockExperienceDetailBySlug(experienceSlug) ?? DEFAULT_MOCK_EXPERIENCE_DETAIL;
+  const mockMatchingDetailState = getMockMatchingDetailStateBySlug(experienceSlug);
   const experienceQuery = useExperienceDetailView(
     experienceIdParam,
     isNumericExperienceRoute,
@@ -477,11 +479,18 @@ export function ExperienceDetailPage() {
               onClick={() =>
                 navigate(ROUTES.reservation, {
                   state: {
+                    experienceSlug: isNumericExperienceRoute
+                      ? undefined
+                      : mockExperienceDetail.slug,
                     experienceId,
                     summaryTitle: title ?? "",
                     summaryMentor: mentorName,
                     summaryImageSrc: heroImageSrc,
-                    unitPrice: mockExperienceDetail.unitPrice,
+                    unitPrice:
+                      mockMatchingDetailState?.unitPriceValue ??
+                      mockExperienceDetail.unitPrice,
+                    availableFromDate: mockMatchingDetailState?.availableFromDate,
+                    availableToDate: mockMatchingDetailState?.availableToDate,
                   },
                 })
               }

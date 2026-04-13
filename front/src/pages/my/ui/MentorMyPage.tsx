@@ -6,8 +6,9 @@ import {
   DEFAULT_SESSION_PROFILE,
   useSessionProfile,
 } from "@/features/auth/api/useSessionProfile";
+import { getCanonicalExperienceSlug } from "@/features/jobs/lib/detailContentRegistry";
 import haenyeoMentorIcon from "@/shared/assets/haenyeoMentorIcon.svg";
-import { ROUTES } from "@/shared/config/routes";
+import { getExperienceDetailRoute, ROUTES } from "@/shared/config/routes";
 import { asRecord, getString } from "@/shared/lib/apiData";
 import {
   BottomNavigation,
@@ -31,7 +32,7 @@ const DEFAULT_MENTOR_PROFILE = {
 
 const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
   {
-    to: ROUTES.experienceDetail,
+    to: getExperienceDetailRoute(getCanonicalExperienceSlug("stone")),
     imageSrc: completedImageOne,
     imageAlt: "제주의 돌을 쌓는 하루",
     badgeLabel: "25년 이어온",
@@ -41,7 +42,7 @@ const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "서귀포시 성산읍",
   },
   {
-    to: ROUTES.experienceDetail,
+    to: getExperienceDetailRoute(getCanonicalExperienceSlug("haenyeo")),
     imageSrc: completedImageTwo,
     imageAlt: "금녕 해녀와 함께하는 하루",
     badgeLabel: "정부지원금 30만원",
@@ -51,7 +52,7 @@ const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "제주시 구좌읍",
   },
   {
-    to: ROUTES.experienceDetail,
+    to: getExperienceDetailRoute(getCanonicalExperienceSlug("stone")),
     imageSrc: completedImageOne,
     imageAlt: "제주의 돌을 쌓는 하루",
     badgeLabel: "25년 이어온",
@@ -61,7 +62,7 @@ const COMPLETED_HISTORY_CARDS: ReadonlyArray<ThumbnailCardProps> = [
     caption: "서귀포시 성산읍",
   },
   {
-    to: ROUTES.experienceDetail,
+    to: getExperienceDetailRoute(getCanonicalExperienceSlug("haenyeo")),
     imageSrc: completedImageTwo,
     imageAlt: "금녕 해녀와 함께하는 하루",
     badgeLabel: "정부지원금 30만원",

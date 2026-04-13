@@ -10,11 +10,12 @@ import {
   useMatchingJobListView,
   type MatchingCategoryKey,
 } from "@/features/jobs/api/useMatchingJobListView";
+import { getCanonicalJobSlug } from "@/features/jobs/lib/detailContentRegistry";
 import {
   FALLBACK_MATCHING_EXPERIENCE_ITEMS,
   FALLBACK_MATCHING_JOB_ITEMS,
 } from "@/features/jobs/lib/fallbackMatchingCards";
-import { ROUTES } from "@/shared/config/routes";
+import { getJobDetailRoute, ROUTES } from "@/shared/config/routes";
 import {
   getNumber,
   getRecordCollection,
@@ -74,6 +75,52 @@ function matchesCategory(jobType: string | undefined, category: MatchingCategory
   };
 
   return categoryMap[category].some((item) => normalizedValue.includes(item));
+}
+
+function resolveJobDetailSlug(...values: Array<string | undefined>) {
+  const normalizedValue = values
+    .map((value) => normalizeCategoryValue(value))
+    .filter((value): value is string => Boolean(value))
+    .join(" ");
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  if (
+    normalizedValue.includes("haenyeo") ||
+    normalizedValue.includes("해녀")
+  ) {
+    return getCanonicalJobSlug("haenyeo");
+  }
+
+  if (
+    normalizedValue.includes("stone") ||
+    normalizedValue.includes("doldam") ||
+    normalizedValue.includes("돌담")
+  ) {
+    return getCanonicalJobSlug("stone");
+  }
+
+  if (
+    normalizedValue.includes("tangerine") ||
+    normalizedValue.includes("gamgyul") ||
+    normalizedValue.includes("감귤") ||
+    normalizedValue.includes("귤")
+  ) {
+    return getCanonicalJobSlug("tangerine");
+  }
+
+  if (
+    normalizedValue.includes("horse") ||
+    normalizedValue.includes("mokjang") ||
+    normalizedValue.includes("목장") ||
+    normalizedValue.includes("말")
+  ) {
+    return getCanonicalJobSlug("horse");
+  }
+
+  return undefined;
 }
 
 type MatchingChipProps = {
@@ -250,18 +297,25 @@ export function MatchingPage() {
     .map((item) => {
       const id = getNumber(item, "id");
       const title = getString(item, "title") ?? "";
+      const jobType = getString(item, "jobType");
       const metaLabel = [
         getString(item, "workHours"),
         getString(item, "physicalLevel"),
       ]
         .filter((value): value is string => Boolean(value))
         .join(" · ");
+      const jobSlug = resolveJobDetailSlug(title, jobType);
 
       return {
-        to: typeof id === "number" ? `/jobs/${id}` : ROUTES.matching,
+        to:
+          jobSlug
+            ? getJobDetailRoute(jobSlug)
+            : typeof id === "number"
+              ? getJobDetailRoute(String(id))
+              : ROUTES.matching,
         imageSrc: getString(item, "mainUrl"),
         imageAlt: title ? `${title} 이미지` : "직업 이미지",
-        badgeLabel: getString(item, "jobType"),
+        badgeLabel: jobType,
         title,
         metaLabel: metaLabel || undefined,
         description: getString(item, "introduction"),

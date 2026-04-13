@@ -1,5 +1,9 @@
 import { useJobDetailView } from "@/features/jobs/api/useJobDetailView";
 import {
+  getCategoryMentorRosterByJobSlug,
+  type DetailMentorRosterEntry,
+} from "@/features/jobs/lib/detailContentRegistry";
+import {
   DEFAULT_MOCK_JOB_DETAIL,
   getMockJobDetailBySlug,
 } from "@/features/jobs/lib/fallbackMatchingCards";
@@ -10,7 +14,7 @@ import {
   getString,
   getStringList,
 } from "@/shared/lib/apiData";
-import { Box, Text, VStack } from "@vapor-ui/core";
+import { Box, HStack, Text, VStack } from "@vapor-ui/core";
 import { useNavigate, useParams } from "react-router-dom";
 
 const DEFAULT_JOB_ID = 1;
@@ -73,6 +77,121 @@ function SkillPill({ label }: { label: string }) {
   );
 }
 
+function MentorRosterCard({ mentor }: { mentor: DetailMentorRosterEntry }) {
+  return (
+    <Box
+      $css={{
+        width: "100%",
+        borderRadius: "20px",
+        border: "1px solid #E9EEF3",
+        backgroundColor: "#F9FBFD",
+        padding: "20px",
+        boxSizing: "border-box",
+      }}
+    >
+      <VStack
+        $css={{
+          gap: "12px",
+          alignItems: "stretch",
+        }}
+      >
+        <HStack
+          $css={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <Text
+            render={<h3 />}
+            $css={{
+              color: "#1F2937",
+              fontFamily: TITLE_FONT,
+              fontSize: "18px",
+              lineHeight: "26px",
+              fontWeight: 700,
+              letterSpacing: "-0.1px",
+              wordBreak: "keep-all",
+            }}
+          >
+            {mentor.name}
+          </Text>
+          <Box
+            $css={{
+              height: "32px",
+              paddingInline: "12px",
+              borderRadius: "999px",
+              backgroundColor: "#EEF9FB",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Text
+              render={<span />}
+              $css={{
+                color: "#0D8298",
+                fontFamily: TITLE_FONT,
+                fontSize: "14px",
+                lineHeight: "22px",
+                fontWeight: 500,
+                letterSpacing: "-0.1px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              만 {mentor.age}세
+            </Text>
+          </Box>
+        </HStack>
+
+        <Text
+          render={<p />}
+          $css={{
+            color: "#94A3B8",
+            fontFamily: TITLE_FONT,
+            fontSize: "14px",
+            lineHeight: "22px",
+            fontWeight: 500,
+            letterSpacing: "-0.1px",
+          }}
+        >
+          {mentor.location}
+        </Text>
+
+        <Text
+          render={<p />}
+          $css={{
+            color: "#45556C",
+            fontFamily: TITLE_FONT,
+            fontSize: "15px",
+            lineHeight: "24px",
+            fontWeight: 500,
+            letterSpacing: "-0.1px",
+            wordBreak: "keep-all",
+          }}
+        >
+          {mentor.bio}
+        </Text>
+
+        <Box
+          $css={{
+            display: "flex",
+            flexWrap: "wrap",
+            columnGap: "8px",
+            rowGap: "8px",
+            alignItems: "center",
+          }}
+        >
+          {mentor.tags.map((tag) => (
+            <SkillPill key={`${mentor.name}-${tag}`} label={tag} />
+          ))}
+        </Box>
+      </VStack>
+    </Box>
+  );
+}
+
 export function JobDetailPage() {
   const navigate = useNavigate();
   const { jobSlug } = useParams();
@@ -99,6 +218,8 @@ export function JobDetailPage() {
   const detailTags = [workHours, physicalLevel].filter(
     (value): value is string => Boolean(value),
   );
+  const mentorRoster =
+    getCategoryMentorRosterByJobSlug(jobSlug) ?? mockJobDetail.mentorRoster;
 
   return (
     <Box
@@ -335,6 +456,28 @@ export function JobDetailPage() {
                       <SkillPill key={`${skill}-${index}`} label={skill} />
                     ))}
                   </Box>
+                </VStack>
+              ) : null}
+
+              {mentorRoster.length > 0 ? (
+                <VStack
+                  $css={{
+                    gap: "16px",
+                  }}
+                >
+                  <SectionTitle>함께하는 멘토</SectionTitle>
+                  <VStack
+                    $css={{
+                      gap: "12px",
+                    }}
+                  >
+                    {mentorRoster.map((mentor) => (
+                      <MentorRosterCard
+                        key={`${mockJobDetail.slug}-${mentor.name}`}
+                        mentor={mentor}
+                      />
+                    ))}
+                  </VStack>
                 </VStack>
               ) : null}
             </VStack>
