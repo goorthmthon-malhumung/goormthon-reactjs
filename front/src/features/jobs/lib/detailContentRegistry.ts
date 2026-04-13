@@ -14,6 +14,8 @@ export type DetailMentorRosterEntry = {
   bio: string;
   location: string;
   tags: readonly string[];
+  careerLabel?: string;
+  highlightLabel?: string;
 };
 
 export type CategoryRouteDefinition = {
@@ -221,6 +223,8 @@ const CATEGORY_MENTOR_ROSTERS: Record<
       bio: "30년 넘게 바다에서 물질해온 해녀입니다. 숨비소리부터 해산물 채취까지 실제 해녀의 삶을 전해드립니다.",
       location: "제주시 구좌읍",
       tags: ["물질", "해산물채취", "바다안전"],
+      careerLabel: "45년 경력",
+      highlightLabel: "제주특별자치도 무형문화재",
     },
     {
       name: "고순자 멘토",
@@ -228,6 +232,8 @@ const CATEGORY_MENTOR_ROSTERS: Record<
       bio: "어릴 때부터 물질을 배워온 해녀로, 계절에 따라 달라지는 바다의 흐름과 해산물 이야기를 들려드립니다.",
       location: "서귀포시 성산읍",
       tags: ["해녀생활", "바다지식", "전통기술"],
+      careerLabel: "45년 경력",
+      highlightLabel: "해녀 기능 보유자",
     },
     {
       name: "양미자 멘토",
@@ -235,6 +241,8 @@ const CATEGORY_MENTOR_ROSTERS: Record<
       bio: "초보자도 안전하게 물질을 체험할 수 있도록 지도하며, 해녀 공동체 문화도 함께 소개합니다.",
       location: "제주시 한림읍",
       tags: ["물질체험", "해녀문화", "안전교육"],
+      careerLabel: "38년 경력",
+      highlightLabel: "현장 체험 지도자",
     },
     {
       name: "이정희 멘토",
@@ -242,6 +250,8 @@ const CATEGORY_MENTOR_ROSTERS: Record<
       bio: "평생 바다에서 살아온 경험을 바탕으로 해녀의 삶과 자연과 공존하는 방식을 알려드립니다.",
       location: "서귀포시 표선면",
       tags: ["바다삶", "해녀정신", "자연공존"],
+      careerLabel: "47년 경력",
+      highlightLabel: "제주 해녀 문화 해설",
     },
   ],
   stone: [

@@ -1,4 +1,5 @@
 import { useJobDetailView } from "@/features/jobs/api/useJobDetailView";
+import mentorRosterCardImage from "@/assets/job-detail/mentor-roster-card.jpg";
 import {
   getCategoryMentorRosterByJobSlug,
   type DetailMentorRosterEntry,
@@ -15,6 +16,7 @@ import {
   getStringList,
 } from "@/shared/lib/apiData";
 import { Box, HStack, Text, VStack } from "@vapor-ui/core";
+import { LocationOutlineIcon } from "@vapor-ui/icons";
 import { useNavigate, useParams } from "react-router-dom";
 
 const DEFAULT_JOB_ID = 1;
@@ -81,57 +83,90 @@ function MentorRosterCard({ mentor }: { mentor: DetailMentorRosterEntry }) {
   return (
     <Box
       $css={{
-        width: "100%",
-        borderRadius: "20px",
-        border: "1px solid #E9EEF3",
-        backgroundColor: "#F9FBFD",
-        padding: "20px",
-        boxSizing: "border-box",
+        width: "297px",
+        height: "168px",
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: "16px",
+        flex: "0 0 auto",
+        backgroundColor: "#FFFFFF",
       }}
     >
+      <Box
+        render={
+          <img
+            src={mentorRosterCardImage}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            width={297}
+            height={168}
+          />
+        }
+        $css={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          display: "block",
+          objectFit: "cover",
+        }}
+      />
+      <Box
+        $css={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(194,232,240,0) 15.73%, rgba(194,232,240,0.92) 87.41%)",
+        }}
+      />
       <VStack
         $css={{
-          gap: "12px",
+          position: "absolute",
+          left: "17px",
+          right: "17px",
+          bottom: "20px",
+          gap: "8px",
           alignItems: "stretch",
         }}
       >
-        <HStack
+        <VStack
           $css={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
+            gap: "2px",
+            alignItems: "flex-start",
           }}
         >
           <Text
             render={<h3 />}
             $css={{
-              color: "#1F2937",
+              color: "#393939",
               fontFamily: TITLE_FONT,
               fontSize: "18px",
               lineHeight: "26px",
               fontWeight: 700,
               letterSpacing: "-0.1px",
+              width: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
               wordBreak: "keep-all",
             }}
           >
             {mentor.name}
           </Text>
-          <Box
+          <HStack
             $css={{
-              height: "32px",
-              paddingInline: "12px",
-              borderRadius: "999px",
-              backgroundColor: "#EEF9FB",
-              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
+              gap: "4px",
+              color: "#4C4C4C",
+              width: "100%",
             }}
           >
             <Text
               render={<span />}
               $css={{
-                color: "#0D8298",
+                color: "inherit",
                 fontFamily: TITLE_FONT,
                 fontSize: "14px",
                 lineHeight: "22px",
@@ -140,52 +175,79 @@ function MentorRosterCard({ mentor }: { mentor: DetailMentorRosterEntry }) {
                 whiteSpace: "nowrap",
               }}
             >
-              만 {mentor.age}세
+              {mentor.age}세
             </Text>
-          </Box>
-        </HStack>
-
-        <Text
-          render={<p />}
-          $css={{
-            color: "#94A3B8",
-            fontFamily: TITLE_FONT,
-            fontSize: "14px",
-            lineHeight: "22px",
-            fontWeight: 500,
-            letterSpacing: "-0.1px",
-          }}
-        >
-          {mentor.location}
-        </Text>
-
-        <Text
-          render={<p />}
-          $css={{
-            color: "#45556C",
-            fontFamily: TITLE_FONT,
-            fontSize: "15px",
-            lineHeight: "24px",
-            fontWeight: 500,
-            letterSpacing: "-0.1px",
-            wordBreak: "keep-all",
-          }}
-        >
-          {mentor.bio}
-        </Text>
+            {mentor.careerLabel ? (
+              <>
+                <Text
+                  render={<span />}
+                  $css={{
+                    color: "inherit",
+                    fontFamily: TITLE_FONT,
+                    fontSize: "14px",
+                    lineHeight: "22px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                  }}
+                >
+                  ·
+                </Text>
+                <Text
+                  render={<span />}
+                  $css={{
+                    color: "inherit",
+                    fontFamily: TITLE_FONT,
+                    fontSize: "14px",
+                    lineHeight: "22px",
+                    fontWeight: 500,
+                    letterSpacing: "-0.1px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {mentor.careerLabel}
+                </Text>
+              </>
+            ) : null}
+          </HStack>
+        </VStack>
 
         <Box
           $css={{
-            display: "flex",
-            flexWrap: "wrap",
-            columnGap: "8px",
-            rowGap: "8px",
+            width: "fit-content",
+            maxWidth: "100%",
+            display: "inline-flex",
             alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "999px",
+            backgroundColor: "#EEF9FB",
+            padding: "3px 8px",
+            boxSizing: "border-box",
           }}
         >
-          {mentor.tags.map((tag) => (
-            <SkillPill key={`${mentor.name}-${tag}`} label={tag} />
-          ))}
+          <HStack
+            $css={{
+              gap: "4px",
+              alignItems: "center",
+            }}
+          >
+            <LocationOutlineIcon size={12} color="#17A3BA" />
+            <Text
+              render={<span />}
+              $css={{
+                color: "#17A3BA",
+                fontFamily: TITLE_FONT,
+                fontSize: "12px",
+                lineHeight: "18px",
+                fontWeight: 500,
+                letterSpacing: "0",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {mentor.highlightLabel ?? mentor.location}
+            </Text>
+          </HStack>
         </Box>
       </VStack>
     </Box>
@@ -465,10 +527,17 @@ export function JobDetailPage() {
                     gap: "16px",
                   }}
                 >
-                  <SectionTitle>함께하는 멘토</SectionTitle>
-                  <VStack
+                  <SectionTitle>{`${mockJobDetail.categoryLabel} 멘토분들을 만나보세요`}</SectionTitle>
+                  <Box
+                    render={<div className="u-hide-scrollbar" />}
                     $css={{
-                      gap: "12px",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "center",
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      scrollSnapType: "x mandatory",
+                      paddingBottom: "4px",
                     }}
                   >
                     {mentorRoster.map((mentor) => (
@@ -477,7 +546,7 @@ export function JobDetailPage() {
                         mentor={mentor}
                       />
                     ))}
-                  </VStack>
+                  </Box>
                 </VStack>
               ) : null}
             </VStack>
